@@ -1,0 +1,52 @@
+.cd-editor-action-button {
+  font-size: 1em;
+  color: $dark-gray;
+  background-color: transparent;
+  font-weight: bold;
+  border: 1px solid $medium-gray;
+  font-size: $font-medium;
+  height: 50px;
+  line-height: 50px;
+  cursor: pointer;
+
+  &.right {
+    float: right;
+  }
+
+  &.left {
+    float: left;
+  }
+
+  .cd-editor-action-button-icon {
+    font-size: 1.2em;
+    height: auto;
+    width: auto;
+    vertical-align: middle;
+    margin-right: 0.2em;
+  }
+}
+
+.cd-customize-show {
+  position: absolute;
+  bottom: 1em;
+  left: 1em;
+  background: none;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  cursor: pointer;
+  opacity: 0.8;
+  z-index: 100;
+  transition: transform 150ms, opacity 150ms;
+
+  &:hover {
+    opacity: 1;
+    transform: translateY(-5px);
+  }
+
+  .cd-customize-show-icon {
+    font-size: 4em;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(#000, 0.5);
+  }
+}
