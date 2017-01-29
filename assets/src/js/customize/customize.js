@@ -692,11 +692,17 @@ class PrimaryActions extends React.Component {
         super(props);
 
         this.hideCustomizer = this.hideCustomizer.bind(this);
+        this.closeCustomizer = this.closeCustomizer.bind(this);
     }
 
     hideCustomizer() {
 
         this.props.onHideCustomizer();
+    }
+
+    closeCustomizer() {
+
+        this.props.onCloseCustomizer();
     }
 
     render() {
@@ -710,7 +716,7 @@ class PrimaryActions extends React.Component {
                 <ActionButton
                     text="Close"
                     icon="times"
-                    onHandleClick=""
+                    onHandleClick={this.closeCustomizer}
                 />
                 <ActionButton
                     text="Save"
@@ -1028,7 +1034,7 @@ class PanelDashboard extends React.Component {
                 <div className="cd-editor-panel-helptext">
                     {data.l10n.no_items_added}
                 </div>
-                ;
+            ;
         }
 
         return (
@@ -1223,6 +1229,7 @@ class Editor extends React.Component {
 
         this.loadPanel = this.loadPanel.bind(this);
         this.hideCustomizer = this.hideCustomizer.bind(this);
+        this.closeCustomizer = this.closeCustomizer.bind(this);
         this.switchRole = this.switchRole.bind(this);
         this.addMenuItem = this.addMenuItem.bind(this);
         this.addSubmenuItem = this.addSubmenuItem.bind(this);
@@ -1246,6 +1253,11 @@ class Editor extends React.Component {
     hideCustomizer() {
 
         this.props.onHideCustomizer();
+    }
+
+    closeCustomizer() {
+
+        window.location.href = data.adminurl;
     }
 
     switchRole(role) {
@@ -1591,6 +1603,7 @@ class Editor extends React.Component {
 
                 <PrimaryActions
                     onHideCustomizer={this.hideCustomizer}
+                    onCloseCustomizer={this.closeCustomizer}
                 />
 
                 <RoleSwitcher
