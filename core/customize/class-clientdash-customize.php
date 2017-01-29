@@ -189,21 +189,106 @@ class ClientDash_Customize {
 		}
 
 		wp_localize_script( 'clientdash-customize', 'ClientdashCustomize_Data', array(
-			'roles'     => $roles,
-			'adminurl'  => admin_url(),
-			'dashicons' => json_decode( file_get_contents( CLIENTDASH_DIR . 'core/dashicons.json' ) ),
-			'l10n'      => array(
-				'role_switcher_label'          => __( 'Modifying for:', 'clientdash' ),
-				'panel_text_menu'              => __( 'Menu', 'clientdash' ),
-				'panel_text_dashboard'         => __( 'Dashboard', 'clientdash' ),
-				'panel_actions_title_menu'     => __( 'Editing: Menu', 'clientdash' ),
-				'panel_actions_title_menu_add' => __( 'Addig: Menu Items', 'clientdash' ),
-				'action_button_back'           => __( 'Back', 'clientdash' ),
-				'action_button_add_items'      => __( 'Add Items', 'clientdash' ),
-				'show_controls'                => __( 'Show Controls', 'clientdash' ),
-				'title'                        => __( 'Title', 'clientdash' ),
-				'original_title'               => __( 'Original title:', 'clientdash' ),
-				'icon'                         => __( 'Icon', 'clientdash' ),
+			'roles'        => $roles,
+			'adminurl'     => admin_url(),
+			'dashicons'    => json_decode( file_get_contents( CLIENTDASH_DIR . 'core/dashicons.json' ) ),
+			'menu'         => array(
+				array(
+					'id'             => 'index.php',
+					'title'          => '',
+					'original_title' => 'Dashboard',
+					'icon'           => 'dashicons dashicons-dashboard',
+				),
+				array(
+					'id'             => 'edit.php',
+					'title'          => '',
+					'original_title' => 'Posts',
+					'icon'           => 'dashicons dashicons-admin-post',
+				),
+				array(
+					'id'             => 'upload.php',
+					'title'          => '',
+					'original_title' => 'Media',
+					'icon'           => 'dashicons dashicons-admin-media',
+				),
+			), // TODO menu data
+			'submenu'      => array(
+				'index.php' => array(
+					array(
+						'id'             => 'update-core.php',
+						'title'          => '',
+						'original_title' => 'Updates',
+					),
+					array(
+						'id'             => 'test.php',
+						'title'          => '',
+						'original_title' => 'Test',
+					),
+				),
+			), // TODO submenu data
+			'orig_menu'    => array(
+				array(
+					'id'    => 'upload.php',
+					'title' => 'Media',
+					'icon'  => 'dashicons dashicons-admin-media',
+				),
+				array(
+					'id'    => 'edit-comments.php',
+					'title' => 'Comments',
+					'icon'  => 'dashicons dashicons-admin-comments',
+				),
+				array(
+					'id'    => 'options-general.php',
+					'title' => 'Settings',
+					'icon'  => 'dashicons dashicons-admin-settings',
+				),
+			), // TODO orig_menu data
+			'orig_submenu' => array(
+				'index.php' => array(
+					array(
+						'id'    => 'update-core.php',
+						'title' => 'Updates',
+					),
+					array(
+						'id'    => 'test2.php',
+						'title' => 'Test2',
+					),
+				),
+			), // TODO orig_submenu data
+			'widgets' => array(
+				array(
+					'id' => 'dashboard_right_now',
+					'title' => '',
+					'original_title' => 'At a Glance',
+				),
+			), // TODO widgets data
+			'orig_widgets' => array(
+				array(
+					'id' => 'dashboard_right_now',
+					'title' => 'At a Glance',
+				),
+				array(
+					'id' => 'dashboard_activity',
+					'title' => 'Activity',
+				),
+			), // TODO orig_widgets data
+			'l10n'         => array(
+				'role_switcher_label'             => __( 'Modifying for:', 'clientdash' ),
+				'panel_text_menu'                 => __( 'Menu', 'clientdash' ),
+				'panel_text_dashboard'            => __( 'Dashboard', 'clientdash' ),
+				'panel_actions_title_menu'        => __( 'Editing: Menu', 'clientdash' ),
+				'panel_actions_title_submenu'     => __( 'Editing: Sub-Menu', 'clientdash' ),
+				'panel_actions_title_menu_add'    => __( 'Adding: Menu Items', 'clientdash' ),
+				'panel_actions_title_submenu_add' => __( 'Adding: Sub-Menu Items', 'clientdash' ),
+				'panel_actions_title_dashboard'   => __( 'Editing: Dashboard', 'clientdash' ),
+				'action_button_back'              => __( 'Back', 'clientdash' ),
+				'action_button_add_items'         => __( 'Add Items', 'clientdash' ),
+				'show_controls'                   => __( 'Show Controls', 'clientdash' ),
+				'title'                           => __( 'Title', 'clientdash' ),
+				'original_title'                  => __( 'Original title:', 'clientdash' ),
+				'icon'                            => __( 'Icon', 'clientdash' ),
+				'no_items_added'                  => __( 'No items added yet. Click the "Add Items" button to add your first item.', 'clientdash' ),
+				'no_items_available'              => __( 'No items available.', 'clientdash' ),
 			),
 		) );
 	}

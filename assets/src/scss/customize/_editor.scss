@@ -46,6 +46,21 @@
       font-size: 1.4em;
       color: $dark-gray;
     }
+
+    .cd-editor-panel-helptext {
+      margin: 0 1em;
+      font-style: italic;
+      color: $dark-gray;
+    }
+
+    .cd-editor-panel-menuinfo {
+      margin: 0 1em 1em;
+      color: $dark-gray;
+
+      .cd-editor-panel-menuinfo-icon {
+        margin-right: 0.2em;
+      }
+    }
   }
 
   .cd-editor-panel-load-button {
