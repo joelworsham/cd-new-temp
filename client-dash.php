@@ -36,6 +36,15 @@ if ( ! class_exists( 'ClientDash' ) ) {
 		public $db;
 
 		/**
+		 * api functions.
+		 *
+		 * @since {{VERSION}}
+		 *
+		 * @var ClientDash_API
+		 */
+		public $api;
+
+		/**
 		 * Handles the plugin settings.
 		 *
 		 * @since {{VERSION}}
@@ -101,9 +110,11 @@ if ( ! class_exists( 'ClientDash' ) ) {
 
 			require_once CLIENTDASH_DIR . 'core/clientdash-functions.php';
 			require_once CLIENTDASH_DIR . 'core/class-clientdash-db.php';
+			require_once CLIENTDASH_DIR . 'core/api/class-clientdash-api.php';
 			require_once CLIENTDASH_DIR . 'core/customize/class-clientdash-customize.php';
 
 			$this->db        = new ClientDash_DB();
+			$this->api       = new ClientDash_API();
 			$this->customize = new ClientDash_Customize();
 
 			if ( is_admin() ) {
@@ -185,9 +196,8 @@ if ( ! class_exists( 'ClientDash' ) ) {
 	new ClientDash_BootStrapper();
 
 	// Installation
-//	require_once CLIENTDASH_DIR . 'core/class-clientdash-install.php';
-//	register_activation_hook( __FILE__, array( 'ClientDash_Install', 'install' ) );
-
+	require_once CLIENTDASH_DIR . 'core/class-clientdash-install.php';
+	register_activation_hook( __FILE__, array( 'ClientDash_Install', 'install' ) );
 
 	/**
 	 * Gets/loads the main plugin class.

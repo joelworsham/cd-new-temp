@@ -1,7 +1,20 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import {SortableContainer, SortableElement, arrayMove} from 'react-sortable-hoc';
 
 const data = ClientdashCustomize_Data || false;
+
+const SortableItem = SortableElement(({value}) => <li>{value}</li>);
+
+const SortableList = SortableContainer(({items}) => {
+    return (
+        <ul>
+            {items.map((value, index) =>
+                <SortableItem key={`item-${index}`} index={index} value={value}/>
+            )}
+        </ul>
+    );
+});
 
 /**
  * Select box option.
@@ -41,26 +54,25 @@ class Select extends React.Component {
             value: ''
         };
 
-        this.onChange = this.onChange.bind(this);
+        this.handleChange = this.handleChange.bind(this);
     }
 
-    onChange(event) {
+    handleChange(event) {
 
         this.setState({
             value: event.target.value
         });
 
-        this.props.onHandleChange();
+        this.props.onHandleChange(event.target.value);
     }
 
     render() {
 
-        var rows = [];
-        const selected = this.props.selected;
+        var options = [];
 
         this.props.options.map((option) =>
-            rows.push(
-                <SelectOption key={option.value} defaultValue={option.value} text={option.text}/>
+            options.push(
+                <SelectOption key={option.value} value={option.value} text={option.text}/>
             )
         );
 
@@ -76,7 +88,7 @@ class Select extends React.Component {
                         multiple={this.props.multi}
                         onChange={this.handleChange}
                     >
-                        {rows}
+                        {options}
                     </select>
                 </label>
 
@@ -408,19 +420,19 @@ class MenuItemEdit extends React.Component {
 
     titleChange(value) {
 
-        this.props.onMenuItemEdit({
-            id: this.props.id,
-            title: value,
+        this.props.onMenuItemEdit(this.props.id, {
             icon: this.props.icon,
+            title: value,
+            original_title: this.props.originalTitle,
         });
     }
 
     iconChange(value) {
 
-        this.props.onMenuItemEdit({
-            id: this.props.id,
+        this.props.onMenuItemEdit(this.props.id, {
             icon: "dashicons " + value,
             title: this.props.title,
+            original_title: this.props.originalTitle,
         });
     }
 
@@ -479,7 +491,6 @@ class MenuItemEdit extends React.Component {
                 </LineItemForm>
             ;
 
-
         return (
             <LineItem
                 key={this.props.id}
@@ -523,8 +534,7 @@ class SubmenuItemEdit extends React.Component {
 
     titleChange(value) {
 
-        this.props.onSubmenuItemEdit({
-            id: this.props.id,
+        this.props.onSubmenuItemEdit(this.props.id, {
             title: value,
         });
     }
@@ -597,8 +607,7 @@ class ItemAdd extends React.Component {
     addItem() {
 
         // Note the "title" and "original_title" to bring to compatibility with the MenuPanel
-        this.props.onAddItem({
-            id: this.props.id,
+        this.props.onAddItem(this.props.id, {
             title: '',
             original_title: this.props.title,
             icon: this.props.icon,
@@ -691,8 +700,14 @@ class PrimaryActions extends React.Component {
 
         super(props);
 
+        this.saveChanges = this.saveChanges.bind(this);
         this.hideCustomizer = this.hideCustomizer.bind(this);
         this.closeCustomizer = this.closeCustomizer.bind(this);
+    }
+
+    saveChanges() {
+
+        this.props.onSaveChanges();
     }
 
     hideCustomizer() {
@@ -721,7 +736,7 @@ class PrimaryActions extends React.Component {
                 <ActionButton
                     text="Save"
                     icon="check"
-                    onHandleClick=""
+                    onHandleClick={this.saveChanges}
                 />
             </header>
         )
@@ -734,11 +749,29 @@ class PrimaryActions extends React.Component {
  * @since {{VERSION}}
  */
 class RoleSwitcher extends React.Component {
+
+    constructor(props) {
+
+        super(props);
+
+        this.switchRole = this.switchRole.bind(this);
+    }
+
+    switchRole(value) {
+
+        this.props.onSwitchRole(value);
+    }
+
     render() {
 
         return (
             <div className="cd-editor-role-switcher">
-                <Select options={data.roles} label={data.l10n.role_switcher_label} selected=""/>
+                <Select
+                    options={data.roles}
+                    label={data.l10n.role_switcher_label}
+                    selected={this.props.role}
+                    onHandleChange={this.switchRole}
+                />
             </div>
         )
     }
@@ -799,41 +832,46 @@ class PanelMenu extends React.Component {
         this.submenuEdit = this.submenuEdit.bind(this);
     }
 
-    deleteItem(item_id) {
+    deleteItem(ID) {
 
-        this.props.onDeleteItem(item_id);
+        this.props.onDeleteItem(ID);
     }
 
-    menuItemEdit(item) {
+    menuItemEdit(ID, item) {
 
-        this.props.onMenuItemEdit(item);
+        this.props.onMenuItemEdit(ID, item);
     }
 
-    submenuEdit(item_id) {
+    submenuEdit(ID) {
 
-        this.props.onSubmenuEdit(item_id);
+        this.props.onSubmenuEdit(ID);
     }
 
     render() {
 
         var menu_items = [];
 
-        if (this.props.menuItems.length) {
+        if (Object.keys(this.props.menuItems).length) {
 
-            this.props.menuItems.map((item) => {
+            Object.keys(this.props.menuItems).forEach((ID) => {
 
-                menu_items.push(
-                    <MenuItemEdit
-                        key={item.id}
-                        id={item.id}
-                        title={item.title}
-                        originalTitle={item.original_title}
-                        icon={item.icon}
-                        onMenuItemEdit={this.menuItemEdit}
-                        onSubmenuEdit={this.submenuEdit}
-                        onDeleteItem={this.deleteItem}
-                    />
-                );
+                let item = this.props.menuItems[ID];
+                let menu_item =
+                        <MenuItemEdit
+                            key={ID}
+                            id={ID}
+                            title={item.title}
+                            originalTitle={item.original_title}
+                            icon={item.icon}
+                            onMenuItemEdit={this.menuItemEdit}
+                            onSubmenuEdit={this.submenuEdit}
+                            onDeleteItem={this.deleteItem}
+                        />
+                    ;
+
+                //menu_item = sortable(menu_item);
+
+                menu_items.push(menu_item);
             });
 
         } else {
@@ -877,23 +915,25 @@ class PanelSubmenu extends React.Component {
         this.props.onDeleteItem(item_id);
     }
 
-    submenuItemEdit(item) {
+    submenuItemEdit(ID, item) {
 
-        this.props.onSubmenuItemEdit(item);
+        this.props.onSubmenuItemEdit(ID, item);
     }
 
     render() {
 
         var menu_items = [];
 
-        if (this.props.submenuItems.length) {
+        if (Object.keys(this.props.submenuItems).length) {
 
-            this.props.submenuItems.map((item) => {
+            Object.keys(this.props.submenuItems).map((ID) => {
+
+                let item = this.props.submenuItems[ID];
 
                 menu_items.push(
                     <SubmenuItemEdit
-                        key={item.id}
-                        id={item.id}
+                        key={ID}
+                        id={ID}
                         title={item.title}
                         onSubmenuItemEdit={this.submenuItemEdit}
                         originalTitle={item.original_title}
@@ -937,9 +977,9 @@ class PanelAddItems extends React.Component {
         this.addItem = this.addItem.bind(this);
     }
 
-    addItem(menu_item) {
+    addItem(ID, item) {
 
-        this.props.onAddItem(menu_item);
+        this.props.onAddItem(ID, item);
     }
 
     render() {
@@ -947,14 +987,18 @@ class PanelAddItems extends React.Component {
         //var available_items = data.orig_menu.filter(item => );
         var menu_items = [];
 
-        if (this.props.availableItems.length) {
+        if (Object.keys(this.props.availableItems).length) {
 
-            this.props.availableItems.map((item) => {
+            //let items = this.props.availableItems;
+
+            Object.keys(this.props.availableItems).map((ID) => {
+
+                let item = this.props.availableItems[ID];
 
                 menu_items.push(
                     <ItemAdd
-                        key={item.id}
-                        id={item.id}
+                        key={ID}
+                        id={ID}
                         title={item.title}
                         icon={item.icon}
                         onAddItem={this.addItem}
@@ -998,28 +1042,30 @@ class PanelDashboard extends React.Component {
         this.widgetEdit = this.widgetEdit.bind(this);
     }
 
-    widgetDelete(widget_id) {
+    widgetDelete(ID) {
 
-        this.props.onDeleteWidget(widget_id);
+        this.props.onDeleteWidget(ID);
     }
 
-    widgetEdit(widget) {
+    widgetEdit(ID, widget) {
 
-        this.props.onWidgetEdit(widget);
+        this.props.onWidgetEdit(ID, widget);
     }
 
     render() {
 
         var widgets = [];
 
-        if (this.props.widgets.length) {
+        if (Object.keys(this.props.widgets).length) {
 
-            this.props.widgets.map((item) => {
+            Object.keys(this.props.widgets).map((ID) => {
+
+                let item = this.props.widgets[ID];
 
                 widgets.push(
                     <WidgetEdit
-                        key={item.id}
-                        id={item.id}
+                        key={ID}
+                        id={ID}
                         title={item.title}
                         originalTitle={item.original_title}
                         onWidgetEdit={this.widgetEdit}
@@ -1039,7 +1085,9 @@ class PanelDashboard extends React.Component {
 
         return (
             <Panel>
-                <LineItems>
+                <LineItems
+                    sortable={true}
+                >
                     {widgets}
                 </LineItems>
             </Panel>
@@ -1076,9 +1124,9 @@ class WidgetEdit extends React.Component {
 
     titleChange(value) {
 
-        this.props.onWidgetEdit({
-            id: this.props.id,
+        this.props.onWidgetEdit(this.props.id, {
             title: value,
+            original_title: this.props.originalTitle,
         });
     }
 
@@ -1218,20 +1266,22 @@ class Editor extends React.Component {
 
         this.state = {
             nextPanel: null,
-            activePanel: 'dashboard', // TODO set to "primary"
+            activePanel: 'menu', // TODO set to "primary"
             hidden: false,
             role: 'administrator',
             menuItems: data.menu,
             submenuItems: data.submenu,
             submenuEdit: null,
             widgets: data.widgets,
+            data: {},
         }
 
         this.loadPanel = this.loadPanel.bind(this);
+        this.saveChanges = this.saveChanges.bind(this);
         this.hideCustomizer = this.hideCustomizer.bind(this);
         this.closeCustomizer = this.closeCustomizer.bind(this);
         this.switchRole = this.switchRole.bind(this);
-        this.addMenuItem = this.addMenuItem.bind(this);
+        this.menuItemAdd = this.menuItemAdd.bind(this);
         this.addSubmenuItem = this.addSubmenuItem.bind(this);
         this.menuItemDelete = this.menuItemDelete.bind(this);
         this.deleteSubmenuItem = this.deleteSubmenuItem.bind(this);
@@ -1241,6 +1291,20 @@ class Editor extends React.Component {
         this.widgetAdd = this.widgetAdd.bind(this);
         this.widgetDelete = this.widgetDelete.bind(this);
         this.widgetEdit = this.widgetEdit.bind(this);
+    }
+
+    componentDidUpdate() {
+
+        this.updateData();
+    }
+
+    updateData() {
+
+        this.state.data[this.state.role] = {
+            menu: this.state.menuItems,
+            submenu: this.state.submenuItems,
+            widgets: this.state.widgets,
+        };
     }
 
     loadPanel(panel_ID) {
@@ -1260,18 +1324,93 @@ class Editor extends React.Component {
         window.location.href = data.adminurl;
     }
 
-    switchRole(role) {
+    saveChanges() {
 
-        this.setState({
-            role: role
+        console.log('saving...');
+
+        fetch('wp-json/clientdash/v1/customizations/' + this.state.role, {
+            method: 'POST',
+            headers: new Headers({
+                'Content-Type': 'application/json'
+            }),
+            body: JSON.stringify({
+                menu: this.state.menuItems,
+                submenu: this.state.submenuItems,
+                widgets: this.state.widgets
+            })
+        }).then(function (response) {
+
+            //console.log(response);
+
+            return response.json();
+
+        }).then(function (customizations) {
+
+            console.log('status: ', customizations);
+
+        }).catch(function (error) {
+
+            console.log('error: ', error);
+
         });
     }
 
-    addMenuItem(menu_item) {
+    switchRole(role) {
+
+        var menuItems, submenuItems, widgets, api = this;
+
+        if (this.state.data[role]) {
+
+            menuItems = this.state.data[role].menu;
+            submenuItems = this.state.data[role].submenu;
+            widgets = this.state.data[role].widgets;
+
+            this.setState({
+                role: role,
+                menuItems: menuItems,
+                submenuItems: submenuItems,
+                widgets: widgets,
+            });
+
+        } else {
+
+            fetch('wp-json/clientdash/v1/customizations/' + role, {
+                method: 'GET',
+                headers: new Headers({
+                    'Content-Type': 'application/json'
+                })
+            }).then(function (response) {
+
+                return response.json();
+
+            }).then(function (customizations) {
+
+                console.log('status: ', customizations);
+
+                menuItems = [];
+                submenuItems = [];
+                widgets = [];
+
+                api.setState({
+                    role: role,
+                    menuItems: menuItems,
+                    submenuItems: submenuItems,
+                    widgets: widgets,
+                });
+
+            }).catch(function (error) {
+
+                console.log('error: ', error);
+
+            });
+        }
+    }
+
+    menuItemAdd(ID, item) {
 
         this.setState((prevState) => {
 
-            prevState.menuItems.push(menu_item);
+            prevState.menuItems[ID] = item;
 
             return prevState;
         });
@@ -1279,18 +1418,13 @@ class Editor extends React.Component {
         this.loadPanel('menu');
     }
 
-    addSubmenuItem(menu_item) {
+    addSubmenuItem(ID, item) {
+
+        let submenu_edit = this.state.submenuEdit;
 
         this.setState((prevState) => {
 
-            if (prevState.submenuItems[this.state.submenuEdit]) {
-
-                prevState.submenuItems[this.state.submenuEdit].push(menu_item);
-
-            } else {
-
-                prevState.submenuItems[this.state.submenuEdit] = [menu_item];
-            }
+            prevState.submenuItems[submenu_edit][ID] = item;
 
             return prevState;
         });
@@ -1298,80 +1432,64 @@ class Editor extends React.Component {
         this.loadPanel('submenu');
     }
 
-    menuItemDelete(item_id) {
-
-        this.setState((prevState) => ({
-            menuItems: prevState.menuItems.filter((menu_item) => {
-
-                return menu_item.id !== item_id;
-            })
-        }));
-    }
-
-    deleteSubmenuItem(item_id) {
-
-        const state = this.state;
+    menuItemDelete(ID) {
 
         this.setState((prevState) => {
 
-            prevState.submenuItems[state.submenuEdit] = prevState.submenuItems[state.submenuEdit].filter((submenu_item) => {
-                return submenu_item.id !== item_id
-            });
+            delete prevState.menuItems[ID];
 
             return prevState;
         });
     }
 
-    submenuEdit(item_id) {
+    deleteSubmenuItem(ID) {
+
+        let submenu_edit = this.state.submenuEdit;
+
+        this.setState((prevState) => {
+
+            delete prevState.submenuItems[submenu_edit][ID];
+
+            return prevState;
+        });
+    }
+
+    submenuEdit(ID) {
 
         this.setState({
-            submenuEdit: item_id
+            submenuEdit: ID
         });
 
         this.loadPanel('submenu');
     }
 
-    menuItemEdit(item) {
-
-        this.setState((prevState) => ({
-            menuItems: prevState.menuItems.map((menu_item) => {
-
-                if (menu_item.id == item.id) {
-
-                    menu_item.title = item.title;
-                    menu_item.icon = item.icon;
-                }
-
-                return menu_item;
-            }),
-        }));
-    }
-
-    submenuItemEdit(item) {
-
-        const state = this.state;
+    menuItemEdit(ID, item) {
 
         this.setState((prevState) => {
 
-            prevState.submenuItems[state.submenuEdit] = prevState.submenuItems[state.submenuEdit].map((submenu_item) => {
-
-                if (submenu_item.id == item.id) {
-
-                    submenu_item.title = item.title;
-                }
-
-                return submenu_item;
-            });
+            prevState.menuItems[ID] = item;
 
             return prevState;
         });
     }
 
-    widgetAdd(widget) {
+    submenuItemEdit(ID, item) {
+
+        let submenu_edit = this.state.submenuEdit;
 
         this.setState((prevState) => {
 
-            prevState.widgets.push(widget);
+            prevState.submenuItems[submenu_edit][ID] = (_item) => (item);
+
+            return prevState;
+        });
+    }
+
+    widgetAdd(ID, widget) {
+
+        this.setState((prevState) => {
+
+            prevState.widgets[ID] = widget;
 
             return prevState;
         });
@@ -1379,234 +1497,249 @@ class Editor extends React.Component {
         this.loadPanel('dashboard');
     }
 
-    widgetDelete(widget_id) {
+    widgetDelete(ID) {
 
-        this.setState((prevState) => ({
-            widgets: prevState.widgets.filter((widget) => {
+        this.setState((prevState) => {
 
-                return widget.id !== widget_id;
-            })
-        }));
+            delete prevState.widgets[ID];
+
+            return prevState;
+        });
     }
 
-    widgetEdit(new_widget) {
+    widgetEdit(ID, widget) {
 
-        this.setState((prevState) => ({
-            widgets: prevState.widgets.map((widget) => {
+        this.setState((prevState) => {
 
-                if (widget.id == new_widget.id) {
+            prevState.widgets[ID] = (widget);
 
-                    widget.title = new_widget.title;
-                }
-
-                return widget;
-            }),
-        }));
+            return prevState;
+        });
     }
 
     render() {
 
-        var panel, secondary_actions, available_items, available_widgets, item_info;
-        var state = this.state;
+        switch (this.state.activePanel) {
 
-        // Get current menu info
-        if (this.state.activePanel == 'submenu' || this.state.activePanel == 'addSubmenuItems') {
+            case 'primary':
+            {
 
-            this.state.menuItems.map((item) => {
+                var panel =
+                        <PanelPrimary
+                            onLoadPanel={this.loadPanel}
+                        />
+                    ;
+                var secondary_actions =
+                        <SecondaryActions />
+                    ;
+                break;
+            }
+            case 'menu':
+            {
 
-                if (item.id == state.submenuEdit) {
+                var panel =
+                        <PanelMenu
+                            menuItems={this.state.menuItems}
+                            onMenuItemEdit={this.menuItemEdit}
+                            onDeleteItem={this.menuItemDelete}
+                            onLoadPanel={this.loadPanel}
+                            onSubmenuEdit={this.submenuEdit}
+                        />
+                    ;
+                var secondary_actions =
+                        <SecondaryActions
+                            title={data.l10n.panel_actions_title_menu}
+                            previousPanel="primary"
+                            nextPanel="addMenuItems"
+                            loadNextText={data.l10n.action_button_add_items}
+                            onLoadPanel={this.loadPanel}
+                        />
+                    ;
+                break;
+            }
+            case 'submenu':
+            {
 
-                    item_info =
+                let menu_item = this.state.menuItems[this.state.submenuEdit];
+                let item_info =
                         <div className="cd-editor-panel-menuinfo">
-                            <span className={"cd-editor-panel-menuinfo-icon " + item.icon}></span>
+                            <span className={"cd-editor-panel-menuinfo-icon " + menu_item.icon}></span>
                                 <span className="cd-editor-panel-menuinfo-title">
-                                    {item.title || item.original_title}
+                                    {menu_item.title || menu_item.original_title}
                                 </span>
                         </div>
                     ;
 
-                    return false;
-                }
-            });
-        }
-
-        switch (this.state.activePanel) {
-
-            case 'primary':
-
-                panel =
-                    <PanelPrimary
-                        onLoadPanel={this.loadPanel}
-                    />
-                ;
-                secondary_actions =
-                    <SecondaryActions />
-                ;
+                var panel =
+                        <PanelSubmenu
+                            itemInfo={item_info}
+                            onSubmenuItemEdit={this.submenuItemEdit}
+                            submenuItems={this.state.submenuItems[this.state.submenuEdit] || []}
+                            onDeleteItem={this.deleteSubmenuItem}
+                            onLoadPanel={this.loadPanel}
+                        />
+                    ;
+                var secondary_actions =
+                        <SecondaryActions
+                            title={data.l10n.panel_actions_title_submenu}
+                            nextPanel="addSubmenuItems"
+                            previousPanel="menu"
+                            loadNextText={data.l10n.action_button_add_items}
+                            onLoadPanel={this.loadPanel}
+                        />
+                    ;
                 break;
-
-            case 'menu':
-
-                panel =
-                    <PanelMenu
-                        menuItems={this.state.menuItems}
-                        onMenuItemEdit={this.menuItemEdit}
-                        onDeleteItem={this.menuItemDelete}
-                        onLoadPanel={this.loadPanel}
-                        onSubmenuEdit={this.submenuEdit}
-                    />
-                ;
-                secondary_actions =
-                    <SecondaryActions
-                        title={data.l10n.panel_actions_title_menu}
-                        previousPanel="primary"
-                        nextPanel="addMenuItems"
-                        loadNextText={data.l10n.action_button_add_items}
-                        onLoadPanel={this.loadPanel}
-                    />
-                ;
-                break;
-
-            case 'submenu':
-
-                panel =
-                    <PanelSubmenu
-                        itemInfo={item_info}
-                        onSubmenuItemEdit={this.submenuItemEdit}
-                        submenuItems={this.state.submenuItems[this.state.submenuEdit] || []}
-                        onDeleteItem={this.deleteSubmenuItem}
-                        onLoadPanel={this.loadPanel}
-                    />
-                ;
-                secondary_actions =
-                    <SecondaryActions
-                        title={data.l10n.panel_actions_title_submenu}
-                        nextPanel="addSubmenuItems"
-                        previousPanel="menu"
-                        loadNextText={data.l10n.action_button_add_items}
-                        onLoadPanel={this.loadPanel}
-                    />
-                ;
-                break;
-
+            }
             case 'addMenuItems':
+            {
 
-                if (data.orig_menu) {
+                let available_items = {};
+                let current_items = this.state.menuItems;
+
+                if (Object.keys(data.orig_menu).length) {
 
                     // Array diff to get all items that don't yet exist in the menu
-                    available_items = data.orig_menu.filter((item) => {
-                        return state.menuItems.filter(_item => _item.id === item.id).length === 0;
+                    Object.keys(data.orig_menu).forEach((ID) => {
+
+                        let item = data.orig_menu[ID];
+
+                        if (!current_items[ID]) {
+
+                            available_items[ID] = item;
+                        }
                     });
-
-                } else {
-
-                    available_items = [];
                 }
 
-                panel =
-                    <PanelAddItems
-                        availableItems={available_items}
-                        onAddItem={this.addMenuItem}
-                    />
-                ;
-                secondary_actions =
-                    <SecondaryActions
-                        title={data.l10n.panel_actions_title_menu_add}
-                        previousPanel="menu"
-                        onLoadPanel={this.loadPanel}
-                    />
-                ;
+                var panel =
+                        <PanelAddItems
+                            availableItems={available_items}
+                            onAddItem={this.menuItemAdd}
+                        />
+                    ;
+                var secondary_actions =
+                        <SecondaryActions
+                            title={data.l10n.panel_actions_title_menu_add}
+                            previousPanel="menu"
+                            onLoadPanel={this.loadPanel}
+                        />
+                    ;
                 break;
-
+            }
             case 'addSubmenuItems':
+            {
+                let menu_item = this.state.menuItems[this.state.submenuEdit];
+                let item_info =
+                        <div className="cd-editor-panel-menuinfo">
+                            <span className={"cd-editor-panel-menuinfo-icon " + menu_item.icon}></span>
+                                <span className="cd-editor-panel-menuinfo-title">
+                                    {menu_item.title || menu_item.original_title}
+                                </span>
+                        </div>
+                    ;
 
-                if (data.orig_submenu[this.state.submenuEdit]) {
+                let available_items = {};
+                let current_items = this.state.submenuItems[this.state.submenuEdit];
+
+                if (Object.keys(data.orig_submenu[this.state.submenuEdit]).length) {
 
                     // Array diff to get all items that don't yet exist in the menu
-                    available_items = data.orig_submenu[this.state.submenuEdit].filter((item) => {
-                        return state.submenuItems[state.submenuEdit].filter(_item => _item.id === item.id).length === 0;
+                    Object.keys(data.orig_submenu[this.state.submenuEdit]).forEach((ID) => {
+
+                        let item = data.orig_submenu[this.state.submenuEdit][ID];
+
+                        if (!current_items[ID]) {
+
+                            available_items[ID] = item;
+                        }
                     });
-
-                } else {
-
-                    available_items = [];
                 }
 
-                panel =
-                    <PanelAddItems
-                        itemInfo={item_info}
-                        availableItems={available_items}
-                        onAddItem={this.addSubmenuItem}
-                    />
-                ;
-                secondary_actions =
-                    <SecondaryActions
-                        title={data.l10n.panel_actions_title_submenu_add}
-                        previousPanel="submenu"
-                        onLoadPanel={this.loadPanel}
-                    />
-                ;
+                var panel =
+                        <PanelAddItems
+                            itemInfo={item_info}
+                            availableItems={available_items}
+                            onAddItem={this.addSubmenuItem}
+                        />
+                    ;
+                var secondary_actions =
+                        <SecondaryActions
+                            title={data.l10n.panel_actions_title_submenu_add}
+                            previousPanel="submenu"
+                            onLoadPanel={this.loadPanel}
+                        />
+                    ;
                 break;
-
+            }
             case 'dashboard':
+            {
 
-                panel =
-                    <PanelDashboard
-                        widgets={this.state.widgets}
-                        onWidgetEdit={this.widgetEdit}
-                        onDeleteWidget={this.widgetDelete}
-                        onLoadPanel={this.loadPanel}
-                    />
-                ;
-                secondary_actions =
-                    <SecondaryActions
-                        title={data.l10n.panel_actions_title_dashboard}
-                        previousPanel="primary"
-                        nextPanel="addWidgets"
-                        loadNextText={data.l10n.action_button_add_items}
-                        onLoadPanel={this.loadPanel}
-                    />
-                ;
+                var panel =
+                        <PanelDashboard
+                            widgets={this.state.widgets}
+                            onWidgetEdit={this.widgetEdit}
+                            onDeleteWidget={this.widgetDelete}
+                            onLoadPanel={this.loadPanel}
+                        />
+                    ;
+                var secondary_actions =
+                        <SecondaryActions
+                            title={data.l10n.panel_actions_title_dashboard}
+                            previousPanel="primary"
+                            nextPanel="addWidgets"
+                            loadNextText={data.l10n.action_button_add_items}
+                            onLoadPanel={this.loadPanel}
+                        />
+                    ;
                 break;
-
+            }
             case 'addWidgets':
+            {
 
-                if (data.orig_widgets) {
+                let available_items = {};
+                let current_items = this.state.widgets;
+
+                if (Object.keys(data.orig_widgets).length) {
 
                     // Array diff to get all items that don't yet exist in the menu
-                    available_widgets = data.orig_widgets.filter((widget) => {
-                        return state.widgets.filter(_widget => _widget.id === widget.id).length === 0;
+                    Object.keys(data.orig_widgets).forEach((ID) => {
+
+                        let item = data.orig_widgets[ID];
+
+                        if (!current_items[ID]) {
+
+                            available_items[ID] = item;
+                        }
                     });
-
-                } else {
-
-                    available_widgets = [];
                 }
 
-                panel =
-                    <PanelAddItems
-                        availableItems={available_widgets}
-                        onAddItem={this.widgetAdd}
-                    />
-                ;
-                secondary_actions =
-                    <SecondaryActions
-                        title={data.l10n.panel_actions_title_menu_add}
-                        previousPanel="dashboard"
-                        onLoadPanel={this.loadPanel}
-                    />
-                ;
+                var panel =
+                        <PanelAddItems
+                            availableItems={available_items}
+                            onAddItem={this.widgetAdd}
+                        />
+                    ;
+                var secondary_actions =
+                        <SecondaryActions
+                            title={data.l10n.panel_actions_title_menu_add}
+                            previousPanel="dashboard"
+                            onLoadPanel={this.loadPanel}
+                        />
+                    ;
                 break;
+            }
         }
 
         return (
             <div id="cd-editor">
 
                 <PrimaryActions
+                    onSaveChanges={this.saveChanges}
                     onHideCustomizer={this.hideCustomizer}
                     onCloseCustomizer={this.closeCustomizer}
                 />
 
                 <RoleSwitcher
+                    role={this.state.role}
                     onSwitchRole={this.switchRole}
                 />
 

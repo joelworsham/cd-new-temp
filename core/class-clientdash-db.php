@@ -20,256 +20,209 @@ defined( 'ABSPATH' ) || die;
 class ClientDash_DB {
 
 	/**
-	 * Gets the plugin states table name.
+	 * Gets a set of customizations.
 	 *
 	 * @since {{VERSION}}
 	 *
-	 * @return string
-	 */
-	public static function states_table() {
-
-		global $wpdb;
-
-		return "{$wpdb->prefix}plugin_states";
-	}
-
-	/**
-	 * Gets a plugin state by ID.
-	 *
-	 * @since {{VERSION}}
-	 *
-	 * @param int $ID ID of state.
+	 * @param string $role Role of the customization.
 	 *
 	 * @return array|null|object|void
 	 */
-	public static function get_state( $ID ) {
+	public static function get_customizations( $role ) {
 
 		global $wpdb;
 
-		$state_table = self::states_table();
+		$results = $wpdb->get_row( "SELECT * FROM {$wpdb->prefix}cd_customizations WHERE role = '$role'", ARRAY_A );
+
+		foreach ( $results as &$result ) {
+
+			$result = maybe_unserialize( $result );
+		}
 
 		/**
-		 * Filters the get_state results.
-		 *
-		 * @since {{VERSION}}
-		 */
-		$results = apply_filters( 'pluginss_get_state', $wpdb->get_row( "SELECT * FROM $state_table WHERE ID = $ID" ) );
-
-		// Unserialize the state active plugins
-		$results->active = unserialize( $results->active );
-
-		return $results;
-	}
-
-	/**
-	 * Gets a plugin state by name.
-	 *
-	 * @since {{VERSION}}
-	 *
-	 * @param string $name State name.
-	 *
-	 * @return array|null|object|void
-	 */
-	public static function get_state_by_name( $name ) {
-
-		global $wpdb;
-
-		$state_table = self::states_table();
-
-		/**
-		 * Filters the state name before retrieving state.
-		 *
-		 * @since {{VERSION}}
-		 */
-		$name = apply_filters( 'pluginss_get_state_name', $name );
-
-		/**
-		 * Filters the get_state by name results.
+		 * Filters the get_customizations results.
 		 *
 		 * @since {{VERSION}}
 		 */
 		$results = apply_filters(
-			'pluginss_get_state_by_name',
-			$wpdb->get_row( $wpdb->prepare( "SELECT * FROM $state_table WHERE name='%s'", $name ) )
+			'cd_db_get_customizations_by_role',
+			$results,
+			$role
 		);
 
 		return $results;
 	}
 
 	/**
-	 * Gets a plugin state by active plugins.
+	 * Gets the role's custom menu, if set.
 	 *
 	 * @since {{VERSION}}
 	 *
-	 * @param array $active Active plugins.
+	 * @param string $role Role to get menu for.
 	 *
-	 * @return array|null|object|void
+	 * @return array|bool|mixed|void
 	 */
-	public static function get_state_by_active( $active ) {
+	public static function get_role_menu( $role ) {
 
-		global $wpdb;
-
-		$state_table = self::states_table();
-
-		/**
-		 * Filters the currently active plugins before retrieving state.
-		 *
-		 * @since {{VERSION}}
-		 */
-		$active = apply_filters( 'pluginss_get_state_active', serialize( $active ) );
-
-		/**
-		 * Filters the get_state by active results.
-		 *
-		 * @since {{VERSION}}
-		 */
-		$results = apply_filters(
-			'pluginss_get_state_by_active',
-			$wpdb->get_row( $wpdb->prepare( "SELECT * FROM $state_table WHERE active='%s'", $active ) )
-		);
-
-		return $results;
-	}
-
-	/**
-	 * Adds a plugin state.
-	 *
-	 * @since {{VERSION}}
-	 *
-	 * @param string $name State name.
-	 * @param array|null $active_plugins Array of active plugins.
-	 *
-	 * @return array|null|object|void
-	 */
-	public static function add_state( $name, $active_plugins ) {
-
-		global $wpdb;
-
-		$state_table = self::states_table();
-
-		/**
-		 * Filters new state to add.
-		 *
-		 * @since {{VERSION}}
-		 */
-		$active_plugins = apply_filters( 'pluginss_add_state', $active_plugins, $name );
-
-		// Don't allow duplicates
-		if ( self::get_state_by_active( $active_plugins ) ||
-		     self::get_state_by_name( $name )
-		) {
+		if ( ! ( $results = self::get_customizations( $role ) ) ) {
 
 			return false;
 		}
 
-		$result = $wpdb->insert(
-			$state_table,
-			array(
-				'name'   => $name,
-				'active' => serialize( $active_plugins ),
-			),
-			array(
-				'%s',
-				'%s',
-			)
-		);
+		if ( ! isset( $results['menu'] ) ) {
 
-		if ( $result ) {
+			return array();
+		}
+
+		/**
+		 * Filters the role's custom menu, if set.
+		 *
+		 * @since {{VERSION}}
+		 */
+		$menu = apply_filters( 'cd_role_menu', $results['menu'] );
+
+		return $menu;
+	}
+
+	/**
+	 * Gets the role's custom submenu, if set.
+	 *
+	 * @since {{VERSION}}
+	 *
+	 * @param string $role Role to get menu for.
+	 *
+	 * @return array|bool|mixed|void
+	 */
+	public static function get_role_submenu( $role ) {
+
+		if ( ! ( $results = self::get_customizations( $role ) ) ) {
+
+			return false;
+		}
+
+		if ( ! isset( $results['submenu'] ) ) {
+
+			return array();
+		}
+
+		/**
+		 * Filters the role's custom submenu, if set.
+		 *
+		 * @since {{VERSION}}
+		 */
+		$submenu = apply_filters( 'cd_role_submenu', $results['submenu'] );
+
+		return $submenu;
+	}
+
+	/**
+	 * Gets the role's custom widgets, if set.
+	 *
+	 * @since {{VERSION}}
+	 *
+	 * @param string $role Role to get widgets for.
+	 *
+	 * @return array|bool|mixed|void
+	 */
+	public static function get_role_widgets( $role ) {
+
+		if ( ! ( $results = self::get_customizations( $role ) ) ) {
+
+			return false;
+		}
+
+		if ( ! isset( $results['widgets'] ) ) {
+
+			return array();
+		}
+
+		/**
+		 * Filters the role's custom widgets, if set.
+		 *
+		 * @since {{VERSION}}
+		 */
+		$widgets = apply_filters( 'cd_role_widgets', $results['widgets'] );
+
+		return $widgets;
+	}
+
+	/**
+	 * Updates or adds a role customizations.
+	 *
+	 * @since {{VERSION}}
+	 *
+	 * @param string $role
+	 * @param array $menu
+	 * @param array $submenu
+	 * @param array $widgets
+	 *
+	 * @return array|null|object|void
+	 */
+	public static function update_role_customizations( $role, $menu, $submenu, $widgets ) {
+
+		global $wpdb;
+
+		/**
+		 * Filters the customizations to update/add.
+		 *
+		 * @since {{VERSION}}
+		 */
+		$customizations = apply_filters( 'cd_db_update_role_customizations', array(
+			'menu'    => $menu,
+			'submenu' => $submenu,
+			'widgets' => $widgets,
+		), $role );
+
+		// Update if exists
+		if ( self::get_customizations( $role ) ) {
+
+			$result = $wpdb->update(
+				"{$wpdb->prefix}cd_customizations",
+				array(
+					'menu'    => serialize( $customizations['menu'] ),
+					'submenu' => serialize( $customizations['submenu'] ),
+					'widgets' => serialize( $customizations['widgets'] ),
+				),
+				array(
+					'role' => $role,
+				),
+				array(
+					'%s',
+					'%s',
+					'%s',
+				),
+				array(
+					'%s',
+				)
+			);
+
+		} else {
+
+			$result = $wpdb->insert(
+				"{$wpdb->prefix}cd_customizations",
+				array(
+					'role'    => $role,
+					'submenu' => serialize( $customizations['submenu'] ),
+					'menu'    => serialize( $customizations['menu'] ),
+					'widgets' => serialize( $customizations['widgets'] ),
+				),
+				array(
+					'%s',
+					'%s',
+					'%s',
+					'%s',
+				)
+			);
+		}
+
+		if ( $result === 1 ) {
 
 			return $wpdb->insert_id;
 
 		} else {
 
-			return false;
+			return $result;
 		}
-	}
-
-	/**
-	 * Updates a plugin state.
-	 *
-	 * @since {{VERSION}}
-	 *
-	 * @param int $ID State ID.
-	 * @param string $name State name.
-	 * @param array|null $active_plugins Array of active plugins.
-	 *
-	 * @return array|null|object|void
-	 */
-	public static function update_state( $ID, $name, $active_plugins ) {
-
-		global $wpdb;
-
-		$state_table = self::states_table();
-
-		/**
-		 * Filters the state to update.
-		 *
-		 * @since {{VERSION}}
-		 */
-		$state = apply_filters( 'pluginss_update_state', array(
-			'name'   => $name,
-			'active' => $active_plugins,
-		), $ID );
-
-		return $wpdb->update(
-			$state_table,
-			$state,
-			array( 'ID' => $ID )
-		);
-	}
-
-	/**
-	 * Deletes a plugin state.
-	 *
-	 * @since {{VERSION}}
-	 *
-	 * @param int $ID State ID.
-	 *
-	 * @return array|null|object|void
-	 */
-	public static function delete_state( $ID ) {
-
-		global $wpdb;
-
-		$state_table = self::states_table();
-
-		/**
-		 * Allow short-ciruiting of deleting state.
-		 *
-		 * @since {{VERSION}}
-		 */
-		if ( apply_filters( 'pluginss_delete_state', false, $ID ) ) {
-
-			return false;
-		}
-
-		return $wpdb->delete(
-			$state_table,
-			array( 'ID' => $ID )
-		);
-	}
-
-	/**
-	 * Retrieves all plugin states.
-	 *
-	 * @since {{VERSION}}
-	 *
-	 * @return array|null|object|void
-	 */
-	public static function get_states() {
-
-		global $wpdb;
-
-		$state_table = self::states_table();
-
-		/**
-		 * Filters the get_states results.
-		 *
-		 * @since {{VERSION}}
-		 */
-		$results = apply_filters( 'pluginss_get_states', $wpdb->get_results( "SELECT * FROM $state_table" ) );
-
-		return $results;
 	}
 }
 
@@ -278,7 +231,7 @@ class ClientDash_DB {
  *
  * @since {{VERSION}}
  */
-function CientDash_DB() {
+function ClientDashDB() {
 
-	return CientDash()->db;
+	return ClientDash()->db;
 }

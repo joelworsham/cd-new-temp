@@ -28,7 +28,7 @@ class ClientDash_Install {
 
 		add_option( 'clientdash_db_version', '1.0.0' );
 
-//		self::setup_tables();
+		self::setup_tables();
 	}
 
 	/**
@@ -45,11 +45,12 @@ class ClientDash_Install {
 
 		$charset_collate = $wpdb->get_charset_collate();
 
-		$sql = "CREATE TABLE {$wpdb->prefix}plugin_states (
-		  id mediumint(9) NOT NULL AUTO_INCREMENT,
-		  name text NOT NULL,
-		  active longtext NOT NULL,
-		  PRIMARY KEY  (id)
+		$sql = "CREATE TABLE {$wpdb->prefix}cd_customizations (
+		  role VARCHAR(100) NOT NULL UNIQUE,
+		  menu LONGTEXT,
+		  submenu LONGTEXT,
+		  widgets LONGTEXT,
+ 		  PRIMARY KEY  (role)
 		) $charset_collate;";
 
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';

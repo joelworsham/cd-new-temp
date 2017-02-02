@@ -28,7 +28,6 @@ class ClientDash_Customize {
 
 		if ( self::is_customizing() ) {
 
-//			add_action( 'init', array( $this, 'setup_screen' ), 999 );
 			add_action( 'template_redirect', array( $this, 'load' ), 0 );
 
 			add_filter( 'show_admin_bar', '__return_false' );
@@ -193,20 +192,17 @@ class ClientDash_Customize {
 			'adminurl'     => admin_url(),
 			'dashicons'    => json_decode( file_get_contents( CLIENTDASH_DIR . 'core/dashicons.json' ) ),
 			'menu'         => array(
-				array(
-					'id'             => 'index.php',
+				'index.php'  => array(
 					'title'          => '',
 					'original_title' => 'Dashboard',
 					'icon'           => 'dashicons dashicons-dashboard',
 				),
-				array(
-					'id'             => 'edit.php',
+				'edit.php'   => array(
 					'title'          => '',
 					'original_title' => 'Posts',
 					'icon'           => 'dashicons dashicons-admin-post',
 				),
-				array(
-					'id'             => 'upload.php',
+				'upload.php' => array(
 					'title'          => '',
 					'original_title' => 'Media',
 					'icon'           => 'dashicons dashicons-admin-media',
@@ -214,61 +210,51 @@ class ClientDash_Customize {
 			), // TODO menu data
 			'submenu'      => array(
 				'index.php' => array(
-					array(
-						'id'             => 'update-core.php',
+					'update-core.php' => array(
 						'title'          => '',
 						'original_title' => 'Updates',
 					),
-					array(
-						'id'             => 'test.php',
+					'test.php'        => array(
 						'title'          => '',
 						'original_title' => 'Test',
 					),
 				),
 			), // TODO submenu data
 			'orig_menu'    => array(
-				array(
-					'id'    => 'upload.php',
+				'upload.php'          => array(
 					'title' => 'Media',
 					'icon'  => 'dashicons dashicons-admin-media',
 				),
-				array(
-					'id'    => 'edit-comments.php',
+				'edit-comments.php'   => array(
 					'title' => 'Comments',
 					'icon'  => 'dashicons dashicons-admin-comments',
 				),
-				array(
-					'id'    => 'options-general.php',
+				'options-general.php' => array(
 					'title' => 'Settings',
 					'icon'  => 'dashicons dashicons-admin-settings',
 				),
 			), // TODO orig_menu data
 			'orig_submenu' => array(
 				'index.php' => array(
-					array(
-						'id'    => 'update-core.php',
+					'update-core.php' => array(
 						'title' => 'Updates',
 					),
-					array(
-						'id'    => 'test2.php',
+					'test2.php'       => array(
 						'title' => 'Test2',
 					),
 				),
 			), // TODO orig_submenu data
-			'widgets' => array(
-				array(
-					'id' => 'dashboard_right_now',
-					'title' => '',
+			'widgets'      => array(
+				'dashboard_right_now' => array(
+					'title'          => '',
 					'original_title' => 'At a Glance',
 				),
 			), // TODO widgets data
 			'orig_widgets' => array(
-				array(
-					'id' => 'dashboard_right_now',
+				'dashboard_right_now' => array(
 					'title' => 'At a Glance',
 				),
-				array(
-					'id' => 'dashboard_activity',
+				'dashboard_activity'  => array(
 					'title' => 'Activity',
 				),
 			), // TODO orig_widgets data
