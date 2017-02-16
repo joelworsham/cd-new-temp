@@ -36,6 +36,25 @@ class ClientDash_Customize {
 			add_action( 'cd_customize_body', array( $this, 'template_body' ) );
 			add_action( 'cd_customize_footer', array( $this, 'template_footer' ) );
 		}
+
+		// If in the customizer, modify the role
+		if ( isset( $_GET['cd_customizing'] ) ) {
+
+			add_action( 'set_current_user', array( $this, 'modify_current_user' ), 99999 );
+		}
+
+		// Save role settings on first role load
+		if ( isset( $_GET['cd_save_role'] ) ) {
+
+			add_filter( 'custom_menu_order', array(
+				$this,
+				'save_menu_preview'
+			), 99998 ); // Priority just before modifying
+			add_filter( 'wp_dashboard_widgets', array(
+				$this,
+				'save_dashboard_preview'
+			), 99998 ); // Priority just before modifying
+		}
 	}
 
 	/**
@@ -62,19 +81,6 @@ class ClientDash_Customize {
 		add_action( 'cd_customize_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 
 		nocache_headers();
-	}
-
-	/**
-	 * Sets up the WP Screen object, for other plugins to gather information to identify customize load.
-	 *
-	 * @since {{VERSION}}
-	 * @access private
-	 */
-	function setup_screen() {
-
-		require_once ABSPATH . 'wp-admin/includes/class-wp-screen.php';
-		require_once ABSPATH . 'wp-admin/includes/screen.php';
-		set_current_screen( 'clientdash_customize' );
 	}
 
 	/**
@@ -171,6 +177,8 @@ class ClientDash_Customize {
 	 */
 	function localize_data() {
 
+		global $menu, $submenu;
+
 		if ( ! function_exists( 'get_editable_roles' ) ) {
 
 			require_once ABSPATH . 'wp-admin/includes/user.php';
@@ -188,77 +196,10 @@ class ClientDash_Customize {
 		}
 
 		wp_localize_script( 'clientdash-customize', 'ClientdashCustomize_Data', array(
-			'roles'        => $roles,
-			'adminurl'     => admin_url(),
-			'dashicons'    => json_decode( file_get_contents( CLIENTDASH_DIR . 'core/dashicons.json' ) ),
-			'menu'         => array(
-				'index.php'  => array(
-					'title'          => '',
-					'original_title' => 'Dashboard',
-					'icon'           => 'dashicons dashicons-dashboard',
-				),
-				'edit.php'   => array(
-					'title'          => '',
-					'original_title' => 'Posts',
-					'icon'           => 'dashicons dashicons-admin-post',
-				),
-				'upload.php' => array(
-					'title'          => '',
-					'original_title' => 'Media',
-					'icon'           => 'dashicons dashicons-admin-media',
-				),
-			), // TODO menu data
-			'submenu'      => array(
-				'index.php' => array(
-					'update-core.php' => array(
-						'title'          => '',
-						'original_title' => 'Updates',
-					),
-					'test.php'        => array(
-						'title'          => '',
-						'original_title' => 'Test',
-					),
-				),
-			), // TODO submenu data
-			'orig_menu'    => array(
-				'upload.php'          => array(
-					'title' => 'Media',
-					'icon'  => 'dashicons dashicons-admin-media',
-				),
-				'edit-comments.php'   => array(
-					'title' => 'Comments',
-					'icon'  => 'dashicons dashicons-admin-comments',
-				),
-				'options-general.php' => array(
-					'title' => 'Settings',
-					'icon'  => 'dashicons dashicons-admin-settings',
-				),
-			), // TODO orig_menu data
-			'orig_submenu' => array(
-				'index.php' => array(
-					'update-core.php' => array(
-						'title' => 'Updates',
-					),
-					'test2.php'       => array(
-						'title' => 'Test2',
-					),
-				),
-			), // TODO orig_submenu data
-			'widgets'      => array(
-				'dashboard_right_now' => array(
-					'title'          => '',
-					'original_title' => 'At a Glance',
-				),
-			), // TODO widgets data
-			'orig_widgets' => array(
-				'dashboard_right_now' => array(
-					'title' => 'At a Glance',
-				),
-				'dashboard_activity'  => array(
-					'title' => 'Activity',
-				),
-			), // TODO orig_widgets data
-			'l10n'         => array(
+			'roles'     => $roles,
+			'adminurl'  => admin_url(),
+			'dashicons' => json_decode( file_get_contents( CLIENTDASH_DIR . 'core/dashicons.json' ) ),
+			'l10n'      => array(
 				'role_switcher_label'             => __( 'Modifying for:', 'clientdash' ),
 				'panel_text_menu'                 => __( 'Menu', 'clientdash' ),
 				'panel_text_dashboard'            => __( 'Dashboard', 'clientdash' ),
@@ -275,6 +216,7 @@ class ClientDash_Customize {
 				'icon'                            => __( 'Icon', 'clientdash' ),
 				'no_items_added'                  => __( 'No items added yet. Click the "Add Items" button to add your first item.', 'clientdash' ),
 				'no_items_available'              => __( 'No items available.', 'clientdash' ),
+				'separator'                       => __( 'Separator', 'clientdash' ),
 			),
 		) );
 	}
@@ -346,5 +288,163 @@ class ClientDash_Customize {
 	function template_footer() {
 
 		include_once CLIENTDASH_DIR . 'core/customize/views/customize-footer.php';
+	}
+
+	/**
+	 * Retrieves and stores the current role.
+	 *
+	 * @since {{VERSION}}
+	 * @access private
+	 *
+	 * @return bool|null|WP_Role
+	 */
+	private function get_role() {
+
+		static $role = false;
+
+		if ( $role === false ) {
+
+			$role = get_role( $_GET['role'] );
+		}
+
+		if ( $role === null ) {
+
+			return false;
+		}
+
+		return $role;
+	}
+
+	/**
+	 * Modifies the current user to set the role.
+	 *
+	 * @since {{VERSION}}
+	 * @access private
+	 */
+	function modify_current_user() {
+
+		global $current_user;
+
+		if ( ! ( $role = $this->get_role() ) ) {
+
+			return;
+		}
+
+		$current_user->roles   = array( $role->name );
+		$current_user->caps    = array( $role->name => true );
+		$current_user->allcaps = $role->capabilities;
+	}
+
+	/**
+	 * Initially saves a role's menu preview for the customizer.
+	 *
+	 * @since {{VERSION}}
+	 * @access private
+	 */
+	function save_menu_preview( $bool ) {
+
+		global $menu, $submenu;
+
+		$role = $_GET['role'];
+
+		$customizations = cd_get_customizations( $role );
+
+		// Get original menu merged with customizations
+		ksort( $menu );
+
+		$save_menu       = array();
+		$customized_menu = isset( $customizations['menu'] ) ? $customizations['menu'] : array();
+
+		foreach ( $menu as $menu_item ) {
+
+			$customized_menu_item = isset( $customized_menu[ $menu_item[2] ] ) ?
+				$customized_menu[ $menu_item[2] ] : array();
+
+			$save_menu[ $menu_item[2] ] = wp_parse_args( $customized_menu_item, array(
+				'original_title' => $menu_item[0],
+				'icon'           => $menu_item[6],
+				'deleted'        => false,
+				'separator'      => $menu_item[4] == 'wp-menu-separator',
+			) );
+		}
+
+		// Get original submenu merged with customizations
+		$save_submenu       = array();
+		$customized_submenu = isset( $customizations['submenu'] ) ? $customizations['submenu'] : array();
+
+		foreach ( $submenu as $menu_slug => $submenu_items ) {
+
+			ksort( $submenu_items );
+
+			$save_submenu[ $menu_slug ] = array();
+
+			foreach ( $submenu_items as $submenu_item ) {
+
+				$customized_submenu_item = isset( $customized_submenu[ $submenu_item[2] ] ) ?
+					$customized_submenu[ $submenu_item[2] ] : array();
+
+				$save_submenu[ $menu_slug ][ $submenu_item[2] ] = wp_parse_args( $customized_submenu_item, array(
+					'original_title' => $submenu_item[0],
+					'deleted'        => false,
+				) );
+			}
+		}
+
+		// Set current role menu
+		cd_update_role_customizations( "preview_$role", array(
+			'menu'    => $save_menu,
+			'submenu' => $save_submenu,
+		) );
+
+		return $bool;
+	}
+
+	/**
+	 * Initially saves a role's dashboard preview.
+	 *
+	 * @since {{VERSION}}
+	 * @access private
+	 *
+	 * @param array $dashboard_widgets
+	 *
+	 * @return array
+	 */
+	function save_dashboard_preview( $dashboard_widgets ) {
+
+		global $wp_meta_boxes;
+
+		$role = $_GET['role'];
+
+		$customizations = cd_get_customizations( $role );
+
+		$save_dashboard       = array();
+		$customized_dashboard = isset( $customizations['dashboard'] ) ? $customizations['dashboard'] : array();
+
+		if ( isset( $wp_meta_boxes['dashboard'] ) ) {
+
+			foreach ( $wp_meta_boxes['dashboard'] as $priorities ) {
+
+				foreach ( $priorities as $widgets ) {
+
+					foreach ( $widgets as $widget ) {
+
+						$customized_widget = isset( $customized_dashboard[ $widget['id'] ] ) ?
+							$customized_dashboard[ $widget['id'] ] : array();
+
+						$save_dashboard[ $widget['id'] ] = wp_parse_args( $customized_widget, array(
+							'original_title' => $widget['title'],
+							'deleted'        => false,
+						) );
+					}
+				}
+			}
+		}
+
+		// Set current role dashboard
+		cd_update_role_customizations( "preview_$role", array(
+			'dashboard' => $save_dashboard,
+		) );
+
+		return $dashboard_widgets;
 	}
 }

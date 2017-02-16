@@ -130,13 +130,9 @@ class ClientDash_REST_Customizations_Controller {
 	 */
 	public function get_item( $request ) {
 
-		$role           = $request['role'];
+		$role = $request['role'];
+
 		$customizations = cd_get_customizations( $role );
-
-		if ( empty( $customizations ) ) {
-
-			return rest_ensure_response( array() );
-		}
 
 		$response = $this->prepare_item_for_response( $customizations );
 
@@ -150,14 +146,11 @@ class ClientDash_REST_Customizations_Controller {
 	 */
 	public function create_item( $request ) {
 
-		$customizations = $this->prepare_item_for_database( $request );
-
-		$results = cd_update_role_customizations(
-			$customizations['role'],
-			$customizations['menu'],
-			$customizations['submenu'],
-			$customizations['widgets']
-		);
+		$results = cd_update_role_customizations( $request['role'], array(
+			'menu'      => $request['menu'],
+			'submenu'   => $request['submenu'],
+			'dashboard' => $request['dashboard'],
+		) );
 
 		if ( $results === false ) {
 
@@ -170,7 +163,7 @@ class ClientDash_REST_Customizations_Controller {
 
 		$request->set_param( 'context', 'edit' );
 
-		$response = $this->prepare_item_for_response( $customizations );
+		$response = $this->prepare_item_for_response( $request );
 		$response = rest_ensure_response( $response );
 
 		$response->set_status( 201 );
@@ -186,10 +179,9 @@ class ClientDash_REST_Customizations_Controller {
 	 */
 	public function update_item( $request ) {
 
-		$role           = $request['role'];
-		$customizations = cd_get_customizations( $role );
+		$role = $request['role'];
 
-		if ( empty( $role ) || empty( $customizations['role'] ) ) {
+		if ( empty( $role ) ) {
 
 			return new WP_Error(
 				'rest_customizations_invalid_role',
@@ -200,12 +192,11 @@ class ClientDash_REST_Customizations_Controller {
 
 		$customizations = $this->prepare_item_for_database( $request );
 
-		$results = cd_update_role_customizations(
-			$customizations->data['role'],
-			$customizations->data['menu'],
-			$customizations->data['submenu'],
-			$customizations->data['widgets']
-		);
+		$results = cd_update_role_customizations( $request['role'], array(
+			'menu'      => $request['menu'],
+			'submenu'   => $request['submenu'],
+			'dashboard' => $request['dashboard'],
+		) );
 
 		if ( $results === false ) {
 
@@ -226,35 +217,35 @@ class ClientDash_REST_Customizations_Controller {
 	/**
 	 * Matches the cusotmizations data to the schema we want.
 	 *
-	 * @param array $customizations
+	 * @param array $data
 	 */
-	public function prepare_item_for_response( $customizations ) {
+	public function prepare_item_for_response( $data ) {
 
-		$customizations_data = array();
+		$response = array();
 
 		$schema = $this->get_item_schema();
 
 		if ( isset( $schema['properties']['role'] ) ) {
 
-			$customizations_data['role'] = $customizations['role'];
+			$response['role'] = $data['role'];
 		}
 
 		if ( isset( $schema['properties']['menu'] ) ) {
 
-			$customizations_data['menu'] = $customizations['menu'];
+			$response['menu'] = $data['menu'];
 		}
 
 		if ( isset( $schema['properties']['submenu'] ) ) {
 
-			$customizations_data['submenu'] = $customizations['submenu'];
+			$response['submenu'] = $data['submenu'];
 		}
 
-		if ( isset( $schema['properties']['widgets'] ) ) {
+		if ( isset( $schema['properties']['dashboard'] ) ) {
 
-			$customizations_data['widgets'] = $customizations['widgets'];
+			$response['dashboard'] = $data['dashboard'];
 		}
 
-		return rest_ensure_response( $customizations_data );
+		return rest_ensure_response( $response );
 	}
 
 	/**
@@ -271,7 +262,7 @@ class ClientDash_REST_Customizations_Controller {
 
 		$customizations = array();
 
-		$schema = $this->get_item_schema();
+		$schema = $this->get_item_schema()['customizations'];
 
 		if ( isset( $schema['properties']['role'] ) ) {
 
@@ -288,9 +279,9 @@ class ClientDash_REST_Customizations_Controller {
 			$customizations['submenu'] = $request->get_param( 'submenu' );
 		}
 
-		if ( isset( $schema['properties']['widgets'] ) ) {
+		if ( isset( $schema['properties']['dashboard'] ) ) {
 
-			$customizations['widgets'] = $request->get_param( 'widgets' );
+			$customizations['dashboard'] = $request->get_param( 'dashboard' );
 		}
 
 		/**
@@ -380,22 +371,22 @@ class ClientDash_REST_Customizations_Controller {
 			'title'      => 'cd_customizations',
 			'type'       => 'object',
 			'properties' => array(
-				'role'    => array(
+				'role'      => array(
 					'description' => esc_html__( 'Unique identifier for the object.', 'clientdash' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit', 'embed' ),
 					'readonly'    => true,
 				),
-				'menu'    => array(
+				'menu'      => array(
 					'description' => esc_html__( 'The customizations menu.', 'clientdash' ),
 					'type'        => 'object',
 				),
-				'submenu' => array(
+				'submenu'   => array(
 					'description' => esc_html__( 'The customizations submenu.', 'clientdash' ),
 					'type'        => 'object',
 				),
-				'widgets' => array(
-					'description' => esc_html__( 'The customizations widgets.', 'clientdash' ),
+				'dashboard' => array(
+					'description' => esc_html__( 'The customizations dashboard.', 'clientdash' ),
 					'type'        => 'object',
 				),
 			),

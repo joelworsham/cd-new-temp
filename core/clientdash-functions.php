@@ -41,19 +41,19 @@ function cd_get_role_menus( $role ) {
 }
 
 /**
- * Gets the role's custom widgets, if set.
+ * Gets the role's custom dashboard, if set.
  *
- * Wrapper for ClientDashDB()::get_role_widgets()
+ * Wrapper for ClientDashDB()::get_role_dashboard()
  *
  * @since {{VERSION}}
  *
- * @param string $role Role to get widgets for.
+ * @param string $role Role to get dashboard for.
  *
  * @return array|bool|mixed|void
  */
-function cd_get_role_widgets( $role ) {
+function cd_get_role_dashboard( $role ) {
 
-	return ClientDash_DB::get_role_widgets( $role );
+	return ClientDash_DB::get_role_dashboard( $role );
 }
 
 /**
@@ -64,13 +64,11 @@ function cd_get_role_widgets( $role ) {
  * @since {{VERSION}}
  *
  * @param string $role
- * @param array $menu
- * @param array $submenu
- * @param array $widgets
+ * @param array $data
  *
  * @return array|null|object|void
  */
-function cd_update_role_customizations( $role, $menu, $submenu, $widgets ) {
+function cd_update_role_customizations( $role, $data ) {
 
-	return ClientDash_DB::update_role_customizations( $role, $menu, $submenu, $widgets );
+	return ClientDash_DB::update_role_customizations( $role, $data );
 }

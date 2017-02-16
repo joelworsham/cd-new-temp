@@ -49,7 +49,7 @@ class ClientDash_Install {
 		  role VARCHAR(100) NOT NULL UNIQUE,
 		  menu LONGTEXT,
 		  submenu LONGTEXT,
-		  widgets LONGTEXT,
+		  dashboard LONGTEXT,
  		  PRIMARY KEY  (role)
 		) $charset_collate;";
 

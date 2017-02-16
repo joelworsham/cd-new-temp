@@ -62,6 +62,15 @@ if ( ! class_exists( 'ClientDash' ) ) {
 		 */
 		public $customize;
 
+		/**
+		 * Modifies the admin from customizations.
+		 *
+		 * @since {{VERSION}}
+		 *
+		 * @var ClientDash_Modify
+		 */
+		public $modify;
+
 		protected function __wakeup() {
 		}
 
@@ -120,8 +129,10 @@ if ( ! class_exists( 'ClientDash' ) ) {
 			if ( is_admin() ) {
 
 				require_once CLIENTDASH_DIR . 'core/settings/class-clientdash-settings.php';
+				require_once CLIENTDASH_DIR . 'core/class-clientdash-modify.php';
 
 				$this->settings = new ClientDash_Settings();
+				$this->modify   = new ClientDash_Modify();
 			}
 		}
 

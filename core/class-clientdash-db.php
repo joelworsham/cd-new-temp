@@ -32,11 +32,20 @@ class ClientDash_DB {
 
 		global $wpdb;
 
-		$results = $wpdb->get_row( "SELECT * FROM {$wpdb->prefix}cd_customizations WHERE role = '$role'", ARRAY_A );
+		$results = $wpdb->get_row(
+			"
+			SELECT menu,submenu,dashboard
+			FROM {$wpdb->prefix}cd_customizations
+			WHERE role = '$role'
+			",
+			ARRAY_A );
 
-		foreach ( $results as &$result ) {
+		if ( $results ) {
 
-			$result = maybe_unserialize( $result );
+			foreach ( $results as &$item ) {
+
+				$item = maybe_unserialize( $item );
+			}
 		}
 
 		/**
@@ -116,34 +125,34 @@ class ClientDash_DB {
 	}
 
 	/**
-	 * Gets the role's custom widgets, if set.
+	 * Gets the role's custom dashboard, if set.
 	 *
 	 * @since {{VERSION}}
 	 *
-	 * @param string $role Role to get widgets for.
+	 * @param string $role Role to get dashboard for.
 	 *
 	 * @return array|bool|mixed|void
 	 */
-	public static function get_role_widgets( $role ) {
+	public static function get_role_dashboard( $role ) {
 
 		if ( ! ( $results = self::get_customizations( $role ) ) ) {
 
 			return false;
 		}
 
-		if ( ! isset( $results['widgets'] ) ) {
+		if ( ! isset( $results['dashboard'] ) ) {
 
 			return array();
 		}
 
 		/**
-		 * Filters the role's custom widgets, if set.
+		 * Filters the role's custom dashboard, if set.
 		 *
 		 * @since {{VERSION}}
 		 */
-		$widgets = apply_filters( 'cd_role_widgets', $results['widgets'] );
+		$dashboard = apply_filters( 'cd_role_dashboard', $results['dashboard'] );
 
-		return $widgets;
+		return $dashboard;
 	}
 
 	/**
@@ -152,13 +161,11 @@ class ClientDash_DB {
 	 * @since {{VERSION}}
 	 *
 	 * @param string $role
-	 * @param array $menu
-	 * @param array $submenu
-	 * @param array $widgets
+	 * @param array $data
 	 *
 	 * @return array|null|object|void
 	 */
-	public static function update_role_customizations( $role, $menu, $submenu, $widgets ) {
+	public static function update_role_customizations( $role, $customizations ) {
 
 		global $wpdb;
 
@@ -167,30 +174,34 @@ class ClientDash_DB {
 		 *
 		 * @since {{VERSION}}
 		 */
-		$customizations = apply_filters( 'cd_db_update_role_customizations', array(
-			'menu'    => $menu,
-			'submenu' => $submenu,
-			'widgets' => $widgets,
-		), $role );
+		$customizations = apply_filters( 'cd_db_update_role_customizations', $customizations, $role );
+
+		$formats = array();
+
+		foreach ( $customizations as &$item ) {
+
+			$item = maybe_serialize( $item );
+
+			if ( is_string( $item ) ) {
+
+				$formats[] = '%s';
+			}
+			if ( is_int( $item ) ) {
+
+				$formats[] = '%d';
+			}
+		}
 
 		// Update if exists
 		if ( self::get_customizations( $role ) ) {
 
 			$result = $wpdb->update(
 				"{$wpdb->prefix}cd_customizations",
-				array(
-					'menu'    => serialize( $customizations['menu'] ),
-					'submenu' => serialize( $customizations['submenu'] ),
-					'widgets' => serialize( $customizations['widgets'] ),
-				),
+				$customizations,
 				array(
 					'role' => $role,
 				),
-				array(
-					'%s',
-					'%s',
-					'%s',
-				),
+				$formats,
 				array(
 					'%s',
 				)
@@ -198,20 +209,13 @@ class ClientDash_DB {
 
 		} else {
 
+			$customizations['role'] = $role;
+			array_unshift( $formats, '%s' );
+
 			$result = $wpdb->insert(
 				"{$wpdb->prefix}cd_customizations",
-				array(
-					'role'    => $role,
-					'submenu' => serialize( $customizations['submenu'] ),
-					'menu'    => serialize( $customizations['menu'] ),
-					'widgets' => serialize( $customizations['widgets'] ),
-				),
-				array(
-					'%s',
-					'%s',
-					'%s',
-					'%s',
-				)
+				$customizations,
+				$formats
 			);
 		}
 
