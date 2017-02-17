@@ -41,6 +41,7 @@ class ClientDash_Customize {
 		if ( isset( $_GET['cd_customizing'] ) ) {
 
 			add_action( 'set_current_user', array( $this, 'modify_current_user' ), 99999 );
+			add_action( 'admin_footer', array( $this, 'footer_scripts' ) );
 		}
 
 		// Save role settings on first role load
@@ -446,5 +447,23 @@ class ClientDash_Customize {
 		) );
 
 		return $dashboard_widgets;
+	}
+
+	function footer_scripts() {
+		?>
+		<script type="text/javascript">
+
+			var links = document.getElementsByTagName('a');
+
+			for (var i = 0, len = links.length; i < len; i++) {
+
+				links[i].onclick = function (e) {
+
+					return false;
+				}
+			}
+
+		</script>
+		<?php
 	}
 }

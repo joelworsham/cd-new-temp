@@ -54,7 +54,7 @@ class ClientDash_Modify {
 	function __construct() {
 
 		add_filter( 'custom_menu_order', array( $this, 'modify_menu' ), 99999 );
-//		add_action( 'wp_dashboard_setup', array( $this, 'modify_dashboard' ), 99999 );
+		add_action( 'wp_dashboard_setup', array( $this, 'modify_dashboard' ), 99999 );
 	}
 
 	/**
@@ -124,6 +124,20 @@ class ClientDash_Modify {
 
 		foreach ( $this->menu as $ID => $menu_item ) {
 
+			// Separators are handled diferrently
+			if ( $menu_item['separator']) {
+
+				$new_menu[] = array(
+					'',
+					'read',
+					$ID,
+					'',
+					'wp-menu-separator',
+				);
+
+				continue;
+			}
+
 			// Skip deleted items
 			if ( $menu_item['deleted'] ) {
 
@@ -171,5 +185,54 @@ class ClientDash_Modify {
 		}
 
 		return $bool;
+	}
+
+	/**
+	 * Modifies the dashboard.
+	 *
+	 * @since {{VERSION}}
+	 * @access private
+	 */
+	function modify_dashboard() {
+
+		global $wp_meta_boxes;
+
+		$this->get_customizations();
+
+		if ( ! $this->dashboard ) {
+
+			return;
+		}
+
+		if ( isset( $wp_meta_boxes['dashboard'] ) ) {
+
+			foreach ( $wp_meta_boxes['dashboard'] as $position => $priorities ) {
+
+				foreach ( $priorities as $priority => $widgets ) {
+
+					foreach ( $widgets as $i => $widget ) {
+
+						// No modification
+						if ( ! isset( $this->dashboard[ $widget['id']])) {
+
+							continue;
+						}
+
+						$custom_widget = $this->dashboard[ $widget['id']];
+
+						// Modify
+						if ( isset( $custom_widget['deleted'] ) && $custom_widget['deleted'] ) {
+
+							unset( $wp_meta_boxes['dashboard'][ $position][$priority][$i]['title'] );
+						}
+
+						if ( isset( $custom_widget['title'] )) {
+
+							$wp_meta_boxes['dashboard'][ $position][$priority][$i]['title'] = $custom_widget['title'];
+						}
+					}
+				}
+			}
+		}
 	}
 }

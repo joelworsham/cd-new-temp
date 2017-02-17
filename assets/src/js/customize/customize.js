@@ -58,6 +58,26 @@ const getAvailableItems = function (items) {
 }
 
 /**
+ * Sets each item's title to the original title.
+ *
+ * @since {{VERSION}}
+ *
+ * @param items
+ * @returns {*}
+ */
+const setToOriginalTitles = function (items) {
+
+    Object.keys(items).map((ID) => {
+
+        let item = items[ID];
+
+        item.title = item.original_title;
+    });
+
+    return items;
+}
+
+/**
  * Re-orders the object for the sortable event.
  *
  * @since {{VERSION}}
@@ -474,7 +494,7 @@ class LineItemForm extends React.Component {
 class LineItemContent extends React.Component {
     render() {
         return (
-            <div id={this.props.id} className={"cd-editor-lineitem " + this.props.classes}>
+            <div id={"cd-editor-lineitem-" + this.props.id} className={"cd-editor-lineitem " + this.props.classes}>
                 <div className="cd-editor-lineitem-block">
                     <div className="cd-editor-lineitem-title">
                         {this.props.icon &&
@@ -662,6 +682,7 @@ class MenuItemEdit extends React.Component {
         return (
             <LineItemContent
                 key={this.props.id}
+                id={this.props.id}
                 title={this.props.title || this.props.originalTitle}
                 icon={this.props.icon}
                 actions={actions}
@@ -704,6 +725,7 @@ class MenuItemSeparator extends React.Component {
         return (
             <LineItemContent
                 key={this.props.id}
+                id={this.props.id}
                 title={l10n.separator}
                 classes="cd-editor-menuitem-separator"
                 actions={actions}
@@ -1539,6 +1561,11 @@ class Preview extends React.Component {
         }
     }
 
+    handleClick(e) {
+
+        console.log(e);
+    }
+
     loaded() {
 
         this.props.onLoad();
@@ -1569,6 +1596,7 @@ class Preview extends React.Component {
                     id="cd-preview-iframe"
                     src={this.getSrc() + (this.props.saveRole ? '&cd_save_role=1' : '')}
                     onLoad={this.loaded}
+                    onClick={this.handleClick}
                 />
             </section>
         )
@@ -1693,6 +1721,9 @@ class Editor extends React.Component {
 
                     state.activePanel = 'primary';
 
+                    // Get the separators indexed
+                    customizations.menu = api.menuIndexSeparators(customizations.menu);
+
                     state.customizations[role] = customizations;
 
                     return state;
@@ -1749,7 +1780,35 @@ class Editor extends React.Component {
 
         this.setState((prevState) => {
 
-            prevState.customizations[role].menu[ID].deleted = false;
+            let menu = prevState.customizations[role].menu;
+
+            // Separator is added differently
+            if (ID == 'separator') {
+
+                let separator_index = 1;
+
+                // Get new separator index
+                Object.keys(menu).map((ID) => {
+
+                    let item = menu[ID];
+
+                    if (item.separator) {
+
+                        separator_index++;
+                    }
+                });
+
+                menu["separator" + separator_index] = {
+                    original_title: l10n.separator,
+                    separator: true,
+                };
+
+                prevState.customizations[role].menu = this.menuIndexSeparators(prevState.customizations[role].menu);
+
+                return prevState;
+            }
+
+            menu[ID].deleted = false;
 
             return prevState;
         });
@@ -1778,7 +1837,19 @@ class Editor extends React.Component {
 
         this.setState((prevState) => {
 
-            prevState.customizations[role].menu[ID].deleted = true;
+            let item = prevState.customizations[role].menu[ID];
+
+            // Separator is added differently
+            if (item.separator) {
+
+                delete prevState.customizations[role].menu[ID];
+
+                prevState.customizations[role].menu = this.menuIndexSeparators(prevState.customizations[role].menu);
+
+                return prevState;
+            }
+
+            item.deleted = true;
 
             return prevState;
         });
@@ -1822,6 +1893,8 @@ class Editor extends React.Component {
 
         let role = this.props.role;
 
+        new_order = this.menuIndexSeparators(new_order);
+
         this.setState((prevState) => {
 
             prevState.customizations[role].menu = new_order;
@@ -1856,13 +1929,40 @@ class Editor extends React.Component {
         });
     }
 
+    menuIndexSeparators(menu) {
+
+        let separator_index = 1;
+        let new_menu = {};
+
+        Object.keys(menu).map((ID) => {
+
+            let item = menu[ID];
+
+            if (item.separator) {
+
+                new_menu['separator' + separator_index] = {
+                    original_title: l10n.separator,
+                    separator: true,
+                }
+
+                separator_index++;
+
+            } else {
+
+                new_menu[ID] = item;
+            }
+        });
+
+        return new_menu;
+    }
+
     widgetAdd(ID, widget) {
 
         let role = this.props.role;
 
         this.setState((prevState) => {
 
-            prevState.customizations[role].dashboard[ID] = widget;
+            prevState.customizations[role].dashboard[ID].deleted = false;
 
             return prevState;
         });
@@ -1876,7 +1976,7 @@ class Editor extends React.Component {
 
         this.setState((prevState) => {
 
-            delete prevState.customizations[role].dashboard[ID];
+            prevState.customizations[role].dashboard[ID].deleted = true;
 
             return prevState;
         });
@@ -1982,6 +2082,25 @@ class Editor extends React.Component {
                 let current_items = customizations.menu;
                 let available_items = getDeletedItems(current_items);
 
+                available_items = setToOriginalTitles(available_items);
+
+                // Skip separators
+                Object.keys(available_items).map((ID) => {
+
+                    let item = available_items[ID];
+
+                    if (item.separator) {
+
+                        delete available_items[ID];
+                    }
+                });
+
+                // Add separator to bottom always
+                available_items.separator = {
+                    title: l10n.separator,
+                    separator: true,
+                }
+
                 var panel =
                         <PanelAddItems
                             availableItems={available_items}
@@ -2011,6 +2130,8 @@ class Editor extends React.Component {
                 let current_items = customizations.submenu[this.state.submenuEdit] || [];
                 let available_items = getDeletedItems(current_items);
 
+                available_items = setToOriginalTitles(available_items);
+
                 var panel =
                         <PanelAddItems
                             itemInfo={item_info}
@@ -2030,9 +2151,12 @@ class Editor extends React.Component {
             case 'dashboard':
             {
 
+                let current_items = customizations.dashboard;
+                let available_items = getAvailableItems(current_items);
+
                 var panel =
                         <PanelDashboard
-                            widgets={customizations.dashboard}
+                            widgets={available_items}
                             onWidgetEdit={this.widgetEdit}
                             onDeleteWidget={this.widgetDelete}
                             onLoadPanel={this.loadPanel}
@@ -2052,23 +2176,10 @@ class Editor extends React.Component {
             case 'addWidgets':
             {
 
-                let available_items = {};
                 let current_items = customizations.dashboard;
-                let original_items = original_data.dashboard;
+                let available_items = getDeletedItems(current_items);
 
-                if (Object.keys(original_items).length) {
-
-                    // Array diff to get all items that don't yet exist in the menu
-                    Object.keys(original_items).forEach((ID) => {
-
-                        let item = original_items[ID];
-
-                        if (!current_items[ID]) {
-
-                            available_items[ID] = item;
-                        }
-                    });
-                }
+                available_items = setToOriginalTitles(available_items);
 
                 var panel =
                         <PanelAddItems
