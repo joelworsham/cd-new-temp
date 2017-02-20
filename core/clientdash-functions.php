@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || die;
  */
 function cd_get_customizations( $role ) {
 
-	return ClientDashDB()::get_customizations( $role );
+	return ClientDash_DB::get_customizations( $role );
 }
 
 /**

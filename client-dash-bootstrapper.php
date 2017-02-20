@@ -54,20 +54,20 @@ class ClientDash_Bootstrapper {
 		$wp_version  = get_bloginfo( 'version' );
 
 		// Minimum PHP version
-		if ( version_compare( $php_version, '5.6.0' ) === - 1 ) {
+		if ( version_compare( $php_version, '5.3.0' ) === - 1 ) {
 
 			$this->notices[] = sprintf(
-				__( 'Minimum PHP version of 5.6.0 required. Current version is %s. Please contact your system administrator to upgrade PHP to its latest version.', 'clientdash' ),
+				__( 'Minimum PHP version of 5.3.0 required. Current version is %s. Please contact your system administrator to upgrade PHP to its latest version.', 'clientdash' ),
 				$php_version
 			);
 		}
 
 		// Minimum WordPress version
 		// TODO Figure out actual minimum version
-		if ( version_compare( $wp_version, '4.6.0' ) === - 1 ) {
+		if ( version_compare( $wp_version, '4.0.0' ) === - 1 ) {
 
 			$this->notices[] = sprintf(
-				__( 'Minimum WordPress version of 4.6.0 required. Current version is %s. Please contact your system administrator to upgrade WordPress to its latest version.', 'clientdash' ),
+				__( 'Minimum WordPress version of 4.0.0 required. Current version is %s. Please contact your system administrator to upgrade WordPress to its latest version.', 'clientdash' ),
 				$wp_version
 			);
 		}
@@ -106,7 +106,7 @@ class ClientDash_Bootstrapper {
 			<p>
 				<?php
 				printf(
-					__( '%Client Dash%s could not load because of the following errors:', 'clientdash' ),
+					__( '%sClient Dash%s could not load because of the following errors:', 'clientdash' ),
 					'<strong>',
 					'</strong>'
 				);
