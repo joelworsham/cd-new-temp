@@ -1,11 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import ReactCSSTransitionReplace from 'react-css-transition-replace';
 import {SortableContainer, SortableElement, arrayMove} from 'react-sortable-hoc';
 
 const l10n = ClientdashCustomize_Data.l10n || false;
 const roles = ClientdashCustomize_Data.roles || false;
 const adminurl = ClientdashCustomize_Data.adminurl || false;
 const dashicons = ClientdashCustomize_Data.dashicons || false;
+var leave_confirmation = false;
 
 /**
  * Returns all items marked "deleted" from a list.
@@ -379,7 +381,7 @@ class DashiconsSelector extends React.Component {
         return (
             <div className="cd-editor-dashicons-selector">
                 <div className="cd-editor-dashicons-selector-label" onClick={this.toggleWindow}>
-                    {l10n.icon}
+                    {l10n['icon']}
                 </div>
 
                 <div className="cd-editor-dashicons-selector-field" onClick={this.toggleWindow}>
@@ -419,14 +421,20 @@ class ActionButton extends React.Component {
 
     handleClick() {
 
-        this.props.onHandleClick();
+        if (!this.props.disabled) {
+
+            this.props.onHandleClick();
+        }
     }
 
     render() {
         return (
-            <button type="button"
-                    className={"cd-editor-action-button " + (this.props.align ? this.props.align : "")}
+            <button type="button" title={this.props.text} aria-label={this.props.text}
+                    className={"cd-editor-action-button " +
+                    (this.props.align ? this.props.align : "") +
+                    (this.props.disabled ? ' cd-editor-action-button-disabled' : '')}
                     onClick={this.handleClick}>
+
                 {this.props.icon &&
                 <span className={"cd-editor-action-button-icon fa fa-" + this.props.icon}></span>
                 }
@@ -451,13 +459,14 @@ class LineItemAction extends React.Component {
 
     handleClick(e) {
 
+
         this.props.onHandleClick();
     }
 
     render() {
         return (
             <button
-                type="button"
+                type="button" title={this.props.text}
                 className={"cd-editor-lineitem-action " + (this.props.classes ? this.props.classes : "")}
                 onClick={this.handleClick}
             >
@@ -494,7 +503,8 @@ class LineItemForm extends React.Component {
 class LineItemContent extends React.Component {
     render() {
         return (
-            <div id={"cd-editor-lineitem-" + this.props.id} className={"cd-editor-lineitem " + this.props.classes}>
+            <div id={"cd-editor-lineitem-" + this.props.id}
+                 className={"cd-editor-lineitem " + (this.props.classes ? this.props.classes : '')}>
                 <div className="cd-editor-lineitem-block">
                     <div className="cd-editor-lineitem-title">
                         {this.props.icon &&
@@ -522,7 +532,9 @@ class LineItemContent extends React.Component {
 class LineItem extends React.Component {
     render() {
         return (
-            <li className="cd-editor-lineitem-li">{this.props.children}</li>
+            <li className="cd-editor-lineitem-li">
+                {this.props.children}
+            </li>
         )
     }
 }
@@ -582,8 +594,6 @@ class MenuItemEdit extends React.Component {
 
         this.state = {
             editing: false,
-            //title: this.props.title,
-            //icon: this.props.icon
         }
 
         this.toggleEdit = this.toggleEdit.bind(this);
@@ -634,11 +644,13 @@ class MenuItemEdit extends React.Component {
             <LineItemAction
                 key="menu-action-submenu"
                 icon="th-list"
+                text={l10n['edit_submenu']}
                 onHandleClick={this.submenuEdit}
             />,
             <LineItemAction
                 key="menu-action-edit"
                 icon={this.state.editing ? "chevron-up" : "chevron-down"}
+                text={l10n['edit']}
                 onHandleClick={this.toggleEdit}
             />
         ];
@@ -649,6 +661,7 @@ class MenuItemEdit extends React.Component {
                 <LineItemAction
                     key="menu-action-delete"
                     icon="times"
+                    text={l10n['delete']}
                     classes="cd-editor-lineitem-action-close"
                     onHandleClick={this.deleteItem}
                 />
@@ -657,14 +670,14 @@ class MenuItemEdit extends React.Component {
 
         const after_title =
                 <span className="cd-editor-lineitem-form-originaltitle">
-                    {l10n.original_title + " "}<strong>{this.props.originalTitle}</strong>
+                    {l10n['original_title'] + " "}<strong>{this.props.originalTitle}</strong>
                 </span>
             ;
 
         const form =
                 <LineItemForm>
                     <InputText
-                        label={l10n.title}
+                        label={l10n['title']}
                         value={this.props.title}
                         placeholder={this.props.originalTitle}
                         onHandleChange={this.titleChange}
@@ -726,7 +739,7 @@ class MenuItemSeparator extends React.Component {
             <LineItemContent
                 key={this.props.id}
                 id={this.props.id}
-                title={l10n.separator}
+                title={l10n['separator']}
                 classes="cd-editor-menuitem-separator"
                 actions={actions}
             />
@@ -794,14 +807,14 @@ class SubmenuItemEdit extends React.Component {
 
         const after_title =
                 <span className="cd-editor-lineitem-form-originaltitle">
-                    {l10n.original_title + " "}<strong>{this.props.originalTitle}</strong>
+                    {l10n['original_title '] + " "}<strong>{this.props.originalTitle}</strong>
                 </span>
             ;
 
         const form =
                 <LineItemForm>
                     <InputText
-                        label={l10n.title}
+                        label={l10n['title']}
                         value={this.props.title}
                         placeholder={this.props.originalTitle}
                         onHandleChange={this.titleChange}
@@ -912,7 +925,7 @@ class PanelLoadButton extends React.Component {
 class Panel extends React.Component {
     render() {
         return (
-            <div className="cd-editor-panel">
+            <div className={"cd-editor-panel " + "cd-editor-panel-" + this.props.id}>
                 {this.props.children}
             </div>
         )
@@ -973,12 +986,13 @@ class PrimaryActions extends React.Component {
                 />
                 <ActionButton
                     text="Preview"
-                    icon="eye"
+                    icon={this.props.loadingPreview ? "circle-o-notch fa-spin" : "eye"}
                     onHandleClick={this.previewChanges}
                 />
                 <ActionButton
                     text="Save"
-                    icon="check"
+                    icon={this.props.saving ? "circle-o-notch fa-spin" : "check"}
+                    disabled={!leave_confirmation}
                     onHandleClick={this.saveChanges}
                 />
             </div>
@@ -1011,7 +1025,7 @@ class RoleSwitcher extends React.Component {
             <div className="cd-editor-role-switcher">
                 <Select
                     options={roles}
-                    label={l10n.role_switcher_label}
+                    label={l10n['role_switcher_label']}
                     selected={this.props.role}
                     onHandleChange={this.switchRole}
                 />
@@ -1031,26 +1045,27 @@ class PanelPrimary extends React.Component {
 
         super(props);
 
-        this.onLoadPanel = this.onLoadPanel.bind(this);
+        this.loadPanel = this.loadPanel.bind(this);
     }
 
-    onLoadPanel(panel_ID) {
+    loadPanel(panel_ID) {
 
-        this.props.onLoadPanel(panel_ID);
+        this.props.onLoadPanel(panel_ID, 'forward');
     }
+
 
     render() {
         return (
-            <Panel>
+            <Panel id="primary">
                 <PanelLoadButton
-                    text={l10n.panel_text_menu}
+                    text={l10n['panel_text_menu']}
                     target="menu"
-                    onLoadPanel={this.onLoadPanel}
+                    onLoadPanel={this.loadPanel}
                 />
                 <PanelLoadButton
-                    text={l10n.panel_text_dashboard}
+                    text={l10n['panel_text_dashboard']}
                     target="dashboard"
-                    onLoadPanel={this.onLoadPanel}
+                    onLoadPanel={this.loadPanel}
                 />
             </Panel>
         )
@@ -1155,12 +1170,12 @@ class PanelMenu extends React.Component {
 
             panel_contents =
                 <div className="cd-editor-panel-helptext">
-                    {l10n.no_items_added}
+                    {l10n['no_items_added']}
                 </div>
         }
 
         return (
-            <Panel>
+            <Panel id="menu">
                 {panel_contents}
             </Panel>
         )
@@ -1240,12 +1255,12 @@ class PanelSubmenu extends React.Component {
 
             panel_contents =
                 <div className="cd-editor-panel-helptext">
-                    {l10n.no_items_added}
+                    {l10n['no_items_added']}
                 </div>
         }
 
         return (
-            <Panel>
+            <Panel id="submenu">
                 {this.props.itemInfo}
                 {panel_contents}
             </Panel>
@@ -1302,13 +1317,13 @@ class PanelAddItems extends React.Component {
 
             panel_contents =
                 <div className="cd-editor-panel-helptext">
-                    {l10n.no_items_available}
+                    {l10n['no_items_available']}
                 </div>
             ;
         }
 
         return (
-            <Panel>
+            <Panel id="add-items">
                 {this.props.itemInfo}
 
                 {panel_contents}
@@ -1373,12 +1388,12 @@ class PanelDashboard extends React.Component {
 
             panel_contents =
                 <div className="cd-editor-panel-helptext">
-                    {l10n.no_items_added}
+                    {l10n['no_items_added']}
                 </div>
         }
 
         return (
-            <Panel>
+            <Panel id="dashboard">
                 {panel_contents}
             </Panel>
         )
@@ -1389,8 +1404,8 @@ class PanelLoading extends React.Component {
     render() {
 
         return (
-            <Panel>
-                Loading...
+            <Panel id="loading">
+                <span className="fa fa-circle-o-notch fa-spin"></span>
             </Panel>
         )
     }
@@ -1454,14 +1469,14 @@ class WidgetEdit extends React.Component {
 
         const after_title =
                 <span className="cd-editor-lineitem-form-originaltitle">
-                    {l10n.original_title + " "}<strong>{this.props.originalTitle}</strong>
+                    {l10n['original_title'] + " "}<strong>{this.props.originalTitle}</strong>
                 </span>
             ;
 
         const form =
                 <LineItemForm>
                     <InputText
-                        label={l10n.title}
+                        label={l10n['title']}
                         value={this.props.title}
                         placeholder={this.props.originalTitle}
                         onHandleChange={this.titleChange}
@@ -1498,12 +1513,12 @@ class SecondaryActions extends React.Component {
 
     loadNextPanel() {
 
-        this.props.onLoadPanel(this.props.nextPanel);
+        this.props.onLoadPanel(this.props.nextPanel, 'forward');
     }
 
     loadPreviousPanel() {
 
-        this.props.onLoadPanel(this.props.previousPanel);
+        this.props.onLoadPanel(this.props.previousPanel, 'backward');
     }
 
     render() {
@@ -1515,10 +1530,11 @@ class SecondaryActions extends React.Component {
                 </div>
                 }
 
+                {(this.props.previousPanel || this.props.nextPanel) &&
                 <div className="cd-editor-panel-actions-buttons">
                     {this.props.previousPanel &&
                     <ActionButton
-                        text={l10n.action_button_back}
+                        text={l10n['action_button_back']}
                         icon="chevron-left"
                         align="left"
                         onHandleClick={this.loadPreviousPanel}
@@ -1534,6 +1550,7 @@ class SecondaryActions extends React.Component {
                     />
                     }
                 </div>
+                }
             </div>
         )
     }
@@ -1559,11 +1576,6 @@ class Preview extends React.Component {
 
             document.getElementById('cd-preview-iframe').contentWindow.location.reload();
         }
-    }
-
-    handleClick(e) {
-
-        console.log(e);
     }
 
     loaded() {
@@ -1604,6 +1616,66 @@ class Preview extends React.Component {
 }
 
 /**
+ * Shows a message to the user.
+ *
+ * @since {{VERSION}}
+ */
+class Message extends React.Component {
+
+    constructor(props) {
+
+        super(props);
+
+        this.state = {
+            visible: true,
+        };
+
+        this.hide = this.hide.bind(this);
+    }
+
+    componentWillReceiveProps(nextProps) {
+
+        clearTimeout(this.hideFinish);
+        clearTimeout(this.hiding);
+
+        if (nextProps.text) {
+
+            this.setState({
+                visible: true
+            });
+        }
+    }
+
+    hide() {
+
+        this.setState({
+            visible: false
+        });
+
+        // Don't signal parent until animation finishes. This must match animation transition time in CSS.
+        this.hideFinish = setTimeout(() => this.props.onHide(), 300);
+    }
+
+    render() {
+
+        if (this.state.visible) {
+
+            this.hiding = setTimeout(() => this.hide(), 5000);
+        }
+
+        return (
+            <div
+                className={"cd-editor-message" + (this.props.text && this.state.visible ? ' cd-editor-message-visible' : '')}>
+                {this.props.text}
+                <span className="cd-editor-message-close dashicons dashicons-no"
+                      onClick={this.hide}
+                      title={l10n['close']}></span>
+            </div>
+        )
+    }
+}
+
+/**
  * The Customize editor.
  *
  * @since {{VERSION}}
@@ -1616,14 +1688,19 @@ class Editor extends React.Component {
 
         this.state = {
             nextPanel: null,
+            panelDirection: 'forward',
             activePanel: 'loading', // TODO set to "primary"
             hidden: false,
             submenuEdit: null,
+            loadingPreview: false,
+            saving: false,
+            message: null,
             customizations: {},
         }
 
         this.loadPanel = this.loadPanel.bind(this);
         this.saveChanges = this.saveChanges.bind(this);
+        this.resetMessage = this.resetMessage.bind(this);
         this.previewChanges = this.previewChanges.bind(this);
         this.hideCustomizer = this.hideCustomizer.bind(this);
         this.closeCustomizer = this.closeCustomizer.bind(this);
@@ -1642,10 +1719,26 @@ class Editor extends React.Component {
         this.widgetEdit = this.widgetEdit.bind(this);
     }
 
-    loadPanel(panel_ID) {
+    shouldComponentUpdate(nextProps, nextState) {
+
+        console.log('test');
+
+        if (this.state.customizations !== nextState.customizations) {
+
+            console.log('change');
+            this.dataChange(false);
+        }
+
+        return true;
+    }
+
+    loadPanel(panel_ID, direction) {
+
+        direction = direction || 'forward';
 
         this.setState({
-            activePanel: panel_ID
+            activePanel: panel_ID,
+            panelDirection: direction
         });
     }
 
@@ -1663,7 +1756,9 @@ class Editor extends React.Component {
 
         let api = this;
 
-        console.log('previewing...');
+        this.setState({
+            loadingPreview: true,
+        });
 
         fetch('wp-json/clientdash/v1/customizations/preview_' + this.props.role, {
             method: 'POST',
@@ -1673,13 +1768,13 @@ class Editor extends React.Component {
             body: JSON.stringify(this.state.customizations[this.props.role])
         }).then(function (response) {
 
-            //console.log(response);
-
             return response.json();
 
         }).then(function (customizations) {
 
-            console.log('status: ', customizations);
+            api.setState({
+                loadingPreview: false,
+            });
 
             api.props.refreshPreview();
 
@@ -1693,7 +1788,8 @@ class Editor extends React.Component {
     switchRole(role) {
 
         this.props.onSwitchRole(role);
-        this.state.activePanel = 'loading';
+
+        this.loadPanel('loading', 'forward');
     }
 
     loadRole() {
@@ -1745,7 +1841,11 @@ class Editor extends React.Component {
 
     saveChanges() {
 
-        console.log('saving...');
+        let api = this;
+
+        this.setState({
+            saving: true,
+        });
 
         fetch('wp-json/clientdash/v1/customizations/' + this.props.role, {
             method: 'POST',
@@ -1759,18 +1859,40 @@ class Editor extends React.Component {
             })
         }).then(function (response) {
 
-            //console.log(response);
-
             return response.json();
 
         }).then(function (customizations) {
 
-            console.log('status: ', customizations);
+            api.setState({
+                saving: false,
+                message: l10n['saved']
+            });
+
+            api.previewChanges();
+
+            leave_confirmation = false;
 
         }).catch(function (error) {
 
             console.log('error: ', error);
+        });
+    }
 
+    dataChange(refreshDelay) {
+
+        clearTimeout(this.refreshingTimeout);
+
+        refreshDelay = refreshDelay === false ? 10 : 2000;
+
+        this.refreshingTimeout = setTimeout(() => this.previewChanges(), refreshDelay);
+
+        leave_confirmation = true;
+    }
+
+    resetMessage() {
+
+        this.setState({
+            message: ''
         });
     }
 
@@ -1799,7 +1921,7 @@ class Editor extends React.Component {
                 });
 
                 menu["separator" + separator_index] = {
-                    original_title: l10n.separator,
+                    original_title: l10n['separator'],
                     separator: true,
                 };
 
@@ -1813,7 +1935,9 @@ class Editor extends React.Component {
             return prevState;
         });
 
-        this.loadPanel('menu');
+        this.dataChange(false);
+
+        this.loadPanel('menu', 'backward');
     }
 
     addSubmenuItem(ID, item) {
@@ -1828,7 +1952,9 @@ class Editor extends React.Component {
             return prevState;
         });
 
-        this.loadPanel('submenu');
+        this.dataChange(false);
+
+        this.loadPanel('submenu', 'backward');
     }
 
     menuItemDelete(ID) {
@@ -1853,7 +1979,10 @@ class Editor extends React.Component {
 
             return prevState;
         });
+
+        this.dataChange(false);
     }
+
 
     deleteSubmenuItem(ID) {
 
@@ -1866,6 +1995,8 @@ class Editor extends React.Component {
 
             return prevState;
         });
+
+        this.dataChange(false);
     }
 
     submenuEdit(ID) {
@@ -1874,7 +2005,7 @@ class Editor extends React.Component {
             submenuEdit: ID
         });
 
-        this.loadPanel('submenu');
+        this.loadPanel('submenu', 'forward');
     }
 
     menuItemEdit(ID, item) {
@@ -1887,6 +2018,23 @@ class Editor extends React.Component {
 
             return prevState;
         });
+
+        //this.dataChange();
+    }
+
+    submenuItemEdit(ID, item) {
+
+        let submenu_edit = this.state.submenuEdit;
+        let role = this.props.role;
+
+        this.setState((prevState) => {
+
+            prevState.customizations[role].submenu[submenu_edit][ID] = item;
+
+            return prevState;
+        });
+
+        //this.dataChange();
     }
 
     reOrderMenu(new_order) {
@@ -1901,6 +2049,8 @@ class Editor extends React.Component {
 
             return prevState;
         });
+
+        this.dataChange(false);
     }
 
     reOrderSubmenu(new_order) {
@@ -1914,19 +2064,8 @@ class Editor extends React.Component {
 
             return prevState;
         });
-    }
 
-    submenuItemEdit(ID, item) {
-
-        let submenu_edit = this.state.submenuEdit;
-        let role = this.props.role;
-
-        this.setState((prevState) => {
-
-            prevState.customizations[role].submenu[submenu_edit][ID] = item;
-
-            return prevState;
-        });
+        this.dataChange(false);
     }
 
     menuIndexSeparators(menu) {
@@ -1941,7 +2080,7 @@ class Editor extends React.Component {
             if (item.separator) {
 
                 new_menu['separator' + separator_index] = {
-                    original_title: l10n.separator,
+                    original_title: l10n['separator'],
                     separator: true,
                 }
 
@@ -1967,7 +2106,9 @@ class Editor extends React.Component {
             return prevState;
         });
 
-        this.loadPanel('dashboard');
+        this.dataChange(false);
+
+        this.loadPanel('dashboard', 'backward');
     }
 
     widgetDelete(ID) {
@@ -1980,6 +2121,8 @@ class Editor extends React.Component {
 
             return prevState;
         });
+
+        this.dataChange(false);
     }
 
     widgetEdit(ID, widget) {
@@ -1992,25 +2135,32 @@ class Editor extends React.Component {
 
             return prevState;
         });
+
+        //this.dataChange();
     }
 
     render() {
 
         var customizations = this.state.customizations[this.props.role];
+        var panel;
+        var secondary_actions;
 
         switch (this.state.activePanel) {
 
             case 'primary':
             {
 
-                var panel =
-                        <PanelPrimary
-                            onLoadPanel={this.loadPanel}
-                        />
-                    ;
-                var secondary_actions =
-                        <SecondaryActions />
-                    ;
+                panel =
+                    <PanelPrimary
+                        key="primary"
+                        onLoadPanel={this.loadPanel}
+                    />
+                ;
+                secondary_actions =
+                    <SecondaryActions
+                        key="primary"
+                    />
+                ;
                 break;
             }
             case 'menu':
@@ -2019,25 +2169,26 @@ class Editor extends React.Component {
                 let current_items = customizations.menu;
                 let available_items = getAvailableItems(current_items);
 
-                var panel =
-                        <PanelMenu
-                            menuItems={available_items}
-                            onMenuItemEdit={this.menuItemEdit}
-                            onDeleteItem={this.menuItemDelete}
-                            onLoadPanel={this.loadPanel}
-                            onSubmenuEdit={this.submenuEdit}
-                            onReOrderMenu={this.reOrderMenu}
-                        />
-                    ;
-                var secondary_actions =
-                        <SecondaryActions
-                            title={l10n.panel_actions_title_menu}
-                            previousPanel="primary"
-                            nextPanel="addMenuItems"
-                            loadNextText={l10n.action_button_add_items}
-                            onLoadPanel={this.loadPanel}
-                        />
-                    ;
+                panel =
+                    <PanelMenu
+                        key="menu"
+                        menuItems={available_items}
+                        onMenuItemEdit={this.menuItemEdit}
+                        onDeleteItem={this.menuItemDelete}
+                        onSubmenuEdit={this.submenuEdit}
+                        onReOrderMenu={this.reOrderMenu}
+                    />
+                ;
+                secondary_actions =
+                    <SecondaryActions
+                        key="menu"
+                        title={l10n['panel_actions_title_menu']}
+                        previousPanel="primary"
+                        nextPanel="addMenuItems"
+                        loadNextText={l10n['action_button_add_items']}
+                        onLoadPanel={this.loadPanel}
+                    />
+                ;
                 break;
             }
             case 'submenu':
@@ -2055,25 +2206,26 @@ class Editor extends React.Component {
                         </div>
                     ;
 
-                var panel =
-                        <PanelSubmenu
-                            itemInfo={item_info}
-                            onSubmenuItemEdit={this.submenuItemEdit}
-                            submenuItems={available_items}
-                            onDeleteItem={this.deleteSubmenuItem}
-                            onLoadPanel={this.loadPanel}
-                            onReOrderSubmenu={this.reOrderSubmenu}
-                        />
-                    ;
-                var secondary_actions =
-                        <SecondaryActions
-                            title={l10n.panel_actions_title_submenu}
-                            nextPanel="addSubmenuItems"
-                            previousPanel="menu"
-                            loadNextText={l10n.action_button_add_items}
-                            onLoadPanel={this.loadPanel}
-                        />
-                    ;
+                panel =
+                    <PanelSubmenu
+                        key="submenu"
+                        itemInfo={item_info}
+                        onSubmenuItemEdit={this.submenuItemEdit}
+                        submenuItems={available_items}
+                        onDeleteItem={this.deleteSubmenuItem}
+                        onReOrderSubmenu={this.reOrderSubmenu}
+                    />
+                ;
+                secondary_actions =
+                    <SecondaryActions
+                        key="submenu"
+                        title={l10n['panel_actions_title_submenu']}
+                        nextPanel="addSubmenuItems"
+                        previousPanel="menu"
+                        loadNextText={l10n['action_button_add_items']}
+                        onLoadPanel={this.loadPanel}
+                    />
+                ;
                 break;
             }
             case 'addMenuItems':
@@ -2097,23 +2249,25 @@ class Editor extends React.Component {
 
                 // Add separator to bottom always
                 available_items.separator = {
-                    title: l10n.separator,
+                    title: l10n['separator'],
                     separator: true,
                 }
 
-                var panel =
-                        <PanelAddItems
-                            availableItems={available_items}
-                            onAddItem={this.menuItemAdd}
-                        />
-                    ;
-                var secondary_actions =
-                        <SecondaryActions
-                            title={l10n.panel_actions_title_menu_add}
-                            previousPanel="menu"
-                            onLoadPanel={this.loadPanel}
-                        />
-                    ;
+                panel =
+                    <PanelAddItems
+                        key="addMenuItems"
+                        availableItems={available_items}
+                        onAddItem={this.menuItemAdd}
+                    />
+                ;
+                secondary_actions =
+                    <SecondaryActions
+                        key="addMenuItems"
+                        title={l10n['panel_actions_title_menu_add']}
+                        previousPanel="menu"
+                        onLoadPanel={this.loadPanel}
+                    />
+                ;
                 break;
             }
             case 'addSubmenuItems':
@@ -2132,20 +2286,22 @@ class Editor extends React.Component {
 
                 available_items = setToOriginalTitles(available_items);
 
-                var panel =
-                        <PanelAddItems
-                            itemInfo={item_info}
-                            availableItems={available_items}
-                            onAddItem={this.addSubmenuItem}
-                        />
-                    ;
-                var secondary_actions =
-                        <SecondaryActions
-                            title={l10n.panel_actions_title_submenu_add}
-                            previousPanel="submenu"
-                            onLoadPanel={this.loadPanel}
-                        />
-                    ;
+                panel =
+                    <PanelAddItems
+                        key="addSubmenuItems"
+                        itemInfo={item_info}
+                        availableItems={available_items}
+                        onAddItem={this.addSubmenuItem}
+                    />
+                ;
+                secondary_actions =
+                    <SecondaryActions
+                        key="addSubmenuItems"
+                        title={l10n['panel_actions_title_submenu_add']}
+                        previousPanel="submenu"
+                        onLoadPanel={this.loadPanel}
+                    />
+                ;
                 break;
             }
             case 'dashboard':
@@ -2154,23 +2310,25 @@ class Editor extends React.Component {
                 let current_items = customizations.dashboard;
                 let available_items = getAvailableItems(current_items);
 
-                var panel =
-                        <PanelDashboard
-                            widgets={available_items}
-                            onWidgetEdit={this.widgetEdit}
-                            onDeleteWidget={this.widgetDelete}
-                            onLoadPanel={this.loadPanel}
-                        />
-                    ;
-                var secondary_actions =
-                        <SecondaryActions
-                            title={l10n.panel_actions_title_dashboard}
-                            previousPanel="primary"
-                            nextPanel="addWidgets"
-                            loadNextText={l10n.action_button_add_items}
-                            onLoadPanel={this.loadPanel}
-                        />
-                    ;
+                panel =
+                    <PanelDashboard
+                        key="dashboard"
+                        widgets={available_items}
+                        onWidgetEdit={this.widgetEdit}
+                        onDeleteWidget={this.widgetDelete}
+                        onLoadPanel={this.loadPanel}
+                    />
+                ;
+                secondary_actions =
+                    <SecondaryActions
+                        key="dashboard"
+                        title={l10n['panel_actions_title_dashboard']}
+                        previousPanel="primary"
+                        nextPanel="addWidgets"
+                        loadNextText={l10n['action_button_add_items']}
+                        onLoadPanel={this.loadPanel}
+                    />
+                ;
                 break;
             }
             case 'addWidgets':
@@ -2181,31 +2339,37 @@ class Editor extends React.Component {
 
                 available_items = setToOriginalTitles(available_items);
 
-                var panel =
-                        <PanelAddItems
-                            availableItems={available_items}
-                            onAddItem={this.widgetAdd}
-                        />
-                    ;
-                var secondary_actions =
-                        <SecondaryActions
-                            title={l10n.panel_actions_title_menu_add}
-                            previousPanel="dashboard"
-                            onLoadPanel={this.loadPanel}
-                        />
-                    ;
+                panel =
+                    <PanelAddItems
+                        key="addWidgets"
+                        availableItems={available_items}
+                        onAddItem={this.widgetAdd}
+                    />
+                ;
+                secondary_actions =
+                    <SecondaryActions
+                        key="addWidgets"
+                        title={l10n['panel_actions_title_menu_add']}
+                        previousPanel="dashboard"
+                        onLoadPanel={this.loadPanel}
+                    />
+                ;
                 break;
             }
 
             case 'loading':
             {
 
-                var panel =
-                        <PanelLoading />
-                    ;
-                var secondary_actions =
-                        <SecondaryActions />
-                    ;
+                panel =
+                    <PanelLoading
+                        key="loading"
+                    />
+                ;
+                secondary_actions =
+                    <SecondaryActions
+                        key="loading"
+                    />
+                ;
                 break;
             }
         }
@@ -2219,20 +2383,37 @@ class Editor extends React.Component {
                         onPreviewChanges={this.previewChanges}
                         onHideCustomizer={this.hideCustomizer}
                         onCloseCustomizer={this.closeCustomizer}
+                        loadingPreview={this.state.loadingPreview}
+                        saving={this.state.saving}
                     />
 
                     <RoleSwitcher
                         role={this.props.role}
                         onSwitchRole={this.switchRole}
                     />
+
+                    <Message
+                        text={this.state.message}
+                        onHide={this.resetMessage}
+                    />
                 </div>
 
                 <div className="cd-editor-panels">
-                    {panel}
+                    <ReactCSSTransitionReplace
+                        transitionName={"panel-" + this.state.panelDirection}
+                        transitionEnterTimeout={300}
+                        transitionLeaveTimeout={300}>
+                        {panel}
+                    </ReactCSSTransitionReplace>
                 </div>
 
                 <div className="cd-editor-footer">
-                    {secondary_actions}
+                    <ReactCSSTransitionReplace
+                        transitionName={"panel-" + this.state.panelDirection}
+                        transitionEnterTimeout={300}
+                        transitionLeaveTimeout={300}>
+                        {secondary_actions}
+                    </ReactCSSTransitionReplace>
                 </div>
 
             </div>
@@ -2275,16 +2456,6 @@ class Customize extends React.Component {
 
         return true;
     }
-
-    //componentDidUpdate(prevProps, prevState) {
-    //
-    //    if (this.state.saveRole === true) {
-    //
-    //        this.setState({
-    //            saveRole: false,
-    //        });
-    //    }
-    //}
 
     hideCustomizer() {
 
@@ -2344,8 +2515,8 @@ class Customize extends React.Component {
         return (
             <div className={"cd-customize-container " + (this.state.hidden ? "hidden" : "")}>
                 {this.state.hidden &&
-                <button type="button" className="cd-customize-show" aria-label={l10n.show_controls}
-                        title={l10n.show_controls} onClick={this.showCustomizer}>
+                <button type="button" className="cd-customize-show"
+                        title={l10n['show_controls']} onClick={this.showCustomizer}>
                     <span className="cd-customize-show-icon fa fa-chevron-circle-right"/>
                 </button>
                 }
@@ -2374,3 +2545,12 @@ ReactDOM.render(
     <Customize />,
     document.getElementById('clientdash-customize')
 );
+
+// Confirm before leave
+window.onbeforeunload = function () {
+
+    if (leave_confirmation) {
+
+        return l10n['leave_confirmation'];
+    }
+};

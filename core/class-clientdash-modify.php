@@ -125,7 +125,7 @@ class ClientDash_Modify {
 		foreach ( $this->menu as $ID => $menu_item ) {
 
 			// Separators are handled diferrently
-			if ( $menu_item['separator']) {
+			if ( $menu_item['separator'] ) {
 
 				$new_menu[] = array(
 					'',
@@ -172,7 +172,25 @@ class ClientDash_Modify {
 					continue;
 				}
 
-				$original_submenu_item = $menu[ $original_submenu_map[ $ID ] ];
+				// Handle weird Customize URL
+				// The Customize URL is dynamic, so it won't match what was saved. This ensures it matches.
+				if ( strpos( $ID, 'customize.php' ) === 0 ) {
+
+					$customize_url = add_query_arg( 'return', urlencode( wp_unslash( $_SERVER['REQUEST_URI'] ) ), 'customize.php' );
+
+					if ( $submenu_item['original_title'] == __( 'Customize' ) ) {
+
+						$ID = esc_url( $customize_url );
+
+					} elseif ( $submenu_item['original_title'] == __( 'Header' ) ) {
+
+						$ID = esc_url(
+							add_query_arg( array( 'autofocus' => array( 'control' => 'header_image' ) ), $customize_url )
+						);
+					}
+				}
+
+				$original_submenu_item = $submenu[ $menu_ID ][ $original_submenu_map[ $ID ] ];
 
 				$new_submenu[] = array(
 					$submenu_item['title'] ? $submenu_item['title'] : $submenu_item['original_title'],
@@ -213,22 +231,23 @@ class ClientDash_Modify {
 					foreach ( $widgets as $i => $widget ) {
 
 						// No modification
-						if ( ! isset( $this->dashboard[ $widget['id']])) {
+						if ( ! isset( $this->dashboard[ $widget['id'] ] ) ) {
 
 							continue;
 						}
 
-						$custom_widget = $this->dashboard[ $widget['id']];
+						$custom_widget = $this->dashboard[ $widget['id'] ];
 
 						// Modify
 						if ( isset( $custom_widget['deleted'] ) && $custom_widget['deleted'] ) {
 
-							unset( $wp_meta_boxes['dashboard'][ $position][$priority][$i]['title'] );
+							unset( $wp_meta_boxes['dashboard'][ $position ][ $priority ][ $i ]['title'] );
+							continue;
 						}
 
-						if ( isset( $custom_widget['title'] )) {
+						if ( isset( $custom_widget['title'] ) && $custom_widget['title'] ) {
 
-							$wp_meta_boxes['dashboard'][ $position][$priority][$i]['title'] = $custom_widget['title'];
+							$wp_meta_boxes['dashboard'][ $position ][ $priority ][ $i ]['title'] = $custom_widget['title'];
 						}
 					}
 				}

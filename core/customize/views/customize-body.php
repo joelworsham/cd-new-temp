@@ -10,4 +10,3 @@ defined( 'ABSPATH' ) || die;
 ?>
 
 <div id="clientdash-customize"></div>
-<!--	<iframe src="--><?php //echo admin_url(); ?><!--"></iframe>-->

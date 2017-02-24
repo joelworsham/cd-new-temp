@@ -1,3 +1,33 @@
+// Animations
+.panel-forward-enter {
+  transform: translateX(100%);
+}
+
+.panel-backward-enter {
+  transform: translateX(-100%);
+}
+
+.panel-forward-enter.panel-forward-enter-active,
+.panel-backward-enter.panel-backward-enter-active{
+  transform: translateX(0);
+  transition: transform 300ms;
+}
+
+.panel-forward-leave,
+.panel-backward-leave{
+  transform: translateX(0);
+}
+
+.panel-forward-leave.panel-forward-leave-active {
+  transform: translateX(-100%);
+  transition: transform 300ms;
+}
+
+.panel-backward-leave.panel-backward-leave-active {
+  transform: translateX(100%);
+  transition: transform 300ms;
+}
+
 #cd-editor {
   background-color: $light-gray;
   font-size: 14px;
@@ -6,13 +36,14 @@
 
 .cd-editor-header {
   position: relative;
-  box-shadow: 0 0 10px rgba(#000, 0.1);
+  box-shadow: 0 0 10px rgba(#000, 0.2);
   z-index: 10;
 }
 
 .cd-editor-primary-actions {
-  border-bottom: 1px solid $medium-gray;
+  position: relative;
   height: 50px;
+  z-index: 10;
 
   &:after {
     content: '';
@@ -38,12 +69,44 @@
   height: 50px;
   line-height: 50px;
   font-style: italic;
-  border-bottom: 1px solid $medium-gray;
+  border-top: 1px solid $medium-gray;
   background-color: #fff;
+  border-bottom: 1px solid $medium-gray;
   z-index: 10;
 
   select {
     margin-left: 0.5em;
+  }
+}
+
+.cd-editor-message {
+  position: absolute;
+  top: 100%;
+  line-height: 50px;
+  width: 100%;
+  background: #fff;
+  padding: 0 1em;
+  border-bottom: 5px solid $primary-color;
+  box-shadow: 0 0 10px rgba(#000, 0.2);
+  transform: translateY(-100%);
+  transition: transform 300ms;
+  z-index: 5;
+
+  &.cd-editor-message-visible {
+    transform: translateY(0);
+  }
+
+  .cd-editor-message-close {
+    position: absolute;
+    right: 0.5em;
+    top: 50%;
+    margin-top: -10px;
+    color: $medium-gray;
+    cursor: pointer;
+
+    &:hover {
+      color: $dark-gray;
+    }
   }
 }
 
@@ -58,6 +121,11 @@
   background-color: #fff;
   border-bottom: 1px solid $medium-gray;
   padding: 1em 0;
+
+  &.cd-editor-panel-loading {
+    text-align: center;
+    font-size: 3em;
+  }
 
   .cd-editor-panel-icon {
     float: right;
@@ -100,7 +168,7 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  box-shadow: 0 0 10px rgba(#000, 0.1);
+  box-shadow: 0 0 10px rgba(#000, 0.2);
   z-index: 10;
 
   .cd-editor-panel-actions-title {
@@ -147,7 +215,7 @@
 body > .cd-editor-lineitem-li {
   list-style: none;
   background-color: #fff;
-  box-shadow: 0 0 20px rgba(#000, 0.1);
+  box-shadow: 0 0 20px rgba(#000, 0.2);
   margin-left: 1em;
   font-size: 14px;
 

@@ -40,6 +40,9 @@ gulp.task('customize_js', function () {
     return gulp.src('./assets/src/js/customize/customize.js')
         .pipe(notify({message: 'Customize JS starting...'}))
         .pipe(webpack({
+            resolve: {
+                moduleDirectories: ['./node_modules']
+            },
             module: {
                 loaders: [
                     {
