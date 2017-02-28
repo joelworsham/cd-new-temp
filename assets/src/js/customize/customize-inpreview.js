@@ -9,12 +9,12 @@ function cd_customize_links(e) {
 
     for (var i = 0, len = links.length; i < len; i++) {
 
-        links[i].onclick = function (e) {
+        links[i].onclick = function (event) {
 
-            e.preventDefault();
+            event.preventDefault();
 
             // Try to get nearest link if clicked item isn't a link (nested)
-            var node = e.target
+            var node = event.target
 
             while (node && !node.href) {
 
@@ -44,10 +44,10 @@ function cd_customize_links(e) {
 function cd_customize_overlay() {
 
     // Don't load on dashboard
-    if (document.body.className.indexOf('index-php') !== -1) {
-
-        return;
-    }
+    //if (document.body.className.indexOf('index-php') !== -1) {
+    //
+    //    return;
+    //}
 
     var content = document.getElementById('wpwrap');
     var cover = document.createElement('div');
@@ -81,16 +81,16 @@ function cd_customize_forms() {
  *
  * @since {{VERSION}}
  *
- * @param e
+ * @param event
  * @returns {boolean}
  */
-function cd_customize_forms_prevent_submit(e) {
+function cd_customize_forms_prevent_submit(event) {
 
     window.parent.postMessage({
         id: 'cd_customize_preview_form_submit'
     }, ClientDashCustomizeInPreview_Data.domain);
 
-    e.preventDefault();
+    event.preventDefault();
     return false;
 }
 

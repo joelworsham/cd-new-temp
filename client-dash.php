@@ -185,8 +185,7 @@ if ( ! class_exists( 'ClientDash' ) ) {
 				'clientdash-customize-inpreview',
 				CLIENTDASH_URI . '/assets/dist/js/clientdash-inpreview.min.js',
 				array(),
-				defined( 'WP_DEBUG' ) && WP_DEBUG ? time() : CLIENTDASH_VERSION,
-				true
+				defined( 'WP_DEBUG' ) && WP_DEBUG ? time() : CLIENTDASH_VERSION
 			);
 
 			wp_localize_script( 'clientdash', 'ClientDash_Data', array(

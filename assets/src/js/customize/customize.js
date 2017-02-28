@@ -509,9 +509,24 @@ class LineItemAction extends React.Component {
  * @since {{VERSION}}
  */
 class LineItemForm extends React.Component {
+
+    constructor(props) {
+
+        super(props);
+
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
+    handleSubmit(event) {
+
+        event.preventDefault();
+
+        this.props.onSubmit(event);
+    }
+
     render() {
         return (
-            <form className="cd-editor-lineitem-form">
+            <form className="cd-editor-lineitem-form" onSubmit={this.handleSubmit}>
                 {this.props.children}
             </form>
         )
@@ -628,6 +643,7 @@ class MenuItemEdit extends React.Component {
         this.iconChange = this.iconChange.bind(this);
         this.deleteItem = this.deleteItem.bind(this);
         this.submenuEdit = this.submenuEdit.bind(this);
+        this.submitForm = this.submitForm.bind(this);
     }
 
     toggleEdit() {
@@ -663,6 +679,11 @@ class MenuItemEdit extends React.Component {
     submenuEdit() {
 
         this.props.onSubmenuEdit(this.props.id);
+    }
+
+    submitForm(event) {
+
+        this.props.onItemFormSubmit();
     }
 
     render() {
@@ -702,7 +723,9 @@ class MenuItemEdit extends React.Component {
             ;
 
         const form =
-                <LineItemForm>
+                <LineItemForm
+                    onSubmit={this.submitForm}
+                >
                     <InputText
                         label={l10n['title']}
                         value={this.props.title}
@@ -794,6 +817,7 @@ class SubmenuItemEdit extends React.Component {
         this.toggleEdit = this.toggleEdit.bind(this);
         this.titleChange = this.titleChange.bind(this);
         this.deleteItem = this.deleteItem.bind(this);
+        this.submitForm = this.submitForm.bind(this);
     }
 
     toggleEdit() {
@@ -814,6 +838,11 @@ class SubmenuItemEdit extends React.Component {
     deleteItem() {
 
         this.props.onDeleteItem(this.props.id);
+    }
+
+    submitForm(event) {
+
+        this.props.onItemFormSubmit();
     }
 
     render() {
@@ -839,7 +868,9 @@ class SubmenuItemEdit extends React.Component {
             ;
 
         const form =
-                <LineItemForm>
+                <LineItemForm
+                    onSubmit={this.submitForm}
+                >
                     <InputText
                         label={l10n['title']}
                         value={this.props.title}
@@ -1127,6 +1158,7 @@ class PanelMenu extends React.Component {
         this.deleteItem = this.deleteItem.bind(this);
         this.menuItemEdit = this.menuItemEdit.bind(this);
         this.submenuEdit = this.submenuEdit.bind(this);
+        this.itemSubmitForm = this.itemSubmitForm.bind(this);
     }
 
     onSortEnd(args) {
@@ -1149,6 +1181,11 @@ class PanelMenu extends React.Component {
     submenuEdit(ID) {
 
         this.props.onSubmenuEdit(ID);
+    }
+
+    itemSubmitForm(event) {
+
+        this.props.onItemSubmitForm(event);
     }
 
     render() {
@@ -1185,6 +1222,7 @@ class PanelMenu extends React.Component {
                                 onMenuItemEdit={this.menuItemEdit}
                                 onSubmenuEdit={this.submenuEdit}
                                 onDeleteItem={this.deleteItem}
+                                onItemFormSubmit={this.itemSubmitForm}
                             />
                         ;
                 }
@@ -1236,6 +1274,7 @@ class PanelSubmenu extends React.Component {
         this.onSortEnd = this.onSortEnd.bind(this);
         this.deleteItem = this.deleteItem.bind(this);
         this.submenuItemEdit = this.submenuItemEdit.bind(this);
+        this.itemSubmitForm = this.itemSubmitForm.bind(this);
     }
 
     onSortEnd(args) {
@@ -1253,6 +1292,11 @@ class PanelSubmenu extends React.Component {
     submenuItemEdit(ID, item) {
 
         this.props.onSubmenuItemEdit(ID, item);
+    }
+
+    itemSubmitForm(event) {
+
+        this.props.onItemSubmitForm(event);
     }
 
     render() {
@@ -1274,6 +1318,7 @@ class PanelSubmenu extends React.Component {
                         onSubmenuItemEdit={this.submenuItemEdit}
                         originalTitle={item.original_title}
                         onDeleteItem={this.deleteItem}
+                        onItemFormSubmit={this.itemSubmitForm}
                     />
                 );
             });
@@ -1383,6 +1428,7 @@ class PanelDashboard extends React.Component {
 
         this.widgetDelete = this.widgetDelete.bind(this);
         this.widgetEdit = this.widgetEdit.bind(this);
+        this.itemSubmitForm = this.itemSubmitForm.bind(this);
     }
 
     widgetDelete(ID) {
@@ -1393,6 +1439,11 @@ class PanelDashboard extends React.Component {
     widgetEdit(ID, widget) {
 
         this.props.onWidgetEdit(ID, widget);
+    }
+
+    itemSubmitForm(event) {
+
+        this.props.onItemSubmitForm(event);
     }
 
     render() {
@@ -1414,6 +1465,7 @@ class PanelDashboard extends React.Component {
                         originalTitle={item.original_title}
                         onWidgetEdit={this.widgetEdit}
                         onWidgetDelete={this.widgetDelete}
+                        onItemFormSubmit={this.itemSubmitForm}
                     />
                 );
             });
@@ -1487,6 +1539,7 @@ class WidgetEdit extends React.Component {
         this.toggleEdit = this.toggleEdit.bind(this);
         this.titleChange = this.titleChange.bind(this);
         this.widgetDelete = this.widgetDelete.bind(this);
+        this.submitForm = this.submitForm.bind(this);
     }
 
     toggleEdit() {
@@ -1507,6 +1560,11 @@ class WidgetEdit extends React.Component {
     widgetDelete() {
 
         this.props.onWidgetDelete(this.props.id);
+    }
+
+    submitForm(event) {
+
+        this.props.onItemFormSubmit();
     }
 
     render() {
@@ -1532,7 +1590,9 @@ class WidgetEdit extends React.Component {
             ;
 
         const form =
-                <LineItemForm>
+                <LineItemForm
+                    onSubmit={this.submitForm}
+                >
                     <InputText
                         label={l10n['title']}
                         value={this.props.title}
@@ -1768,7 +1828,7 @@ class Preview extends React.Component {
                     type: 'error',
                     text: l10n['cannot_submit_form']
                 });
-                
+
                 break;
         }
     }
@@ -2034,6 +2094,8 @@ class Editor extends React.Component {
     previewChanges() {
 
         let api = this;
+
+        clearTimeout(this.refreshingTimeout);
 
         this.setState({
             loadingPreview: true,
@@ -2526,6 +2588,7 @@ class Editor extends React.Component {
                         onDeleteItem={this.menuItemDelete}
                         onSubmenuEdit={this.submenuEdit}
                         onReOrderMenu={this.reOrderMenu}
+                        onItemSubmitForm={this.previewChanges}
                     />
                 ;
                 secondary_actions =
@@ -2564,6 +2627,7 @@ class Editor extends React.Component {
                         submenuItems={available_items}
                         onDeleteItem={this.deleteSubmenuItem}
                         onReOrderSubmenu={this.reOrderSubmenu}
+                        onItemSubmitForm={this.previewChanges}
                     />
                 ;
                 secondary_actions =
@@ -2670,6 +2734,7 @@ class Editor extends React.Component {
                         onWidgetEdit={this.widgetEdit}
                         onDeleteWidget={this.widgetDelete}
                         onLoadPanel={this.loadPanel}
+                        onItemSubmitForm={this.previewChanges}
                     />
                 ;
                 secondary_actions =
@@ -2915,9 +2980,9 @@ class Customize extends React.Component {
 
         this.refs.preview.refresh();
     }
-    
+
     showMessage(message) {
-        
+
         this.refs.editor.showMessage(message);
     }
 

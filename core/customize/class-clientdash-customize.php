@@ -41,7 +41,7 @@ class ClientDash_Customize {
 		if ( isset( $_GET['cd_customizing'] ) ) {
 
 			add_action( 'set_current_user', array( $this, 'modify_current_user' ), 99999 );
-			add_action( 'admin_enqueue_scripts', array( $this, 'preview_scripts' ), 99999 );
+			add_action( 'admin_enqueue_scripts', array( $this, 'preview_scripts' ), 1 );
 		}
 
 		// Save role settings on first role load
