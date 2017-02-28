@@ -11,7 +11,7 @@ var uglify = require('gulp-uglify');
 var webpack = require('gulp-webpack');
 
 gulp.task('sass', function () {
-    return gulp.src('./assets/src/scss/**/*.scss')
+    return gulp.src('./assets/src/scss/*.scss')
         .pipe(sourcemaps.init())
         .pipe(sass({
             outputStyle: 'compressed'
@@ -25,6 +25,36 @@ gulp.task('sass', function () {
         .pipe(notify({message: 'SASS complete'}));
 });
 
+gulp.task('customize_sass', function () {
+    return gulp.src('./assets/src/scss/customize/*.scss')
+        .pipe(sourcemaps.init())
+        .pipe(sass({
+            outputStyle: 'compressed'
+        }).on('error', sass.logError))
+        .pipe(sourcemaps.write())
+        .pipe(rename({
+            dirname: '',
+            suffix: '.min'
+        }))
+        .pipe(gulp.dest('./assets/dist/css'))
+        .pipe(notify({message: 'SASS Customize Inpreview complete'}));
+});
+
+gulp.task('customize_inpreview_sass', function () {
+    return gulp.src('./assets/src/scss/customize-inpreview/*.scss')
+        .pipe(sourcemaps.init())
+        .pipe(sass({
+            outputStyle: 'compressed'
+        }).on('error', sass.logError))
+        .pipe(sourcemaps.write())
+        .pipe(rename({
+            dirname: '',
+            suffix: '.min'
+        }))
+        .pipe(gulp.dest('./assets/dist/css'))
+        .pipe(notify({message: 'SASS Customize Inpreview complete'}));
+});
+
 gulp.task('scripts', function () {
     return gulp.src('./assets/src/js/*.js')
         .pipe(concat('clientdash.min.js'))
@@ -34,6 +64,17 @@ gulp.task('scripts', function () {
         .pipe(sourcemaps.write('/'))
         .pipe(gulp.dest('./assets/dist/js/'))
         .pipe(notify({message: 'JS complete'}));
+});
+
+gulp.task('customize_inpreview_js', function () {
+    return gulp.src('./assets/src/js/customize/customize-inpreview.js')
+        .pipe(concat('clientdash-inpreview.min.js'))
+        .pipe(gulp.dest('./assets/dist/js/'))
+        .pipe(sourcemaps.init())
+        .pipe(uglify())
+        .pipe(sourcemaps.write('/'))
+        .pipe(gulp.dest('./assets/dist/js/'))
+        .pipe(notify({message: 'JS Customize inpreview complete'}));
 });
 
 gulp.task('customize_js', function () {
@@ -116,10 +157,13 @@ gulp.task('customize_js', function () {
 //        .pipe(gulp.dest('./languages/'));
 //});
 //
-gulp.task('default', ['sass', 'scripts', 'customize_js'], function () {
-    gulp.watch(['./assets/src/scss/**/*.scss'], ['sass']);
+gulp.task('default', ['sass', 'scripts', 'customize_sass', 'customize_inpreview_sass', 'customize_inpreview_js', 'customize_js'], function () {
+    gulp.watch(['./assets/src/scss/*.scss'], ['sass']);
+    gulp.watch(['./assets/src/scss/customize/*.scss'], ['customize_sass']);
+    gulp.watch(['./assets/src/scss/customize-inpreview/*.scss'], ['customize_inpreview_sass']);
     gulp.watch(['./assets/src/js/*.js'], ['scripts']);
-    gulp.watch(['./assets/src/js/customize/*.js'], ['customize_js']);
+    gulp.watch(['./assets/src/js/customize/customize.js'], ['customize_js']);
+    gulp.watch(['./assets/src/js/customize/customize-inpreview.js'], ['customize_inpreview_js']);
 });
 //
 //gulp.task('build', ['version', 'generate_pot']);

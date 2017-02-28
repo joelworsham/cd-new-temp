@@ -41,7 +41,7 @@ class ClientDash_Customize {
 		if ( isset( $_GET['cd_customizing'] ) ) {
 
 			add_action( 'set_current_user', array( $this, 'modify_current_user' ), 99999 );
-			add_action( 'admin_footer', array( $this, 'footer_scripts' ) );
+			add_action( 'admin_enqueue_scripts', array( $this, 'preview_scripts' ), 99999 );
 		}
 
 		// Save role settings on first role load
@@ -132,8 +132,6 @@ class ClientDash_Customize {
 		$wp_styles->queue  = array();
 
 		do_action( 'cd_customize_enqueue_scripts' );
-
-//		add_action( 'wp_enqueue_scripts', array( $this, 'reset_enqueues' ), 999999 );
 	}
 
 	/**
@@ -160,9 +158,6 @@ class ClientDash_Customize {
 	 * @access private
 	 */
 	function enqueue_assets() {
-
-//		wp_enqueue_style( 'common' );
-//		wp_enqueue_style( 'forms' );
 
 		wp_enqueue_style( 'dashicons' );
 		wp_enqueue_style( 'clientdash-fontawesome' );
@@ -199,6 +194,7 @@ class ClientDash_Customize {
 		wp_localize_script( 'clientdash-customize', 'ClientdashCustomize_Data', array(
 			'roles'     => $roles,
 			'adminurl'  => admin_url(),
+			'domain'    => get_bloginfo( 'url' ),
 			'dashicons' => json_decode( file_get_contents( CLIENTDASH_DIR . 'core/dashicons.json' ) ),
 			'l10n'      => array(
 				'role_switcher_label'             => __( 'Modifying for:', 'clientdash' ),
@@ -223,8 +219,17 @@ class ClientDash_Customize {
 				'edit_submenu'                    => __( 'Edit submenu', 'clientdash' ),
 				'delete'                          => __( 'Delete', 'clientdash' ),
 				'leave_confirmation'              => __( 'Are you sure you want to leave? Any unsaved changes will be lost.', 'clientdash' ),
+				'save'                            => __( 'Save', 'clientdash' ),
 				'saved'                           => __( 'Changes saved and live!', 'clientdash' ),
+				'role_reset'                      => __( 'Role successfully reset!', 'clientdash' ),
 				'close'                           => __( 'Close', 'clientdash' ),
+				'cancel'                          => __( 'Cancel', 'clientdash' ),
+				'confirm'                         => __( 'Confirm', 'clientdash' ),
+				'reset_role'                      => __( 'Reset Role', 'clientdash' ),
+				'up_do_date'                      => __( 'Up to date', 'clientdash' ),
+				'confirm_role_reset'              => __( 'Are you sure you want to reset all customizations for this role? This can not be undone.', 'clientdash' ),
+				'cannot_submit_form'              => __( 'Preview only. Cannot do that. Sorry!', 'clientdash' ),
+				'cannot_view_link'                => __( 'Only administrative links can be viewed.', 'clientdash' ),
 			),
 		) );
 	}
@@ -344,6 +349,18 @@ class ClientDash_Customize {
 	}
 
 	/**
+	 * Loads scripts and styles for inside the preview iframe.
+	 *
+	 * @since {{VERSION}}
+	 * @access private
+	 */
+	function preview_scripts() {
+
+		wp_enqueue_script( 'clientdash-customize-inpreview' );
+		wp_enqueue_style( 'clientdash-customize-inpreview' );
+	}
+
+	/**
 	 * Initially saves a role's menu preview for the customizer.
 	 *
 	 * @since {{VERSION}}
@@ -457,23 +474,5 @@ class ClientDash_Customize {
 		) );
 
 		return $dashboard_widgets;
-	}
-
-	function footer_scripts() {
-		?>
-		<script type="text/javascript">
-
-			var links = document.getElementsByTagName('a');
-
-			for (var i = 0, len = links.length; i < len; i++) {
-
-				links[i].onclick = function (e) {
-
-					return false;
-				}
-			}
-
-		</script>
-		<?php
 	}
 }

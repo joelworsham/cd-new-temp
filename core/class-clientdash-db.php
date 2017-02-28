@@ -161,11 +161,11 @@ class ClientDash_DB {
 	 * @since {{VERSION}}
 	 *
 	 * @param string $role
-	 * @param array $data
+	 * @param array $customizations
 	 *
 	 * @return array|null|object|void
 	 */
-	public static function update_role_customizations( $role, $customizations ) {
+	public static function update_customizations( $role, $customizations ) {
 
 		global $wpdb;
 
@@ -222,6 +222,38 @@ class ClientDash_DB {
 		if ( $result === 1 ) {
 
 			return $wpdb->insert_id;
+
+		} else {
+
+			return $result;
+		}
+	}
+
+	/**
+	 * Deletes a role customizations.
+	 *
+	 * @since {{VERSION}}
+	 *
+	 * @param string $role
+	 *
+	 * @return array|null|object False or WP_Error on failure, null on nothing to delete, 1 on success.
+	 */
+	public static function delete_customizations( $role ) {
+
+		global $wpdb;
+
+		if ( ! self::get_customizations( $role ) ) {
+
+			return null;
+		}
+
+		$result = $wpdb->delete("{$wpdb->prefix}cd_customizations", array(
+			'role' => $role,
+		));
+
+		if ( $result === 1 ) {
+
+			return true;
 
 		} else {
 

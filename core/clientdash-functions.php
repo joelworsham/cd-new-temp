@@ -70,5 +70,19 @@ function cd_get_role_dashboard( $role ) {
  */
 function cd_update_role_customizations( $role, $data ) {
 
-	return ClientDash_DB::update_role_customizations( $role, $data );
+	return ClientDash_DB::update_customizations( $role, $data );
+}
+
+/**
+ * Deletes customizations.
+ *
+ * Wrapper for ClientDashDB()::delete_customizations()
+ *
+ * @since {{VERSION}}
+ *
+ * @param string $role Customizations role.
+ */
+function cd_delete_customizations( $role ) {
+
+	return ClientDash_DB::delete_customizations( $role );
 }

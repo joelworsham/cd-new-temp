@@ -1,37 +1,14 @@
-// Animations
-.panel-forward-enter {
-  transform: translateX(100%);
-}
-
-.panel-backward-enter {
-  transform: translateX(-100%);
-}
-
-.panel-forward-enter.panel-forward-enter-active,
-.panel-backward-enter.panel-backward-enter-active{
-  transform: translateX(0);
-  transition: transform 300ms;
-}
-
-.panel-forward-leave,
-.panel-backward-leave{
-  transform: translateX(0);
-}
-
-.panel-forward-leave.panel-forward-leave-active {
-  transform: translateX(-100%);
-  transition: transform 300ms;
-}
-
-.panel-backward-leave.panel-backward-leave-active {
-  transform: translateX(100%);
-  transition: transform 300ms;
-}
-
 #cd-editor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 300px;
+  margin-left: -300px;
   background-color: $light-gray;
   font-size: 14px;
   color: #444;
+  border-right: 1px solid $medium-gray;
 }
 
 .cd-editor-header {
@@ -82,11 +59,11 @@
 .cd-editor-message {
   position: absolute;
   top: 100%;
-  line-height: 50px;
+  line-height: 1.5em;
   width: 100%;
   background: #fff;
-  padding: 0 1em;
-  border-bottom: 5px solid $primary-color;
+  min-height: 50px;
+  padding: 0.8em 2em 0.8em 1em;
   box-shadow: 0 0 10px rgba(#000, 0.2);
   transform: translateY(-100%);
   transition: transform 300ms;
@@ -94,6 +71,18 @@
 
   &.cd-editor-message-visible {
     transform: translateY(0);
+  }
+
+  &.cd-editor-message-default {
+    border-bottom: 5px solid $primary-color;
+  }
+
+  &.cd-editor-message-success {
+    border-bottom: 5px solid $color-success;
+  }
+
+  &.cd-editor-message-error {
+    border-bottom: 5px solid $color-error;
   }
 
   .cd-editor-message-close {
@@ -125,6 +114,11 @@
   &.cd-editor-panel-loading {
     text-align: center;
     font-size: 3em;
+  }
+
+  &.cd-editor-panel-blank {
+    padding: 0;
+    border: 0;
   }
 
   .cd-editor-panel-icon {
@@ -324,4 +318,34 @@ body > .cd-editor-lineitem-li {
   .cd-editor-input {
     margin-bottom: 1em;
   }
+}
+
+// Animations
+.panel-forward-enter {
+  transform: translateX(100%);
+}
+
+.panel-backward-enter {
+  transform: translateX(-100%);
+}
+
+.panel-forward-enter.panel-forward-enter-active,
+.panel-backward-enter.panel-backward-enter-active{
+  transform: translateX(0);
+  transition: transform 300ms;
+}
+
+.panel-forward-leave,
+.panel-backward-leave{
+  transform: translateX(0);
+}
+
+.panel-forward-leave.panel-forward-leave-active {
+  transform: translateX(-100%);
+  transition: transform 300ms;
+}
+
+.panel-backward-leave.panel-backward-leave-active {
+  transform: translateX(100%);
+  transition: transform 300ms;
 }

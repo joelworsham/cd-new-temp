@@ -144,14 +144,6 @@ if ( ! class_exists( 'ClientDash' ) ) {
 		 */
 		function register_assets() {
 
-//			wp_register_script(
-//				'clientdash',
-//				CLIENTDASH_URI . '/assets/dist/js/clientdash.min.js',
-//				array( 'jquery' ),
-//				defined( 'WP_DEBUG' ) && WP_DEBUG ? time() : CLIENTDASH_VERSION,
-//				true
-//			);
-
 			wp_register_style(
 				'clientdash',
 				CLIENTDASH_URI . '/assets/dist/css/clientdash.min.css',
@@ -174,6 +166,13 @@ if ( ! class_exists( 'ClientDash' ) ) {
 				defined( 'WP_DEBUG' ) && WP_DEBUG ? time() : CLIENTDASH_VERSION
 			);
 
+			wp_register_style(
+				'clientdash-customize-inpreview',
+				CLIENTDASH_URI . '/assets/dist/css/clientdash.customize.inpreview.min.css',
+				array(),
+				defined( 'WP_DEBUG' ) && WP_DEBUG ? time() : CLIENTDASH_VERSION
+			);
+
 			wp_register_script(
 				'clientdash-customize',
 				CLIENTDASH_URI . '/assets/dist/js/clientdash.customize.min.js',
@@ -182,9 +181,24 @@ if ( ! class_exists( 'ClientDash' ) ) {
 				true
 			);
 
+			wp_register_script(
+				'clientdash-customize-inpreview',
+				CLIENTDASH_URI . '/assets/dist/js/clientdash-inpreview.min.js',
+				array(),
+				defined( 'WP_DEBUG' ) && WP_DEBUG ? time() : CLIENTDASH_VERSION,
+				true
+			);
+
 			wp_localize_script( 'clientdash', 'ClientDash_Data', array(
 				'nonce' => wp_create_nonce( 'clientdash_nonce' ),
 			) );
+
+			wp_localize_script( 'clientdash-customize-inpreview', 'ClientDashCustomizeInPreview_Data', array(
+				'domain'    => get_bloginfo( 'url' ),
+				'l10n' => array(
+					'preview_only' => __( 'Preview Only', 'clientdash' ),
+				),
+			));
 		}
 
 		/**

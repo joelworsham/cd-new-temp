@@ -56,6 +56,18 @@ class ClientDash_REST_Customizations_Controller {
 				'permission_callback' => array( $this, 'update_item_permissions_check' ),
 				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 			),
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'delete_item' ),
+				'permission_callback' => array( $this, 'delete_item_permissions_check' ),
+				'args'                => array(
+					'force' => array(
+						'type'        => 'boolean',
+						'default'     => false,
+						'description' => __( 'Whether to bypass trash and force deletion.' ),
+					),
+				),
+			),
 			'schema' => array( $this, 'get_item_schema' ),
 		) );
 	}
@@ -111,6 +123,26 @@ class ClientDash_REST_Customizations_Controller {
 	 * @param WP_REST_Request $request Current request.
 	 */
 	public function update_item_permissions_check( $request ) {
+
+		// TODO Get this working
+
+		// TODO Custom capability
+//		if ( ! current_user_can( 'read' ) ) {
+//
+//			return new WP_Error( 'rest_forbidden', esc_html__( 'You cannot view the customizations resource.' ), array( 'status' => $this->authorization_status_code() ) );
+//		}
+
+		return true;
+	}
+
+	/**
+	 * Check permissions for the customizations.
+	 *
+	 * @since {{VERSION}}
+	 *
+	 * @param WP_REST_Request $request Current request.
+	 */
+	public function delete_item_permissions_check( $request ) {
 
 		// TODO Get this working
 
@@ -210,6 +242,60 @@ class ClientDash_REST_Customizations_Controller {
 		$request->set_param( 'context', 'edit' );
 
 		$response = $this->prepare_item_for_response( $customizations );
+
+		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Deletes a customization.
+	 *
+	 * @param WP_REST_Request $request Current request.
+	 */
+	public function delete_item( $request ) {
+
+		$role = $request['role'];
+
+		if ( empty( $role ) ) {
+
+			return new WP_Error(
+				'rest_customizations_invalid_role',
+				__( 'Invalid customizations Role.', 'clientdash' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$customizations = cd_get_customizations( $request['role'] );
+
+		if ( ! $customizations ) {
+
+			$response = new WP_REST_Response();
+			$response->set_data( array(
+				'deleted' => false,
+				'message' => __( 'Role has no customizations.', 'clientdash' ),
+			) );
+
+			return $response;
+		}
+
+		$results = cd_delete_customizations( $request['role'] );
+
+		if ( $results === false ) {
+
+			return new WP_Error(
+				'rest_customizations_cant_delete',
+				__( 'Cannot delete customization for unknown reasons.', 'clientdash' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		$request->set_param( 'context', 'edit' );
+
+		$previous = $this->prepare_item_for_response( $customizations, $request );
+		$response = new WP_REST_Response();
+		$response->set_data( array(
+			'deleted' => true,
+			'previous' => $previous->get_data(),
+		) );
 
 		return rest_ensure_response( $response );
 	}

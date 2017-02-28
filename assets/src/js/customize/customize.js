@@ -6,8 +6,8 @@ import {SortableContainer, SortableElement, arrayMove} from 'react-sortable-hoc'
 const l10n = ClientdashCustomize_Data.l10n || false;
 const roles = ClientdashCustomize_Data.roles || false;
 const adminurl = ClientdashCustomize_Data.adminurl || false;
+const domain = ClientdashCustomize_Data.domain || false;
 const dashicons = ClientdashCustomize_Data.dashicons || false;
-var leave_confirmation = false;
 
 /**
  * Returns all items marked "deleted" from a list.
@@ -233,7 +233,7 @@ class Select extends React.Component {
                         value={this.props.selected}
                         multiple={this.props.multi}
                         onChange={this.handleChange}
-                    >
+                        disabled={this.props.disabled}>
                         {options}
                     </select>
                 </label>
@@ -428,11 +428,38 @@ class ActionButton extends React.Component {
     }
 
     render() {
+
+        var type_class = 'default';
+
+        switch (this.props.type) {
+            case 'primary':
+
+                type_class = 'primary';
+                break;
+
+            case 'delete':
+
+                type_class = 'delete';
+                break;
+        }
+
+        var classes = [
+            'cd-editor-action-button',
+            'cd-editor-action-button-' + type_class
+        ];
+
+        if (this.props.align) {
+
+            classes.push(this.props.align);
+        }
+
+        if (this.props.disabled) {
+
+            classes.push('cd-editor-action-button-disabled');
+        }
+
         return (
-            <button type="button" title={this.props.text} aria-label={this.props.text}
-                    className={"cd-editor-action-button " +
-                    (this.props.align ? this.props.align : "") +
-                    (this.props.disabled ? ' cd-editor-action-button-disabled' : '')}
+            <button type="button" title={this.props.text} aria-label={this.props.text} className={classes.join(' ')}
                     onClick={this.handleClick}>
 
                 {this.props.icon &&
@@ -953,6 +980,11 @@ class PrimaryActions extends React.Component {
 
     saveChanges() {
 
+        if (this.props.saving) {
+
+            return;
+        }
+
         this.props.onSaveChanges();
     }
 
@@ -974,25 +1006,30 @@ class PrimaryActions extends React.Component {
     render() {
         return (
             <div className="cd-editor-primary-actions">
+
                 <ActionButton
                     text="Hide"
                     icon="chevron-circle-left"
+                    disabled={this.props.saving || this.props.disabled}
                     onHandleClick={this.hideCustomizer}
                 />
                 <ActionButton
                     text="Close"
                     icon="times"
+                    disabled={this.props.saving || this.props.disabled}
                     onHandleClick={this.closeCustomizer}
                 />
                 <ActionButton
                     text="Preview"
                     icon={this.props.loadingPreview ? "circle-o-notch fa-spin" : "eye"}
+                    disabled={this.props.saving || this.props.disabled}
                     onHandleClick={this.previewChanges}
                 />
                 <ActionButton
-                    text="Save"
-                    icon={this.props.saving ? "circle-o-notch fa-spin" : "check"}
-                    disabled={!leave_confirmation}
+                    text={this.props.changes ? l10n['save'] : l10n['up_to_date']}
+                    icon={this.props.saving ? "circle-o-notch fa-spin" : (this.props.changes ? "floppy-o" : "check")}
+                    disabled={!this.props.changes || this.props.saving || this.props.disabled}
+                    type="primary"
                     onHandleClick={this.saveChanges}
                 />
             </div>
@@ -1027,6 +1064,7 @@ class RoleSwitcher extends React.Component {
                     options={roles}
                     label={l10n['role_switcher_label']}
                     selected={this.props.role}
+                    disabled={this.props.disabled}
                     onHandleChange={this.switchRole}
                 />
             </div>
@@ -1400,12 +1438,32 @@ class PanelDashboard extends React.Component {
     }
 }
 
+/**
+ * Panel for loading indicator.
+ *
+ * @since {{VERSION}}
+ */
 class PanelLoading extends React.Component {
     render() {
 
         return (
             <Panel id="loading">
                 <span className="fa fa-circle-o-notch fa-spin"></span>
+            </Panel>
+        )
+    }
+}
+
+/**
+ * Panel with nothing in it.
+ *
+ * @since {{VERSION}}
+ */
+class PanelBlank extends React.Component {
+    render() {
+
+        return (
+            <Panel id="blank">
             </Panel>
         )
     }
@@ -1497,7 +1555,7 @@ class WidgetEdit extends React.Component {
 }
 
 /**
- * Panel specific actions for Menu.
+ * Secondary actions for panels.
  *
  * @since {{VERSION}}
  */
@@ -1538,6 +1596,7 @@ class SecondaryActions extends React.Component {
                         icon="chevron-left"
                         align="left"
                         onHandleClick={this.loadPreviousPanel}
+                        disabled={this.props.disabled}
                     />
                     }
 
@@ -1547,10 +1606,103 @@ class SecondaryActions extends React.Component {
                         icon="plus"
                         align="right"
                         onHandleClick={this.loadNextPanel}
+                        disabled={this.props.disabled}
                     />
                     }
                 </div>
                 }
+            </div>
+        )
+    }
+}
+
+
+/**
+ * Secondary actions for the Primary panel.
+ *
+ * @since {{VERSION}}
+ */
+class SecondaryActionsPrimary extends React.Component {
+
+    constructor(props) {
+
+        super(props);
+
+        this.state = {
+            confirming: false
+        }
+
+        this.resetRole = this.resetRole.bind(this);
+        this.cancelReset = this.cancelReset.bind(this);
+        this.confirmReset = this.confirmReset.bind(this);
+    }
+
+    resetRole() {
+
+        if (this.props.deleting) {
+
+            return;
+        }
+
+        this.props.onResetRole();
+
+        this.setState({
+            confirming: false
+        });
+    }
+
+    confirmReset() {
+
+        this.props.onConfirmReset();
+
+        this.setState({
+            confirming: true,
+        });
+    }
+
+    cancelReset() {
+
+        this.props.onCancelReset();
+
+        this.setState({
+            confirming: false
+        });
+    }
+
+    render() {
+
+        return (
+            <div className="cd-editor-secondary-actions">
+                <div className="cd-editor-panel-actions-buttons">
+
+                    {(!this.state.confirming && !this.props.deleting) &&
+                    <ActionButton
+                        text={l10n['reset_role']}
+                        icon="refresh"
+                        align="left"
+                        type="delete"
+                        disabled={this.props.resettable}
+                        onHandleClick={this.confirmReset}
+                    />}
+
+                    {(this.state.confirming && !this.props.deleting) &&
+                    <ActionButton
+                        text={l10n['cancel']}
+                        icon="ban"
+                        align="left"
+                        onHandleClick={this.cancelReset}
+                    />}
+
+                    {(this.state.confirming || this.props.deleting) &&
+                    <ActionButton
+                        text={l10n['confirm']}
+                        icon={this.props.deleting ? 'circle-o-notch fa-spin' : 'check'}
+                        align="right"
+                        type="delete"
+                        onHandleClick={this.resetRole}
+                    />}
+
+                </div>
             </div>
         )
     }
@@ -1567,15 +1719,69 @@ class Preview extends React.Component {
 
         super(props);
 
+        this.handleFrameTasks = this.handleFrameTasks.bind(this);
         this.loaded = this.loaded.bind(this);
     }
 
-    componentWillUpdate() {
+    shouldComponentUpadte() {
 
-        if (!this.props.initial) {
+        // iframe should NEVER re-render, because it would refresh
+        return false;
+    }
 
-            document.getElementById('cd-preview-iframe').contentWindow.location.reload();
+    componentDidMount() {
+
+        window.addEventListener('message', this.handleFrameTasks);
+    }
+
+    handleFrameTasks(e) {
+
+        if (!e.data.id) {
+
+            return;
         }
+
+        switch (e.data.id) {
+
+            case 'cd_customize_preview_link_clicked' :
+
+                if (!this.isLinkValid(e.data.link)) {
+
+                    this.props.onShowMessage({
+                        type: 'error',
+                        text: l10n['cannot_view_link']
+                    });
+
+                    return;
+                }
+
+                var link_base = e.data.link.includes('?') ? e.data.link + '&' : e.data.link + '?';
+                var link = link_base + 'cd_customizing=1&role=' + this.props.role;
+
+                this.load(link);
+
+                break;
+
+            case 'cd_customize_preview_form_submit' :
+
+                this.props.onShowMessage({
+                    type: 'error',
+                    text: l10n['cannot_submit_form']
+                });
+                
+                break;
+        }
+    }
+
+    isLinkValid(link) {
+
+        // Not admin
+        if (!link.includes('/wp-admin')) {
+
+            return false;
+        }
+
+        return true;
     }
 
     loaded() {
@@ -1588,27 +1794,34 @@ class Preview extends React.Component {
         return adminurl + '?cd_customizing=1&role=' + this.props.role;
     }
 
+    load(url) {
+
+        this.iframe.src = url;
+    }
+
     refresh() {
 
         // If the iframe contains the "cd_save_role" param, remove it for subsequent loads.
-        if (document.getElementById('cd-preview-iframe').src.includes('&cd_save_role=1')) {
+        if (this.iframe.src.includes('&cd_save_role=1')) {
 
-            document.getElementById('cd-preview-iframe').src = this.getSrc();
+            this.iframe.src = this.getSrc();
 
         } else {
 
-            document.getElementById('cd-preview-iframe').contentWindow.location.reload();
+            this.iframe.contentWindow.location.reload();
         }
     }
 
     render() {
+
         return (
             <section id="cd-preview">
                 <iframe
                     id="cd-preview-iframe"
                     src={this.getSrc() + (this.props.saveRole ? '&cd_save_role=1' : '')}
                     onLoad={this.loaded}
-                    onClick={this.handleClick}
+                    sandbox="allow-scripts allow-forms allow-same-origin"
+                    ref={(f) => this.iframe = f}
                 />
             </section>
         )
@@ -1658,18 +1871,29 @@ class Message extends React.Component {
 
     render() {
 
-        if (this.state.visible) {
+        if (this.state.visible && !this.props.noHide) {
 
-            this.hiding = setTimeout(() => this.hide(), 5000);
+            this.hiding = setTimeout(() => this.hide(), 4000);
+        }
+
+        var classes = [
+            'cd-editor-message',
+            'cd-editor-message-' + this.props.type
+        ]
+
+        if (this.props.text && this.state.visible) {
+
+            classes.push('cd-editor-message-visible');
         }
 
         return (
-            <div
-                className={"cd-editor-message" + (this.props.text && this.state.visible ? ' cd-editor-message-visible' : '')}>
+            <div className={classes.join(' ')}>
                 {this.props.text}
+
+                {!this.props.noHide &&
                 <span className="cd-editor-message-close dashicons dashicons-no"
                       onClick={this.hide}
-                      title={l10n['close']}></span>
+                      title={l10n['close']}></span>}
             </div>
         )
     }
@@ -1689,17 +1913,26 @@ class Editor extends React.Component {
         this.state = {
             nextPanel: null,
             panelDirection: 'forward',
-            activePanel: 'loading', // TODO set to "primary"
+            activePanel: 'loading',
             hidden: false,
             submenuEdit: null,
             loadingPreview: false,
             saving: false,
-            message: null,
+            deleting: false,
+            loading: true,
+            changes: false,
+            message: {
+                type: 'default',
+                text: null
+            },
             customizations: {},
         }
 
         this.loadPanel = this.loadPanel.bind(this);
         this.saveChanges = this.saveChanges.bind(this);
+        this.confirmReset = this.confirmReset.bind(this);
+        this.cancelReset = this.cancelReset.bind(this);
+        this.resetRole = this.resetRole.bind(this);
         this.resetMessage = this.resetMessage.bind(this);
         this.previewChanges = this.previewChanges.bind(this);
         this.hideCustomizer = this.hideCustomizer.bind(this);
@@ -1717,19 +1950,22 @@ class Editor extends React.Component {
         this.widgetAdd = this.widgetAdd.bind(this);
         this.widgetDelete = this.widgetDelete.bind(this);
         this.widgetEdit = this.widgetEdit.bind(this);
+        this.handleEditorClick = this.handleEditorClick.bind(this);
+        this.showMessage = this.showMessage.bind(this);
     }
 
-    shouldComponentUpdate(nextProps, nextState) {
+    componentDidMount() {
 
-        console.log('test');
+        var api = this;
 
-        if (this.state.customizations !== nextState.customizations) {
+        // Confirm before leave
+        window.onbeforeunload = function () {
 
-            console.log('change');
-            this.dataChange(false);
-        }
+            if (api.state.changes) {
 
-        return true;
+                return l10n['leave_confirmation'];
+            }
+        };
     }
 
     loadPanel(panel_ID, direction) {
@@ -1738,7 +1974,11 @@ class Editor extends React.Component {
 
         this.setState({
             activePanel: panel_ID,
-            panelDirection: direction
+            panelDirection: direction,
+            message: {
+                type: 'default',
+                text: ''
+            }
         });
     }
 
@@ -1750,6 +1990,45 @@ class Editor extends React.Component {
     closeCustomizer() {
 
         window.location.href = adminurl;
+    }
+
+    saveChanges() {
+
+        let api = this;
+
+        this.setState({
+            saving: true,
+        });
+
+        fetch('wp-json/clientdash/v1/customizations/' + this.props.role, {
+            method: 'POST',
+            headers: new Headers({
+                'Content-Type': 'application/json'
+            }),
+            body: JSON.stringify({
+                menu: this.state.customizations[this.props.role].menu,
+                submenu: this.state.customizations[this.props.role].submenu,
+                dashboard: this.state.customizations[this.props.role].dashboard
+            })
+        }).then(function (response) {
+
+            return response.json();
+
+        }).then(function (customizations) {
+
+            api.setState({
+                saving: false,
+                changes: false,
+                message: {
+                    type: 'success',
+                    text: l10n['saved']
+                }
+            });
+
+        }).catch(function (error) {
+
+            console.log('error: ', error);
+        });
     }
 
     previewChanges() {
@@ -1785,11 +2064,91 @@ class Editor extends React.Component {
         });
     }
 
+    confirmReset() {
+
+        this.setState({
+            activePanel: 'confirmReset',
+            panelDirection: 'forward',
+            message: {
+                type: 'default',
+                text: l10n['confirm_role_reset'],
+                noHide: true
+            }
+        });
+    }
+
+    cancelReset() {
+
+        this.setState({
+            activePanel: 'primary',
+            panelDirection: 'backward',
+            message: {
+                type: 'default',
+                text: ''
+            }
+        });
+    }
+
+    resetRole() {
+
+        var role = this.props.role;
+        var api = this;
+
+        this.setState({
+            deleting: true,
+            activePanel: 'deleting',
+            panelDirection: 'forward',
+            message: {
+                type: 'default',
+                text: ''
+            }
+        });
+
+        fetch('wp-json/clientdash/v1/customizations/' + this.props.role, {
+            method: 'DELETE',
+            headers: new Headers({
+                'Content-Type': 'application/json'
+            })
+        }).then(function (response) {
+
+            return response.json();
+
+        }).then(function (customizations) {
+
+            api.setState((prevState) => {
+
+                prevState.deleting = false;
+                prevState.loading = true;
+                prevState.changes = false;
+                prevState.activePanel = 'loading';
+                prevState.panelDirection = 'backward';
+                prevState.message = {
+                    type: 'success',
+                    text: l10n['role_reset']
+                };
+
+                delete prevState.customizations[role];
+
+                return prevState;
+            });
+
+            api.props.onResetRole(role);
+
+        }).catch(function (error) {
+
+            console.log('error: ', error);
+        });
+    }
+
     switchRole(role) {
 
         this.props.onSwitchRole(role);
 
-        this.loadPanel('loading', 'forward');
+        this.setState({
+            activePanel: 'loading',
+            panelDirection: 'forward',
+            loading: true
+        });
     }
 
     loadRole() {
@@ -1799,6 +2158,11 @@ class Editor extends React.Component {
 
             let role = this.props.role;
             let api = this;
+
+            this.setState({
+                activePanel: 'loading',
+                loading: true
+            });
 
             fetch('wp-json/clientdash/v1/customizations/preview_' + role, {
                 method: 'GET',
@@ -1813,69 +2177,29 @@ class Editor extends React.Component {
 
                 api.setState((prevState) => {
 
-                    let state = prevState;
-
-                    state.activePanel = 'primary';
+                    prevState.activePanel = 'primary';
+                    prevState.loading = false;
 
                     // Get the separators indexed
                     customizations.menu = api.menuIndexSeparators(customizations.menu);
 
-                    state.customizations[role] = customizations;
+                    prevState.customizations[role] = customizations;
 
-                    return state;
+                    return prevState;
                 });
 
             }).catch(function (error) {
 
                 console.log('error: ', error);
-
             });
 
         } else if (this.state.activePanel == 'loading') {
 
             this.setState({
                 activePanel: 'primary',
+                loading: false
             });
         }
-    }
-
-    saveChanges() {
-
-        let api = this;
-
-        this.setState({
-            saving: true,
-        });
-
-        fetch('wp-json/clientdash/v1/customizations/' + this.props.role, {
-            method: 'POST',
-            headers: new Headers({
-                'Content-Type': 'application/json'
-            }),
-            body: JSON.stringify({
-                menu: this.state.customizations[this.props.role].menu,
-                submenu: this.state.customizations[this.props.role].submenu,
-                dashboard: this.state.customizations[this.props.role].dashboard
-            })
-        }).then(function (response) {
-
-            return response.json();
-
-        }).then(function (customizations) {
-
-            api.setState({
-                saving: false,
-                message: l10n['saved']
-            });
-
-            api.previewChanges();
-
-            leave_confirmation = false;
-
-        }).catch(function (error) {
-
-            console.log('error: ', error);
-        });
     }
 
     dataChange(refreshDelay) {
@@ -1886,13 +2210,17 @@ class Editor extends React.Component {
 
         this.refreshingTimeout = setTimeout(() => this.previewChanges(), refreshDelay);
 
-        leave_confirmation = true;
+        this.setState({
+            changes: true
+        });
     }
 
     resetMessage() {
 
         this.setState({
-            message: ''
+            message: {
+                text: null
+            }
         });
     }
 
@@ -2019,7 +2347,7 @@ class Editor extends React.Component {
             return prevState;
         });
 
-        //this.dataChange();
+        this.dataChange();
     }
 
     submenuItemEdit(ID, item) {
@@ -2034,7 +2362,7 @@ class Editor extends React.Component {
             return prevState;
         });
 
-        //this.dataChange();
+        this.dataChange();
     }
 
     reOrderMenu(new_order) {
@@ -2136,7 +2464,22 @@ class Editor extends React.Component {
             return prevState;
         });
 
-        //this.dataChange();
+        this.dataChange();
+    }
+
+    handleEditorClick() {
+
+        if (!this.state.message.noHide) {
+
+            this.resetMessage();
+        }
+    }
+
+    showMessage(message) {
+
+        this.setState({
+            message: message
+        });
     }
 
     render() {
@@ -2148,8 +2491,9 @@ class Editor extends React.Component {
         switch (this.state.activePanel) {
 
             case 'primary':
+            case 'confirmReset':
+            case 'deleting':
             {
-
                 panel =
                     <PanelPrimary
                         key="primary"
@@ -2157,8 +2501,13 @@ class Editor extends React.Component {
                     />
                 ;
                 secondary_actions =
-                    <SecondaryActions
+                    <SecondaryActionsPrimary
                         key="primary"
+                        onResetRole={this.resetRole}
+                        onConfirmReset={this.confirmReset}
+                        onCancelReset={this.cancelReset}
+                        deleting={this.state.deleting}
+                        disabled={this.state.saving || this.state.deleting}
                     />
                 ;
                 break;
@@ -2187,6 +2536,7 @@ class Editor extends React.Component {
                         nextPanel="addMenuItems"
                         loadNextText={l10n['action_button_add_items']}
                         onLoadPanel={this.loadPanel}
+                        disabled={this.state.saving || this.state.deleting}
                     />
                 ;
                 break;
@@ -2224,6 +2574,7 @@ class Editor extends React.Component {
                         previousPanel="menu"
                         loadNextText={l10n['action_button_add_items']}
                         onLoadPanel={this.loadPanel}
+                        disabled={this.state.saving || this.state.deleting}
                     />
                 ;
                 break;
@@ -2266,6 +2617,7 @@ class Editor extends React.Component {
                         title={l10n['panel_actions_title_menu_add']}
                         previousPanel="menu"
                         onLoadPanel={this.loadPanel}
+                        disabled={this.state.saving || this.state.deleting}
                     />
                 ;
                 break;
@@ -2300,6 +2652,7 @@ class Editor extends React.Component {
                         title={l10n['panel_actions_title_submenu_add']}
                         previousPanel="submenu"
                         onLoadPanel={this.loadPanel}
+                        disabled={this.state.saving || this.state.deleting}
                     />
                 ;
                 break;
@@ -2327,6 +2680,7 @@ class Editor extends React.Component {
                         nextPanel="addWidgets"
                         loadNextText={l10n['action_button_add_items']}
                         onLoadPanel={this.loadPanel}
+                        disabled={this.state.saving || this.state.deleting}
                     />
                 ;
                 break;
@@ -2352,6 +2706,7 @@ class Editor extends React.Component {
                         title={l10n['panel_actions_title_menu_add']}
                         previousPanel="dashboard"
                         onLoadPanel={this.loadPanel}
+                        disabled={this.state.saving || this.state.deleting}
                     />
                 ;
                 break;
@@ -2372,6 +2727,31 @@ class Editor extends React.Component {
                 ;
                 break;
             }
+
+            case 'blank':
+            {
+
+                panel =
+                    <PanelBlank
+                        key="blank"
+                    />
+                ;
+                secondary_actions =
+                    <SecondaryActions
+                        key="blank"
+                    />
+                ;
+                break;
+            }
+        }
+
+        if (this.state.activePanel == 'confirmReset' || this.state.activePanel == 'deleting') {
+
+            panel =
+                <PanelBlank
+                    key="blank"
+                />
+            ;
         }
 
         return (
@@ -2385,20 +2765,25 @@ class Editor extends React.Component {
                         onCloseCustomizer={this.closeCustomizer}
                         loadingPreview={this.state.loadingPreview}
                         saving={this.state.saving}
+                        disabled={this.state.deleting || this.state.loading}
+                        changes={this.state.changes}
                     />
 
                     <RoleSwitcher
                         role={this.props.role}
+                        disabled={this.state.saving || this.state.deleting || this.state.loading}
                         onSwitchRole={this.switchRole}
                     />
 
                     <Message
-                        text={this.state.message}
+                        text={this.state.message.text || ''}
+                        type={this.state.message.type || 'default'}
+                        noHide={this.state.message.noHide || false}
                         onHide={this.resetMessage}
                     />
                 </div>
 
-                <div className="cd-editor-panels">
+                <div className="cd-editor-panels" onClick={this.handleEditorClick}>
                     <ReactCSSTransitionReplace
                         transitionName={"panel-" + this.state.panelDirection}
                         transitionEnterTimeout={300}
@@ -2437,13 +2822,16 @@ class Customize extends React.Component {
             role: 'administrator',
             loadedRoles: ['administrator'],
             saveRole: true,
+            previewLoading: true,
         }
 
         this.hideCustomizer = this.hideCustomizer.bind(this);
         this.showCustomizer = this.showCustomizer.bind(this);
         this.switchRole = this.switchRole.bind(this);
+        this.resetRole = this.resetRole.bind(this);
         this.loadData = this.loadData.bind(this);
         this.refreshPreview = this.refreshPreview.bind(this);
+        this.showMessage = this.showMessage.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -2471,10 +2859,26 @@ class Customize extends React.Component {
         });
     }
 
+    resetRole(role) {
+
+        console.log('resetting');
+
+        this.setState((prevState) => {
+
+            prevState.saveRole = true;
+            prevState.previewLoading = true;
+            prevState.role = role;
+            prevState.saveRole = true;
+
+            return prevState;
+        });
+
+        this.refs.preview.load(adminurl + '?cd_customizing=1&cd_save_role=1&role=' + role);
+    }
+
     switchRole(role) {
 
         if (this.state.loadedRoles.indexOf(role) === -1) {
-
 
             this.setState((prevState) => {
 
@@ -2495,19 +2899,26 @@ class Customize extends React.Component {
 
     loadData() {
 
+        this.setState({
+            previewLoading: false,
+            saveRole: this.state.saveRole || false,
+        });
+
         this.refs.editor.loadRole();
-
-        if (this.state.saveRole === true) {
-
-            this.setState({
-                saveRole: false,
-            });
-        }
     }
 
     refreshPreview() {
 
+        this.setState({
+            previewLoading: true,
+        });
+
         this.refs.preview.refresh();
+    }
+    
+    showMessage(message) {
+        
+        this.refs.editor.showMessage(message);
     }
 
     render() {
@@ -2524,6 +2935,7 @@ class Customize extends React.Component {
                 <Editor
                     onHideCustomizer={this.hideCustomizer}
                     onSwitchRole={this.switchRole}
+                    onResetRole={this.resetRole}
                     refreshPreview={this.refreshPreview}
                     role={this.state.role}
                     ref="editor"
@@ -2533,8 +2945,14 @@ class Customize extends React.Component {
                     role={this.state.role}
                     onLoad={this.loadData}
                     saveRole={this.state.saveRole}
+                    onShowMessage={this.showMessage}
                     ref="preview"
                 />
+
+                {this.state.previewLoading &&
+                <div id="cd-editor-preview-cover">
+                    <span className="cd-editor-preview-cover-icon fa fa-circle-o-notch fa-spin"/>
+                </div>}
             </div>
         )
     }
@@ -2545,12 +2963,3 @@ ReactDOM.render(
     <Customize />,
     document.getElementById('clientdash-customize')
 );
-
-// Confirm before leave
-window.onbeforeunload = function () {
-
-    if (leave_confirmation) {
-
-        return l10n['leave_confirmation'];
-    }
-};

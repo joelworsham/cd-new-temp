@@ -37,6 +37,28 @@
     vertical-align: middle;
     margin-right: 0.2em;
   }
+
+  &.cd-editor-action-button-delete {
+    background: $color-error;
+    color: mix($color-error, #fff, 50%);
+    border-color: darken($color-error, 10%);
+
+    &:hover {
+      background: linear-gradient(to bottom, $color-error 0%, darken($color-error, 10%) 100%);
+      color: #fff;
+    }
+  }
+
+  &.cd-editor-action-button-primary {
+    background: $primary-color;
+    color: mix($primary-color, #fff, 50%);
+    border-color: darken($primary-color, 10%);
+
+    &:hover {
+      background: linear-gradient(to bottom, $primary-color 0%, darken($primary-color, 10%) 100%);
+      color: #fff;
+    }
+  }
 }
 
 .cd-customize-show {
