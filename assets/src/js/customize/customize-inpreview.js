@@ -46,7 +46,7 @@ function cd_customize_overlay() {
     // Don't load on dashboard
     if (document.body.className.indexOf('index-php') !== -1) {
 
-        //return;
+        return;
     }
 
     var content = document.getElementById('wpwrap');
