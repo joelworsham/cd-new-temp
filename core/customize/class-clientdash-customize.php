@@ -390,7 +390,7 @@ class ClientDash_Customize {
 				'original_title' => $menu_item[0],
 				'icon'           => isset( $menu_item[6] ) ? $menu_item[6] : '',
 				'deleted'        => false,
-				'separator'      => $menu_item[4] == 'wp-menu-separator',
+				'separator'      => strpos( $menu_item[4], 'wp-menu-separator' ) !== false,
 			) );
 		}
 

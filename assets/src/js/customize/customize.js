@@ -586,7 +586,13 @@ class LineItem extends React.Component {
  *
  * @since {{VERSION}}
  */
-const SortableLineItem = SortableElement(({item}) => <li className="cd-editor-lineitem-li">{item}</li>);
+const SortableLineItem = SortableElement(({item}) => {
+    return (
+        <li className="cd-editor-lineitem-li">
+            {item}
+        </li>
+    );
+})
 
 /**
  * Line items container.
@@ -617,7 +623,11 @@ const SortableLineItems = SortableContainer(({items}) => {
     return (
         <ul className="cd-editor-lineitems sortable">
             {items.map((item, index) =>
-                <SortableLineItem key={`item-${index}`} index={index} item={item}/>
+                <SortableLineItem
+                    key={`item-${index}`}
+                    index={index}
+                    item={item}
+                />
             )}
         </ul>
     );
@@ -688,24 +698,22 @@ class MenuItemEdit extends React.Component {
 
     render() {
 
-        var actions = [
-            <LineItemAction
-                key="menu-action-submenu"
-                icon="th-list"
-                text={l10n['edit_submenu']}
-                onHandleClick={this.submenuEdit}
-            />,
-            <LineItemAction
-                key="menu-action-edit"
-                icon={this.state.editing ? "chevron-up" : "chevron-down"}
-                text={l10n['edit']}
-                onHandleClick={this.toggleEdit}
-            />
-        ];
+        var actions = [];
 
         if (this.props.id != 'cd_settings') {
-
-            actions.push(
+            actions = [
+                <LineItemAction
+                    key="menu-action-submenu"
+                    icon="th-list"
+                    text={l10n['edit_submenu']}
+                    onHandleClick={this.submenuEdit}
+                />,
+                <LineItemAction
+                    key="menu-action-edit"
+                    icon={this.state.editing ? "chevron-up" : "chevron-down"}
+                    text={l10n['edit']}
+                    onHandleClick={this.toggleEdit}
+                />,
                 <LineItemAction
                     key="menu-action-delete"
                     icon="times"
@@ -713,7 +721,7 @@ class MenuItemEdit extends React.Component {
                     classes="cd-editor-lineitem-action-close"
                     onHandleClick={this.deleteItem}
                 />
-            );
+            ];
         }
 
         const after_title =
@@ -894,7 +902,7 @@ class SubmenuItemEdit extends React.Component {
 }
 
 /**
- * Line item for adding a menu item.
+ * Line item for adding an item.
  *
  * @since {{VERSION}}
  */
@@ -934,6 +942,7 @@ class ItemAdd extends React.Component {
                 title={this.props.title}
                 icon={this.props.icon}
                 actions={actions}
+                classes={this.props.id == 'separator' && 'cd-editor-menuitem-separator'}
             />
         )
     }
