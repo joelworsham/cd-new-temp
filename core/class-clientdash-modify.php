@@ -122,7 +122,7 @@ class ClientDash_Modify {
 		$original_menu_map = array_flip( wp_list_pluck( $menu, 2 ) );
 		$new_menu          = array();
 
-		foreach ( $this->menu as $ID => $menu_item ) {
+		foreach ( $this->menu as $menu_item ) {
 
 			// Separators are handled diferrently
 			if ( $menu_item['type'] == 'separator' ) {
@@ -130,7 +130,7 @@ class ClientDash_Modify {
 				$new_menu[] = array(
 					'',
 					'read',
-					$ID,
+					$menu_item['id'],
 					'',
 					'wp-menu-separator',
 				);
@@ -146,8 +146,8 @@ class ClientDash_Modify {
 					'read',
 					$menu_item['link'],
 					$menu_item['title'] ? $menu_item['title'] : $menu_item['original_title'],
-					"menu-top toplevel_page_$ID",
-					"toplevel_page_$ID",
+					"menu-top toplevel_page_$menu_item[id]",
+					"toplevel_page_$menu_item[id]",
 					$menu_item['icon'],
 				);
 
@@ -160,12 +160,12 @@ class ClientDash_Modify {
 				continue;
 			}
 
-			$original_menu_item = $menu[ $original_menu_map[ $ID ] ];
+			$original_menu_item = $menu[ $original_menu_map[ $menu_item['id'] ] ];
 
 			$new_menu[] = array(
 				$menu_item['title'] ? $menu_item['title'] : $menu_item['original_title'],
 				$original_menu_item[1],
-				$ID,
+				$menu_item['id'],
 				$original_menu_item[3],
 				$original_menu_item[4],
 				$original_menu_item[5],
@@ -180,7 +180,7 @@ class ClientDash_Modify {
 			$original_submenu_map = array_flip( wp_list_pluck( $submenu[ $menu_ID ], 2 ) );
 			$new_submenu          = array();
 
-			foreach ( $submenu_items as $ID => $submenu_item ) {
+			foreach ( $submenu_items as $submenu_item ) {
 
 				// Skip deleted items
 				if ( $submenu_item['deleted'] ) {
@@ -190,28 +190,28 @@ class ClientDash_Modify {
 
 				// Handle weird Customize URL
 				// The Customize URL is dynamic, so it won't match what was saved. This ensures it matches.
-				if ( strpos( $ID, 'customize.php' ) === 0 ) {
+				if ( strpos( $submenu_item['id'], 'customize.php' ) === 0 ) {
 
 					$customize_url = add_query_arg( 'return', urlencode( wp_unslash( $_SERVER['REQUEST_URI'] ) ), 'customize.php' );
 
 					if ( $submenu_item['original_title'] == __( 'Customize' ) ) {
 
-						$ID = esc_url( $customize_url );
+						$submenu_item['id'] = esc_url( $customize_url );
 
 					} elseif ( $submenu_item['original_title'] == __( 'Header' ) ) {
 
-						$ID = esc_url(
+						$submenu_item['id'] = esc_url(
 							add_query_arg( array( 'autofocus' => array( 'control' => 'header_image' ) ), $customize_url )
 						);
 					}
 				}
 
-				$original_submenu_item = $submenu[ $menu_ID ][ $original_submenu_map[ $ID ] ];
+				$original_submenu_item = $submenu[ $menu_ID ][ $original_submenu_map[ $submenu_item['id'] ] ];
 
 				$new_submenu[] = array(
 					$submenu_item['title'] ? $submenu_item['title'] : $submenu_item['original_title'],
 					$original_submenu_item[1],
-					$ID,
+					$submenu_item['id'],
 				);
 			}
 
@@ -247,12 +247,10 @@ class ClientDash_Modify {
 					foreach ( $widgets as $i => $widget ) {
 
 						// No modification
-						if ( ! isset( $this->dashboard[ $widget['id'] ] ) ) {
+						if ( ( $custom_widget = cd_array_search_by_key( $this->dashboard, 'id', $widget['id'] ) ) === false ) {
 
 							continue;
 						}
-
-						$custom_widget = $this->dashboard[ $widget['id'] ];
 
 						// Modify
 						if ( isset( $custom_widget['deleted'] ) && $custom_widget['deleted'] ) {

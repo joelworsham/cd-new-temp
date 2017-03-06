@@ -86,3 +86,32 @@ function cd_delete_customizations( $role ) {
 
 	return ClientDash_DB::delete_customizations( $role );
 }
+
+/**
+ * Searches an array by a nested key and returns the match.
+ *
+ * @since {{VERSION}}
+ *
+ * @param array $array
+ * @param string $key
+ * @param string $value
+ *
+ * @return bool|mixed
+ */
+function cd_array_search_by_key( $array, $key, $value ) {
+
+	foreach ( $array as $array_item ) {
+
+		if ( ! isset( $array_item[ $key ] ) ) {
+
+			continue;
+		}
+
+		if ( $array_item[ $key ] === $value ) {
+
+			return $array_item;
+		}
+	}
+
+	return false;
+}

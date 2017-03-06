@@ -10,28 +10,92 @@ const domain = ClientdashCustomize_Data.domain || false;
 const dashicons = ClientdashCustomize_Data.dashicons || false;
 
 /**
+ * Returns an item in an array based on the item ID.
+ *
+ * @since {{VERSION}}
+ *
+ * @param items
+ * @param ID
+ * @returns {boolean}
+ */
+const getItem = function (items, ID) {
+
+    var found = false;
+
+    items.map((item) => {
+
+        if (item.id === ID) {
+
+            found = item;
+        }
+    });
+
+    return found;
+}
+
+/**
+ * Delets an item in an array based on the item ID.
+ *
+ * @since {{VERSION}}
+ *
+ * @param items
+ * @param ID
+ * @returns {boolean}
+ */
+const deleteItem = function (items, ID) {
+
+    items = items.filter((item) => {
+
+        return item.id !== ID;
+    });
+
+    return items;
+}
+
+/**
+ * Modifies an item in an array based on the supplied new item.
+ *
+ * @since {{VERSION}}
+ *
+ * @param items
+ * @param ID
+ * @param new_item
+ * @returns {*}
+ */
+const modifyItem = function (items, ID, new_item) {
+
+    items = items.map((item) => {
+
+        if (item.id === ID) {
+
+            Object.keys(new_item).map((key) => {
+
+                item[key] = new_item[key];
+            });
+        }
+
+        return item;
+    });
+
+    return items;
+}
+
+/**
  * Returns all items marked "deleted" from a list.
  *
  * @since {{VERSION}}
  *
- * @param {{}} items
- * @returns {{}}
+ * @param {[]} items
+ * @returns {[]}
  */
 const getDeletedItems = function (items) {
 
-    var deleted_items = {};
+    items = items.filter((item) => {
 
-    Object.keys(items).forEach((ID) => {
-
-        let item = items[ID];
-
-        if (item.deleted) {
-
-            deleted_items[ID] = item;
-        }
+        return item.deleted;
     });
 
-    return deleted_items;
+    return items;
 }
 
 /**
@@ -44,19 +108,12 @@ const getDeletedItems = function (items) {
  */
 const getAvailableItems = function (items) {
 
-    var available_items = {};
+    items = items.filter((item) => {
 
-    Object.keys(items).forEach((ID) => {
-
-        let item = items[ID];
-
-        if (!item.deleted) {
-
-            available_items[ID] = item;
-        }
+        return !item.deleted;
     });
 
-    return available_items;
+    return items;
 }
 
 /**
@@ -69,54 +126,14 @@ const getAvailableItems = function (items) {
  */
 const setToOriginalTitles = function (items) {
 
-    Object.keys(items).map((ID) => {
-
-        let item = items[ID];
+    items = items.map((item) => {
 
         item.title = item.original_title;
+
+        return item;
     });
 
     return items;
-}
-
-/**
- * Re-orders the object for the sortable event.
- *
- * @since {{VERSION}}
- *
- * @param object
- * @param old_index
- * @param new_index
- * @returns {{}}
- */
-const sortableReOrder = function (object, old_index, new_index) {
-
-    // Convert object to an array, so we can sort it
-    var sortable = [];
-    Object.keys(object).map((ID) => {
-
-        let item = object[ID];
-
-        item.ID = ID;
-
-        sortable.push(item);
-    });
-
-    // Sort it
-    sortable = arrayMove(sortable, old_index, new_index);
-
-    // Convert back to an object and send off to parent state
-    var new_order = {};
-    sortable.map((item) => {
-
-        let ID = item.ID;
-
-        delete item.ID;
-
-        new_order[ID] = item;
-    });
-
-    return new_order;
 }
 
 /**
@@ -665,7 +682,8 @@ class MenuItemEdit extends React.Component {
 
     titleChange(value) {
 
-        this.props.onMenuItemEdit(this.props.id, {
+        this.props.onMenuItemEdit({
+            id: this.props.id,
             icon: this.props.icon,
             title: value,
             original_title: this.props.originalTitle,
@@ -674,7 +692,8 @@ class MenuItemEdit extends React.Component {
 
     iconChange(value) {
 
-        this.props.onMenuItemEdit(this.props.id, {
+        this.props.onMenuItemEdit({
+            id: this.props.id,
             icon: value,
             title: this.props.title,
             original_title: this.props.originalTitle,
@@ -838,7 +857,8 @@ class MenuItemCustomLink extends React.Component {
 
     titleChange(value) {
 
-        this.props.onMenuItemEdit(this.props.id, {
+        this.props.onMenuItemEdit({
+            id: this.props.id,
             icon: this.props.icon,
             title: value,
             link: this.props.link,
@@ -849,7 +869,8 @@ class MenuItemCustomLink extends React.Component {
 
     linkChange(value) {
 
-        this.props.onMenuItemEdit(this.props.id, {
+        this.props.onMenuItemEdit({
+            id: this.props.id,
             icon: this.props.icon,
             link: value,
             title: this.props.title,
@@ -860,7 +881,8 @@ class MenuItemCustomLink extends React.Component {
 
     iconChange(value) {
 
-        this.props.onMenuItemEdit(this.props.id, {
+        this.props.onMenuItemEdit({
+            id: this.props.id,
             icon: value,
             link: this.props.link,
             title: this.props.title,
@@ -990,7 +1012,8 @@ class SubmenuItemEdit extends React.Component {
 
     titleChange(value) {
 
-        this.props.onSubmenuItemEdit(this.props.id, {
+        this.props.onSubmenuItemEdit({
+            id: this.props.id,
             title: value,
             original_title: this.props.originalTitle,
         });
@@ -1024,7 +1047,7 @@ class SubmenuItemEdit extends React.Component {
 
         const after_title =
                 <span className="cd-editor-lineitem-form-originaltitle">
-                    {l10n['original_title '] + " "}<strong>{this.props.originalTitle}</strong>
+                    {l10n['original_title'] + " "}<strong>{this.props.originalTitle}</strong>
                 </span>
             ;
 
@@ -1071,7 +1094,8 @@ class ItemAdd extends React.Component {
     addItem() {
 
         // Note the "title" and "original_title" to bring to compatibility with the MenuPanel
-        this.props.onAddItem(this.props.id, {
+        this.props.onAddItem({
+            id: this.props.id,
             title: '',
             original_title: this.props.title,
             icon: this.props.icon,
@@ -1325,7 +1349,7 @@ class PanelMenu extends React.Component {
 
     onSortEnd(args) {
 
-        var new_order = sortableReOrder(this.props.menuItems, args.oldIndex, args.newIndex);
+        var new_order = arrayMove(this.props.menuItems, args.oldIndex, args.newIndex);
 
         this.props.onReOrderMenu(new_order);
     }
@@ -1335,9 +1359,9 @@ class PanelMenu extends React.Component {
         this.props.onDeleteItem(ID);
     }
 
-    menuItemEdit(ID, item) {
+    menuItemEdit(item) {
 
-        this.props.onMenuItemEdit(ID, item);
+        this.props.onMenuItemEdit(item);
     }
 
     submenuEdit(ID) {
@@ -1355,18 +1379,16 @@ class PanelMenu extends React.Component {
         var menu_items = [];
         var panel_contents;
 
-        if (Object.keys(this.props.menuItems).length) {
+        if (this.props.menuItems.length) {
 
-            Object.keys(this.props.menuItems).map((ID) => {
-
-                let item = this.props.menuItems[ID];
+            this.props.menuItems.map((item) => {
 
                 if (item.type == 'separator') {
 
                     var menu_item =
                             <MenuItemSeparator
-                                key={ID}
-                                id={ID}
+                                key={item.id}
+                                id={item.id}
                                 onDeleteItem={this.deleteItem}
                             />
                         ;
@@ -1375,8 +1397,8 @@ class PanelMenu extends React.Component {
 
                     var menu_item =
                             <MenuItemCustomLink
-                                key={ID}
-                                id={ID}
+                                key={item.id}
+                                id={item.id}
                                 title={item.title}
                                 link={item.link}
                                 originalTitle={item.original_title}
@@ -1393,12 +1415,12 @@ class PanelMenu extends React.Component {
 
                     var menu_item =
                             <MenuItemEdit
-                                key={ID}
-                                id={ID}
+                                key={item.id}
+                                id={item.id}
                                 title={item.title}
                                 originalTitle={item.original_title}
                                 icon={item.icon}
-                                active={this.props.lastAdded === ID}
+                                active={this.props.lastAdded === item.id}
                                 hasSubmenu={item.hasSubmenu}
                                 onMenuItemEdit={this.menuItemEdit}
                                 onSubmenuEdit={this.submenuEdit}
@@ -1460,7 +1482,7 @@ class PanelSubmenu extends React.Component {
 
     onSortEnd(args) {
 
-        var new_order = sortableReOrder(this.props.submenuItems, args.oldIndex, args.newIndex);
+        var new_order = arrayMove(this.props.submenuItems, args.oldIndex, args.newIndex);
 
         this.props.onReOrderSubmenu(new_order);
     }
@@ -1470,9 +1492,9 @@ class PanelSubmenu extends React.Component {
         this.props.onDeleteItem(item_id);
     }
 
-    submenuItemEdit(ID, item) {
+    submenuItemEdit(item) {
 
-        this.props.onSubmenuItemEdit(ID, item);
+        this.props.onSubmenuItemEdit(item);
     }
 
     itemSubmitForm(event) {
@@ -1485,16 +1507,14 @@ class PanelSubmenu extends React.Component {
         var menu_items = [];
         var panel_contents;
 
-        if (Object.keys(this.props.submenuItems).length) {
+        if (this.props.submenuItems.length) {
 
-            Object.keys(this.props.submenuItems).map((ID) => {
-
-                let item = this.props.submenuItems[ID];
+            this.props.submenuItems.map((item) => {
 
                 menu_items.push(
                     <SubmenuItemEdit
-                        key={ID}
-                        id={ID}
+                        key={item.id}
+                        id={item.id}
                         title={item.title}
                         onSubmenuItemEdit={this.submenuItemEdit}
                         originalTitle={item.original_title}
@@ -1546,9 +1566,9 @@ class PanelAddItems extends React.Component {
         this.addItem = this.addItem.bind(this);
     }
 
-    addItem(ID, item) {
+    addItem(item) {
 
-        this.props.onAddItem(ID, item);
+        this.props.onAddItem(item);
     }
 
     render() {
@@ -1556,18 +1576,14 @@ class PanelAddItems extends React.Component {
         var menu_items = [];
         var panel_contents;
 
-        if (Object.keys(this.props.availableItems).length) {
+        if (this.props.availableItems.length) {
 
-            //let items = this.props.availableItems;
-
-            Object.keys(this.props.availableItems).map((ID) => {
-
-                let item = this.props.availableItems[ID];
+            this.props.availableItems.map((item) => {
 
                 menu_items.push(
                     <ItemAdd
-                        key={ID}
-                        id={ID}
+                        key={item.id}
+                        id={item.id}
                         title={item.title}
                         icon={item.icon}
                         onAddItem={this.addItem}
@@ -1617,9 +1633,9 @@ class PanelDashboard extends React.Component {
         this.props.onDeleteWidget(ID);
     }
 
-    widgetEdit(ID, widget) {
+    widgetEdit(widget) {
 
-        this.props.onWidgetEdit(ID, widget);
+        this.props.onWidgetEdit(widget);
     }
 
     itemSubmitForm(event) {
@@ -1634,14 +1650,12 @@ class PanelDashboard extends React.Component {
 
         if (Object.keys(this.props.widgets).length) {
 
-            Object.keys(this.props.widgets).map((ID) => {
-
-                let item = this.props.widgets[ID];
+            this.props.widgets.map((item) => {
 
                 widgets.push(
                     <WidgetEdit
-                        key={ID}
-                        id={ID}
+                        key={item.id}
+                        id={item.id}
                         title={item.title}
                         originalTitle={item.original_title}
                         onWidgetEdit={this.widgetEdit}
@@ -1732,7 +1746,8 @@ class WidgetEdit extends React.Component {
 
     titleChange(value) {
 
-        this.props.onWidgetEdit(this.props.id, {
+        this.props.onWidgetEdit({
+            id: this.props.id,
             title: value,
             original_title: this.props.originalTitle,
         });
@@ -2469,7 +2484,7 @@ class Editor extends React.Component {
         });
     }
 
-    menuItemAdd(ID, item) {
+    menuItemAdd(item) {
 
         let role = this.props.role;
 
@@ -2478,14 +2493,12 @@ class Editor extends React.Component {
             let menu = prevState.customizations[role].menu;
 
             // Separator is added differently
-            if (ID == 'separator') {
+            if (item.id == 'separator') {
 
                 let separator_index = 1;
 
                 // Get new separator index
-                Object.keys(menu).map((ID) => {
-
-                    let item = menu[ID];
+                menu.map((item) => {
 
                     if (item.type == 'separator') {
 
@@ -2493,26 +2506,25 @@ class Editor extends React.Component {
                     }
                 });
 
-                menu["separator" + separator_index] = {
+                menu.push({
+                    id: "separator" + separator_index,
                     original_title: l10n['separator'],
                     type: 'separator',
-                };
+                });
 
-                prevState.customizations[role].menu = this.menuIndexItems(prevState.customizations[role].menu);
+                prevState.customizations[role].menu = this.menuIndexItems(menu);
                 prevState.history[role].menuItemLastAdded = "separator" + separator_index;
 
                 return prevState;
             }
 
             // Custom link is added differently
-            if (ID == 'custom_link') {
+            if (item.id == 'custom_link') {
 
                 let custom_link_index = 1;
 
                 // Get new custom_link index
-                Object.keys(menu).map((ID) => {
-
-                    let item = menu[ID];
+                menu.map((item) => {
 
                     if (item.type == 'custom_link') {
 
@@ -2520,20 +2532,21 @@ class Editor extends React.Component {
                     }
                 });
 
-                menu["custom_link" + custom_link_index] = {
+                menu.push({
+                    id: "custom_link" + custom_link_index,
                     original_title: l10n['custom_link'],
                     icon: 'dashicons-admin-generic',
                     type: 'custom_link',
-                };
+                });
 
-                prevState.customizations[role].menu = this.menuIndexItems(prevState.customizations[role].menu);
+                prevState.customizations[role].menu = this.menuIndexItems(menu);
                 prevState.history[role].menuItemLastAdded = "custom_link" + custom_link_index;
 
                 return prevState;
             }
 
-            prevState.history[role].menuItemLastAdded = ID;
-            menu[ID].deleted = false;
+            prevState.customizations[role].menu = modifyItem(menu, item.id, {deleted: false});
+            prevState.history[role].menuItemLastAdded = item.id;
 
             return prevState;
         });
@@ -2543,14 +2556,18 @@ class Editor extends React.Component {
         this.loadPanel('menu', 'backward');
     }
 
-    addSubmenuItem(ID, item) {
+    addSubmenuItem(item) {
 
         let submenu_edit = this.state.submenuEdit;
         let role = this.props.role;
 
         this.setState((prevState) => {
 
-            prevState.customizations[role].submenu[submenu_edit][ID].deleted = false;
+            prevState.customizations[role].submenu[submenu_edit] = modifyItem(
+                prevState.customizations[role].submenu[submenu_edit],
+                item.id,
+                {deleted: false}
+            );
 
             return prevState;
         });
@@ -2566,19 +2583,23 @@ class Editor extends React.Component {
 
         this.setState((prevState) => {
 
-            let item = prevState.customizations[role].menu[ID];
+            let item = getItem(prevState.customizations[role].menu, ID);
 
             // Separator is added differently
             if (item.type == 'separator' || item.type == 'custom_link') {
 
-                delete prevState.customizations[role].menu[ID];
+                let items = deleteItem(prevState.customizations[role].menu, ID);
 
-                prevState.customizations[role].menu = this.menuIndexItems(prevState.customizations[role].menu);
+                prevState.customizations[role].menu = this.menuIndexItems(items);
 
                 return prevState;
             }
 
-            item.deleted = true;
+            prevState.customizations[role].menu = modifyItem(
+                prevState.customizations[role].menu,
+                ID,
+                {deleted: true}
+            );
 
             return prevState;
         });
@@ -2594,7 +2615,11 @@ class Editor extends React.Component {
 
         this.setState((prevState) => {
 
-            prevState.customizations[role].submenu[submenu_edit][ID].deleted = true;
+            prevState.customizations[role].submenu[submenu_edit] = modifyItem(
+                prevState.customizations[role].submenu[submenu_edit],
+                ID,
+                {deleted: true}
+            )
 
             return prevState;
         });
@@ -2611,13 +2636,17 @@ class Editor extends React.Component {
         this.loadPanel('submenu', 'forward');
     }
 
-    menuItemEdit(ID, item) {
+    menuItemEdit(item) {
 
         let role = this.props.role;
 
         this.setState((prevState) => {
 
-            prevState.customizations[role].menu[ID] = item;
+            prevState.customizations[role].menu = modifyItem(
+                prevState.customizations[role].menu,
+                item.id,
+                item
+            );
 
             return prevState;
         });
@@ -2625,14 +2654,18 @@ class Editor extends React.Component {
         this.dataChange();
     }
 
-    submenuItemEdit(ID, item) {
+    submenuItemEdit(item) {
 
         let submenu_edit = this.state.submenuEdit;
         let role = this.props.role;
 
         this.setState((prevState) => {
 
-            prevState.customizations[role].submenu[submenu_edit][ID] = item;
+            prevState.customizations[role].submenu[submenu_edit] = modifyItem(
+                prevState.customizations[role].submenu[submenu_edit],
+                item.id,
+                item
+            );
 
             return prevState;
         });
@@ -2675,40 +2708,40 @@ class Editor extends React.Component {
 
         let separator_index = 1;
         let custom_link_index = 1;
-        let new_menu = {};
+        let new_menu = [];
 
-        Object.keys(menu).map((ID) => {
-
-            let item = menu[ID];
+        menu.map((item) => {
 
             if (item.type == 'separator') {
 
-                new_menu['separator' + separator_index] = item;
+                item.id = 'separator' + separator_index;
 
                 separator_index++;
 
             } else if (item.type == 'custom_link') {
 
-                new_menu['custom_link' + custom_link_index] = item;
+                item.id = 'custom_link' + custom_link_index;
 
                 custom_link_index++;
-
-            } else {
-
-                new_menu[ID] = item;
             }
+
+            new_menu.push(item);
         });
 
         return new_menu;
     }
 
-    widgetAdd(ID, widget) {
+    widgetAdd(widget) {
 
         let role = this.props.role;
 
         this.setState((prevState) => {
 
-            prevState.customizations[role].dashboard[ID].deleted = false;
+            prevState.customizations[role].dashboard = modifyItem(
+                prevState.customizations[role].dashboard,
+                widget.id,
+                {deleted: false}
+            );
 
             return prevState;
         });
@@ -2724,7 +2757,11 @@ class Editor extends React.Component {
 
         this.setState((prevState) => {
 
-            prevState.customizations[role].dashboard[ID].deleted = true;
+            prevState.customizations[role].dashboard = modifyItem(
+                prevState.customizations[role].dashboard,
+                ID,
+                {deleted: true}
+            );
 
             return prevState;
         });
@@ -2732,13 +2769,17 @@ class Editor extends React.Component {
         this.dataChange(false);
     }
 
-    widgetEdit(ID, widget) {
+    widgetEdit(widget) {
 
         let role = this.props.role;
 
         this.setState((prevState) => {
 
-            prevState.customizations[role].dashboard[ID] = (widget);
+            prevState.customizations[role].dashboard = modifyItem(
+                prevState.customizations[role].dashboard,
+                widget.id,
+                widget
+            );
 
             return prevState;
         });
@@ -2828,7 +2869,7 @@ class Editor extends React.Component {
 
                 let current_items = customizations.submenu[this.state.submenuEdit] || [];
                 let available_items = getAvailableItems(current_items);
-                let menu_item = customizations.menu[this.state.submenuEdit];
+                let menu_item = getItem(customizations.menu, this.state.submenuEdit);
                 let item_info =
                         <div className="cd-editor-panel-menuinfo">
                             <span className={"cd-editor-panel-menuinfo-icon dashicons " + menu_item.icon}></span>
@@ -2871,27 +2912,24 @@ class Editor extends React.Component {
                 available_items = setToOriginalTitles(available_items);
 
                 // Skip separators
-                Object.keys(available_items).map((ID) => {
+                available_items = available_items.filter((item) => {
 
-                    let item = available_items[ID];
-
-                    if (item.type == 'separator') {
-
-                        delete available_items[ID];
-                    }
+                    return item.type != 'separator';
                 });
 
                 // Add custom link
-                available_items.custom_link = {
+                available_items.push({
+                    id: 'custom_link',
                     title: l10n['custom_link'],
                     type: 'custom_link',
-                }
+                });
 
                 // Add separator to bottom always
-                available_items.separator = {
+                available_items.push({
+                    id: 'separator',
                     title: l10n['separator'],
                     type: 'separator',
-                }
+                });
 
                 panel =
                     <PanelAddItems
@@ -2913,7 +2951,7 @@ class Editor extends React.Component {
             }
             case 'addSubmenuItems':
             {
-                let menu_item = customizations.menu[this.state.submenuEdit];
+                let menu_item = getItem(customizations.menu,this.state.submenuEdit);
                 let item_info =
                         <div className="cd-editor-panel-menuinfo">
                             <span className={"cd-editor-panel-menuinfo-icon dashicons " + menu_item.icon}></span>

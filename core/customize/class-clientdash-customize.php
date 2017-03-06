@@ -47,7 +47,7 @@ class ClientDash_Customize {
 		// Save role settings on first role load
 		if ( isset( $_GET['cd_save_role'] ) ) {
 
-			add_filter( 'custom_menu_order', array(
+ 			add_filter( 'custom_menu_order', array(
 				$this,
 				'save_menu_preview'
 			), 99998 ); // Priority just before modifying
@@ -384,8 +384,8 @@ class ClientDash_Customize {
 
 		foreach ( $menu as $menu_item ) {
 
-			$customized_menu_item = isset( $customized_menu[ $menu_item[2] ] ) ?
-				$customized_menu[ $menu_item[2] ] : array();
+			$customized_menu_item = cd_array_search_by_key( $customized_menu, 'id', $menu_item[2] );
+			$customized_menu_item = $customized_menu_item ? $customized_menu_item : array();
 
 			$type = 'menu_item';
 
@@ -394,7 +394,8 @@ class ClientDash_Customize {
 				$type = 'separator';
 			}
 
-			$save_menu[ $menu_item[2] ] = wp_parse_args( $customized_menu_item, array(
+			$save_menu[] = wp_parse_args( $customized_menu_item, array(
+				'id'             => $menu_item[2],
 				'title'          => '',
 				'original_title' => $menu_item[0],
 				'icon'           => isset( $menu_item[6] ) ? $menu_item[6] : '',
@@ -415,10 +416,18 @@ class ClientDash_Customize {
 
 			foreach ( $submenu_items as $submenu_item ) {
 
-				$customized_submenu_item = isset( $customized_submenu[ $submenu_item[2] ] ) ?
-					$customized_submenu[ $submenu_item[2] ] : array();
+				if ( isset( $customized_submenu[ $menu_slug ])) {
 
-				$save_submenu[ $menu_slug ][ $submenu_item[2] ] = wp_parse_args( $customized_submenu_item, array(
+					$customized_submenu_item = cd_array_search_by_key( $customized_submenu[ $menu_slug ], 'id', $submenu_item[2] );
+					$customized_submenu_item = $customized_submenu_item ? $customized_submenu_item : array();
+
+				} else {
+
+					$customized_submenu_item = array();
+				}
+
+				$save_submenu[ $menu_slug ][] = wp_parse_args( $customized_submenu_item, array(
+					'id'             => $submenu_item[2],
 					'title'          => '',
 					'original_title' => $submenu_item[0],
 					'deleted'        => false,
@@ -464,10 +473,11 @@ class ClientDash_Customize {
 
 					foreach ( $widgets as $widget ) {
 
-						$customized_widget = isset( $customized_dashboard[ $widget['id'] ] ) ?
-							$customized_dashboard[ $widget['id'] ] : array();
+						$customized_widget = cd_array_search_by_key( $customized_dashboard, 'id', $widget['id']);
+						$customized_widget = $customized_widget ? $customized_widget : array();
 
-						$save_dashboard[ $widget['id'] ] = wp_parse_args( $customized_widget, array(
+						$save_dashboard[] = wp_parse_args( $customized_widget, array(
+							'id'             => $widget['id'],
 							'title'          => '',
 							'original_title' => $widget['title'],
 							'deleted'        => false,
