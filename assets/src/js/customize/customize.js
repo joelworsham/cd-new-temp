@@ -574,7 +574,7 @@ class LineItemContent extends React.Component {
 class LineItem extends React.Component {
     render() {
         return (
-            <li className="cd-editor-lineitem-li">
+            <li className="cd-editor-lineitem-li" data-id={this.props.id}>
                 {this.props.children}
             </li>
         )
@@ -588,7 +588,7 @@ class LineItem extends React.Component {
  */
 const SortableLineItem = SortableElement(({item}) => {
     return (
-        <li className="cd-editor-lineitem-li">
+        <li className="cd-editor-lineitem-li" data-id={item.key}>
             {item}
         </li>
     );
@@ -604,7 +604,7 @@ class LineItems extends React.Component {
         return (
             <ul className="cd-editor-lineitems">
                 {this.props.items.map((item, index) =>
-                    <LineItem key={`item-${index}`}>
+                    <LineItem key={`item-${index}`} id={item.id}>
                         {item}
                     </LineItem>
                 )}
@@ -700,7 +700,7 @@ class MenuItemEdit extends React.Component {
 
         var actions = [];
 
-        if (this.props.id != 'cd_settings') {
+        if (this.props.id != 'clientdash') {
             actions = [
                 <LineItemAction
                     key="menu-action-submenu"
@@ -757,7 +757,7 @@ class MenuItemEdit extends React.Component {
                 title={this.props.title || this.props.originalTitle}
                 icon={this.props.icon}
                 actions={actions}
-                form={this.state.editing ? form : false}
+                form={this.props.active || this.state.editing ? form : false}
             />
         )
     }
@@ -800,6 +800,159 @@ class MenuItemSeparator extends React.Component {
                 title={l10n['separator']}
                 classes="cd-editor-menuitem-separator"
                 actions={actions}
+            />
+        )
+    }
+}
+
+/**
+ * Line item for editing a menu item custom link.
+ *
+ * @since {{VERSION}}
+ */
+class MenuItemCustomLink extends React.Component {
+
+    constructor(props) {
+
+        super(props);
+
+        this.state = {
+            editing: false,
+        }
+
+        this.toggleEdit = this.toggleEdit.bind(this);
+        this.titleChange = this.titleChange.bind(this);
+        this.linkChange = this.linkChange.bind(this);
+        this.iconChange = this.iconChange.bind(this);
+        this.deleteItem = this.deleteItem.bind(this);
+        this.submenuEdit = this.submenuEdit.bind(this);
+        this.submitForm = this.submitForm.bind(this);
+    }
+
+    toggleEdit() {
+
+        this.setState((prevState) => ({
+            editing: !prevState.editing
+        }));
+    }
+
+    titleChange(value) {
+
+        this.props.onMenuItemEdit(this.props.id, {
+            icon: this.props.icon,
+            title: value,
+            link: this.props.link,
+            original_title: this.props.originalTitle,
+            type: 'custom_link',
+        });
+    }
+
+    linkChange(value) {
+
+        this.props.onMenuItemEdit(this.props.id, {
+            icon: this.props.icon,
+            link: value,
+            title: this.props.title,
+            original_title: this.props.originalTitle,
+            type: 'custom_link',
+        });
+    }
+
+    iconChange(value) {
+
+        this.props.onMenuItemEdit(this.props.id, {
+            icon: value,
+            link: this.props.link,
+            title: this.props.title,
+            original_title: this.props.originalTitle,
+            type: 'custom_link',
+        });
+    }
+
+    deleteItem() {
+
+        this.props.onDeleteItem(this.props.id);
+    }
+
+    submenuEdit() {
+
+        this.props.onSubmenuEdit(this.props.id);
+    }
+
+    submitForm(event) {
+
+        this.props.onItemFormSubmit();
+    }
+
+    render() {
+
+        var actions = [];
+
+        if (this.props.id != 'clientdash') {
+            actions = [
+                <LineItemAction
+                    key="menu-action-submenu"
+                    icon="th-list"
+                    text={l10n['edit_submenu']}
+                    onHandleClick={this.submenuEdit}
+                />,
+                <LineItemAction
+                    key="menu-action-edit"
+                    icon={this.state.editing ? "chevron-up" : "chevron-down"}
+                    text={l10n['edit']}
+                    onHandleClick={this.toggleEdit}
+                />,
+                <LineItemAction
+                    key="menu-action-delete"
+                    icon="times"
+                    text={l10n['delete']}
+                    classes="cd-editor-lineitem-action-close"
+                    onHandleClick={this.deleteItem}
+                />
+            ];
+        }
+
+        const after_title =
+                <span className="cd-editor-lineitem-form-originaltitle">
+                    {l10n['original_title'] + " "}<strong>{this.props.originalTitle}</strong>
+                </span>
+            ;
+
+        const form =
+                <LineItemForm
+                    onSubmit={this.submitForm}
+                >
+                    <InputText
+                        label={l10n['title']}
+                        value={this.props.title}
+                        placeholder={this.props.originalTitle}
+                        onHandleChange={this.titleChange}
+                        after={after_title}
+                    />
+
+                    <InputText
+                        label={l10n['link']}
+                        value={this.props.link}
+                        placeholder="http://"
+                        onHandleChange={this.linkChange}
+                    />
+
+                    <DashiconsSelector
+                        dashicon={this.props.icon}
+                        onSelectDashicon={this.iconChange}
+                    />
+
+                </LineItemForm>
+            ;
+
+        return (
+            <LineItemContent
+                key={this.props.id}
+                id={this.props.id}
+                title={this.props.title || this.props.originalTitle}
+                icon={this.props.icon}
+                actions={actions}
+                form={this.state.editing ? form : false}
             />
         )
     }
@@ -1208,13 +1361,31 @@ class PanelMenu extends React.Component {
 
                 let item = this.props.menuItems[ID];
 
-                if (item.separator) {
+                if (item.type == 'separator') {
 
                     var menu_item =
                             <MenuItemSeparator
                                 key={ID}
                                 id={ID}
                                 onDeleteItem={this.deleteItem}
+                            />
+                        ;
+
+                } else if (item.type == 'custom_link') {
+
+                    var menu_item =
+                            <MenuItemCustomLink
+                                key={ID}
+                                id={ID}
+                                title={item.title}
+                                link={item.link}
+                                originalTitle={item.original_title}
+                                icon={item.icon}
+                                hasSubmenu={item.hasSubmenu}
+                                onMenuItemEdit={this.menuItemEdit}
+                                onSubmenuEdit={this.submenuEdit}
+                                onDeleteItem={this.deleteItem}
+                                onItemFormSubmit={this.itemSubmitForm}
                             />
                         ;
 
@@ -1227,6 +1398,7 @@ class PanelMenu extends React.Component {
                                 title={item.title}
                                 originalTitle={item.original_title}
                                 icon={item.icon}
+                                active={this.props.lastAdded === ID}
                                 hasSubmenu={item.hasSubmenu}
                                 onMenuItemEdit={this.menuItemEdit}
                                 onSubmenuEdit={this.submenuEdit}
@@ -1995,6 +2167,7 @@ class Editor extends React.Component {
                 text: null
             },
             customizations: {},
+            history: {},
         }
 
         this.loadPanel = this.loadPanel.bind(this);
@@ -2252,9 +2425,10 @@ class Editor extends React.Component {
                     prevState.loading = false;
 
                     // Get the separators indexed
-                    customizations.menu = api.menuIndexSeparators(customizations.menu);
+                    customizations.menu = api.menuIndexItems(customizations.menu);
 
                     prevState.customizations[role] = customizations;
+                    prevState.history[role] = {};
 
                     return prevState;
                 });
@@ -2313,7 +2487,7 @@ class Editor extends React.Component {
 
                     let item = menu[ID];
 
-                    if (item.separator) {
+                    if (item.type == 'separator') {
 
                         separator_index++;
                     }
@@ -2321,14 +2495,44 @@ class Editor extends React.Component {
 
                 menu["separator" + separator_index] = {
                     original_title: l10n['separator'],
-                    separator: true,
+                    type: 'separator',
                 };
 
-                prevState.customizations[role].menu = this.menuIndexSeparators(prevState.customizations[role].menu);
+                prevState.customizations[role].menu = this.menuIndexItems(prevState.customizations[role].menu);
+                prevState.history[role].menuItemLastAdded = "separator" + separator_index;
 
                 return prevState;
             }
 
+            // Custom link is added differently
+            if (ID == 'custom_link') {
+
+                let custom_link_index = 1;
+
+                // Get new custom_link index
+                Object.keys(menu).map((ID) => {
+
+                    let item = menu[ID];
+
+                    if (item.type == 'custom_link') {
+
+                        custom_link_index++;
+                    }
+                });
+
+                menu["custom_link" + custom_link_index] = {
+                    original_title: l10n['custom_link'],
+                    icon: 'dashicons-admin-generic',
+                    type: 'custom_link',
+                };
+
+                prevState.customizations[role].menu = this.menuIndexItems(prevState.customizations[role].menu);
+                prevState.history[role].menuItemLastAdded = "custom_link" + custom_link_index;
+
+                return prevState;
+            }
+
+            prevState.history[role].menuItemLastAdded = ID;
             menu[ID].deleted = false;
 
             return prevState;
@@ -2365,11 +2569,11 @@ class Editor extends React.Component {
             let item = prevState.customizations[role].menu[ID];
 
             // Separator is added differently
-            if (item.separator) {
+            if (item.type == 'separator' || item.type == 'custom_link') {
 
                 delete prevState.customizations[role].menu[ID];
 
-                prevState.customizations[role].menu = this.menuIndexSeparators(prevState.customizations[role].menu);
+                prevState.customizations[role].menu = this.menuIndexItems(prevState.customizations[role].menu);
 
                 return prevState;
             }
@@ -2440,7 +2644,7 @@ class Editor extends React.Component {
 
         let role = this.props.role;
 
-        new_order = this.menuIndexSeparators(new_order);
+        new_order = this.menuIndexItems(new_order);
 
         this.setState((prevState) => {
 
@@ -2467,23 +2671,27 @@ class Editor extends React.Component {
         this.dataChange(false);
     }
 
-    menuIndexSeparators(menu) {
+    menuIndexItems(menu) {
 
         let separator_index = 1;
+        let custom_link_index = 1;
         let new_menu = {};
 
         Object.keys(menu).map((ID) => {
 
             let item = menu[ID];
 
-            if (item.separator) {
+            if (item.type == 'separator') {
 
-                new_menu['separator' + separator_index] = {
-                    original_title: l10n['separator'],
-                    separator: true,
-                }
+                new_menu['separator' + separator_index] = item;
 
                 separator_index++;
+
+            } else if (item.type == 'custom_link') {
+
+                new_menu['custom_link' + custom_link_index] = item;
+
+                custom_link_index++;
 
             } else {
 
@@ -2558,6 +2766,7 @@ class Editor extends React.Component {
         var customizations = this.state.customizations[this.props.role];
         var panel;
         var secondary_actions;
+        var history = this.state.history[this.props.role] || {};
 
         switch (this.state.activePanel) {
 
@@ -2593,6 +2802,7 @@ class Editor extends React.Component {
                     <PanelMenu
                         key="menu"
                         menuItems={available_items}
+                        lastAdded={history.menuItemLastAdded || false}
                         onMenuItemEdit={this.menuItemEdit}
                         onDeleteItem={this.menuItemDelete}
                         onSubmenuEdit={this.submenuEdit}
@@ -2665,16 +2875,22 @@ class Editor extends React.Component {
 
                     let item = available_items[ID];
 
-                    if (item.separator) {
+                    if (item.type == 'separator') {
 
                         delete available_items[ID];
                     }
                 });
 
+                // Add custom link
+                available_items.custom_link = {
+                    title: l10n['custom_link'],
+                    type: 'custom_link',
+                }
+
                 // Add separator to bottom always
                 available_items.separator = {
                     title: l10n['separator'],
-                    separator: true,
+                    type: 'separator',
                 }
 
                 panel =

@@ -105,13 +105,22 @@ class ClientDash_Settings {
 			__( 'Client Dash', 'clientdash' ),
 			__( 'Client Dash', 'clientdash' ),
 			'manage_options',
-			'cd_settings',
+			'clientdash',
 			array( $this, 'settings_page' ),
 			'dashicons-admin-generic',
 			100
 		);
 
-		$submenu['cd_settings'][10] = array(
+		add_submenu_page(
+			'clientdash',
+			__( 'Settings', 'clientdash' ),
+			__( 'Settings', 'clientdash' ),
+			'manage_options',
+			'cd_settings',
+			array( $this, 'settings_page' )
+		);
+
+		$submenu['clientdash'][10] = array(
 			__( 'Customize Admin', 'clientdash' ),
 			'manage_options', // TODO create custom cap
 			'/?clientdash_customize=1'
@@ -140,7 +149,7 @@ class ClientDash_Settings {
 		 *
 		 * @since {{VERSION}}
 		 */
-		$template = apply_filters( 'cd_settings_tab_template', CLIENTDASH_DIR . "core/views/settings-{$tab}.php" );
+		$template = apply_filters( 'cd_settings_tab_template', CLIENTDASH_DIR . "core/settings/views/settings-{$tab}.php" );
 
 		if ( file_exists( $template ) ) {
 
@@ -189,7 +198,7 @@ class ClientDash_Settings {
 			),
 		) );
 
-		include_once CLIENTDASH_DIR . 'core/views/settings-tab-menu.php';
+		include_once CLIENTDASH_DIR . 'core/settings/views/settings-tab-menu.php';
 	}
 
 	/**
@@ -200,6 +209,6 @@ class ClientDash_Settings {
 	 */
 	function settings_page() {
 
-		include_once CLIENTDASH_DIR . 'core/views/settings-page.php';
+		include_once CLIENTDASH_DIR . 'core/settings/views/settings-page.php';
 	}
 }

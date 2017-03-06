@@ -125,7 +125,7 @@ class ClientDash_Modify {
 		foreach ( $this->menu as $ID => $menu_item ) {
 
 			// Separators are handled diferrently
-			if ( $menu_item['separator'] ) {
+			if ( $menu_item['type'] == 'separator' ) {
 
 				$new_menu[] = array(
 					'',
@@ -133,6 +133,22 @@ class ClientDash_Modify {
 					$ID,
 					'',
 					'wp-menu-separator',
+				);
+
+				continue;
+			}
+
+			// Separators are handled diferrently
+			if ( $menu_item['type'] == 'custom_link' ) {
+
+				$new_menu[] = array(
+					$menu_item['title'] ? $menu_item['title'] : $menu_item['original_title'],
+					'read',
+					$menu_item['link'],
+					$menu_item['title'] ? $menu_item['title'] : $menu_item['original_title'],
+					"menu-top toplevel_page_$ID",
+					"toplevel_page_$ID",
+					$menu_item['icon'],
 				);
 
 				continue;

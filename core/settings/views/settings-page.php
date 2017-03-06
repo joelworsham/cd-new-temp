@@ -14,11 +14,10 @@ defined( 'ABSPATH' ) || die;
 <div class="wrap cd-settings">
 
 	<h2 class="cd-title">
-		<span class="dashicons dashicons-admin-settings cd-icon"></span>
-		<span class="cd-title-text">Client Dash Settings</span>
+		<?php echo get_admin_page_title(); ?>
 	</h2>
 
-	<?php $this->load_settings_tab_menu(); ?>
+<!--	--><?php //$this->load_settings_tab_menu(); ?>
 
 	<form method="post" action="options.php">
 

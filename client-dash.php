@@ -9,6 +9,25 @@
  * @package ClientDash
  */
 
+
+
+
+
+
+// TODO Auto expand newly added, editable items (menu, submenu, AND dashboard)
+
+// -> Change JS customizations to be arrays instead of object with ID's as keys... better order predicibility. Just
+//    create a function to quickly get an array item by nested ID.
+
+
+// TODO Make sure that custom links are maintaining original, unique ID's, even after re-indexing!
+// TODO Allow custom links to be added to submenus of custom links.
+
+
+
+
+
+
 defined( 'ABSPATH' ) || die;
 
 if ( ! class_exists( 'ClientDash' ) ) {
@@ -45,13 +64,13 @@ if ( ! class_exists( 'ClientDash' ) ) {
 		public $api;
 
 		/**
-		 * Handles the plugin settings.
+		 * Handles the plugin pages.
 		 *
 		 * @since {{VERSION}}
 		 *
-		 * @var ClientDash_Settings
+		 * @var ClientDash_PluginPages
 		 */
-		public $settings;
+		public $pluginpages;
 
 		/**
 		 * Loads the Client Dash Customizer.
@@ -128,10 +147,10 @@ if ( ! class_exists( 'ClientDash' ) ) {
 
 			if ( is_admin() ) {
 
-				require_once CLIENTDASH_DIR . 'core/settings/class-clientdash-settings.php';
+				require_once CLIENTDASH_DIR . 'core/plugin-pages/class-clientdash-pluginpages.php';
 				require_once CLIENTDASH_DIR . 'core/class-clientdash-modify.php';
 
-				$this->settings = new ClientDash_Settings();
+				$this->pluginpages = new ClientDash_PluginPages();
 				$this->modify   = new ClientDash_Modify();
 			}
 		}
@@ -235,5 +254,3 @@ if ( ! class_exists( 'ClientDash' ) ) {
 		return ClientDash::instance();
 	}
 }
-
-// TODO Banner location

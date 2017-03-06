@@ -211,9 +211,11 @@ class ClientDash_Customize {
 				'title'                           => __( 'Title', 'clientdash' ),
 				'original_title'                  => __( 'Original title:', 'clientdash' ),
 				'icon'                            => __( 'Icon', 'clientdash' ),
+				'link'                            => __( 'Link', 'clientdash' ),
 				'no_items_added'                  => __( 'No items added yet. Click the "Add Items" button to add your first item.', 'clientdash' ),
 				'no_items_available'              => __( 'No items available.', 'clientdash' ),
 				'separator'                       => __( 'Separator', 'clientdash' ),
+				'custom_link'                     => __( 'Custom Link', 'clientdash' ),
 				'click_to_move'                   => __( 'Click to move', 'clientdash' ),
 				'edit'                            => __( 'Edit', 'clientdash' ),
 				'edit_submenu'                    => __( 'Edit submenu', 'clientdash' ),
@@ -385,12 +387,19 @@ class ClientDash_Customize {
 			$customized_menu_item = isset( $customized_menu[ $menu_item[2] ] ) ?
 				$customized_menu[ $menu_item[2] ] : array();
 
+			$type = 'menu_item';
+
+			if ( strpos( $menu_item[4], 'wp-menu-separator' ) !== false ) {
+
+				$type = 'separator';
+			}
+
 			$save_menu[ $menu_item[2] ] = wp_parse_args( $customized_menu_item, array(
 				'title'          => '',
 				'original_title' => $menu_item[0],
 				'icon'           => isset( $menu_item[6] ) ? $menu_item[6] : '',
-				'deleted'        => false,
-				'separator'      => strpos( $menu_item[4], 'wp-menu-separator' ) !== false,
+				'deleted'        => ! empty( $customized_menu ) && empty( $customized_menu_item ),
+				'type'           => $type,
 			) );
 		}
 

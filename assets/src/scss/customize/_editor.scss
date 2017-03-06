@@ -195,18 +195,25 @@
       cursor: move;
     }
   }
+}
 
-  .cd-editor-lineitem-li {
-    margin: 0 1em 1em;
+.cd-editor-lineitem-li {
+  margin: 0 1em 1em;
 
-    &:last-of-type {
-      margin-bottom: 0;
-    }
+  &:last-of-type {
+    margin-bottom: 0;
   }
 
-  #cd-editor-lineitem-cd_settings {
+  &[data-id="clientdash"] {
     background-color: $primary-color;
     color: #fff;
+
+    .cd-editor-lineitem-icon {
+      &:before {
+        font-family: 'ClientDash';
+        @extend .cd-icon-logo:before;
+      }
+    }
   }
 }
 
