@@ -3076,7 +3076,7 @@ class Editor extends React.Component {
                 secondary_actions =
                     <SecondaryActions
                         key="addWidgets"
-                        title={l10n['panel_actions_title_menu_add']}
+                        title={l10n['panel_actions_title_dashboard_add']}
                         previousPanel="dashboard"
                         onLoadPanel={this.loadPanel}
                         disabled={this.state.saving || this.state.deleting}

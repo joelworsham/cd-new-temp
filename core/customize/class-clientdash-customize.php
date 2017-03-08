@@ -205,6 +205,7 @@ class ClientDash_Customize {
 				'panel_actions_title_menu_add'    => __( 'Adding: Menu Items', 'clientdash' ),
 				'panel_actions_title_submenu_add' => __( 'Adding: Sub-Menu Items', 'clientdash' ),
 				'panel_actions_title_dashboard'   => __( 'Editing: Dashboard', 'clientdash' ),
+				'panel_actions_title_dashboard_add' => __( 'Adding: Widgets', 'clientdash' ),
 				'action_button_back'              => __( 'Back', 'clientdash' ),
 				'action_button_add_items'         => __( 'Add Items', 'clientdash' ),
 				'show_controls'                   => __( 'Show Controls', 'clientdash' ),
