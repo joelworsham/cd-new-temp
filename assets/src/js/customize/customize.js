@@ -34,6 +34,30 @@ const getItem = function (items, ID) {
 }
 
 /**
+ * Gets an items index by the item ID.
+ *
+ * @since {{VERSION}}
+ *
+ * @param items
+ * @param ID
+ * @returns {int|bool}
+ */
+const getItemIndex = function (items, ID) {
+
+    var index = false;
+
+    items.map((item, i) => {
+
+        if (item.id === ID) {
+
+            index = i;
+        }
+    });
+
+    return index;
+}
+
+/**
  * Delets an item in an array based on the item ID.
  *
  * @since {{VERSION}}
@@ -2037,6 +2061,12 @@ class Preview extends React.Component {
             return false;
         }
 
+        // Not customizer
+        if (link.includes('customize.php')) {
+
+            return false;
+        }
+
         return true;
     }
 
@@ -2506,7 +2536,7 @@ class Editor extends React.Component {
                     }
                 });
 
-                menu.push({
+                menu.unshift({
                     id: "separator" + separator_index,
                     original_title: l10n['separator'],
                     type: 'separator',
@@ -2532,7 +2562,7 @@ class Editor extends React.Component {
                     }
                 });
 
-                menu.push({
+                menu.unshift({
                     id: "custom_link" + custom_link_index,
                     original_title: l10n['custom_link'],
                     icon: 'dashicons-admin-generic',
@@ -2546,6 +2576,14 @@ class Editor extends React.Component {
             }
 
             prevState.customizations[role].menu = modifyItem(menu, item.id, {deleted: false});
+
+            // Move to beginning
+            prevState.customizations[role].menu = arrayMove(
+                prevState.customizations[role].menu,
+                getItemIndex(prevState.customizations[role].menu, item.id),
+                0
+            );
+
             prevState.history[role].menuItemLastAdded = item.id;
 
             return prevState;
@@ -2567,6 +2605,13 @@ class Editor extends React.Component {
                 prevState.customizations[role].submenu[submenu_edit],
                 item.id,
                 {deleted: false}
+            );
+
+            // Move to beginning
+            prevState.customizations[role].submenu[submenu_edit] = arrayMove(
+                prevState.customizations[role].submenu[submenu_edit],
+                getItemIndex(prevState.customizations[role].submenu[submenu_edit], item.id),
+                0
             );
 
             return prevState;
