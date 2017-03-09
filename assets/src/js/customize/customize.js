@@ -10,6 +10,64 @@ const domain = ClientdashCustomize_Data.domain || false;
 const dashicons = ClientdashCustomize_Data.dashicons || false;
 
 /**
+ * Takes an array of indexes, sorts them, then finds the first available.
+ *
+ * Example: You have [1,2,4]. This will return 3.
+ * Example2: You have [1,2,3]. This will return 4.
+ *
+ * @since {{VERSION}}
+ *
+ * @param {[]} indexes
+ *
+ * @return {int}
+ */
+const getFirstAvailableIndex = function (indexes) {
+
+    indexes.sort((a, b) => a - b);
+
+    let index = 1;
+    let i = 0;
+
+    while (index === indexes[i]) {
+        i++;
+        index++;
+    }
+
+    return index;
+}
+
+/**
+ * Given a list of items, this finds the first available index for the item of a given type and then returns the new ID.
+ *
+ * @since {{VERSION}}
+ *
+ * @param {[]} items
+ * @param {string} type
+ * @returns {string}
+ */
+const getNewItemID = function (items, type) {
+
+    let indexes = [];
+
+    // Get all current item indexes
+    items.map((item) => {
+
+        if (item.type == type) {
+
+            let regex = new RegExp(type + '(\\d+)');
+            let matches = item.id.match(regex);
+
+            if (matches) {
+
+                indexes.push(parseInt(matches[1]));
+            }
+        }
+    });
+
+    return type + getFirstAvailableIndex(indexes);
+}
+
+/**
  * Returns an item in an array based on the item ID.
  *
  * @since {{VERSION}}
@@ -686,7 +744,7 @@ class MenuItemEdit extends React.Component {
         super(props);
 
         this.state = {
-            editing: false,
+            editing: this.props.editing || false,
         }
 
         this.toggleEdit = this.toggleEdit.bind(this);
@@ -708,9 +766,7 @@ class MenuItemEdit extends React.Component {
 
         this.props.onMenuItemEdit({
             id: this.props.id,
-            icon: this.props.icon,
             title: value,
-            original_title: this.props.originalTitle,
         });
     }
 
@@ -719,8 +775,6 @@ class MenuItemEdit extends React.Component {
         this.props.onMenuItemEdit({
             id: this.props.id,
             icon: value,
-            title: this.props.title,
-            original_title: this.props.originalTitle,
         });
     }
 
@@ -769,7 +823,7 @@ class MenuItemEdit extends React.Component {
 
         const after_title =
                 <span className="cd-editor-lineitem-form-originaltitle">
-                    {l10n['original_title'] + " "}<strong>{this.props.originalTitle}</strong>
+                    {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
                 </span>
             ;
 
@@ -780,13 +834,13 @@ class MenuItemEdit extends React.Component {
                     <InputText
                         label={l10n['title']}
                         value={this.props.title}
-                        placeholder={this.props.originalTitle}
+                        placeholder={this.props.original_title}
                         onHandleChange={this.titleChange}
                         after={after_title}
                     />
 
                     <DashiconsSelector
-                        dashicon={this.props.icon}
+                        dashicon={this.props.icon || this.props.original_icon}
                         onSelectDashicon={this.iconChange}
                     />
 
@@ -797,10 +851,10 @@ class MenuItemEdit extends React.Component {
             <LineItemContent
                 key={this.props.id}
                 id={this.props.id}
-                title={this.props.title || this.props.originalTitle}
-                icon={this.props.icon}
+                title={this.props.title || this.props.original_title}
+                icon={this.props.icon || this.props.original_icon}
                 actions={actions}
-                form={this.props.active || this.state.editing ? form : false}
+                form={this.state.editing ? form : false}
             />
         )
     }
@@ -860,7 +914,7 @@ class MenuItemCustomLink extends React.Component {
         super(props);
 
         this.state = {
-            editing: false,
+            editing: this.props.editing || false,
         }
 
         this.toggleEdit = this.toggleEdit.bind(this);
@@ -883,11 +937,7 @@ class MenuItemCustomLink extends React.Component {
 
         this.props.onMenuItemEdit({
             id: this.props.id,
-            icon: this.props.icon,
             title: value,
-            link: this.props.link,
-            original_title: this.props.originalTitle,
-            type: 'custom_link',
         });
     }
 
@@ -895,11 +945,7 @@ class MenuItemCustomLink extends React.Component {
 
         this.props.onMenuItemEdit({
             id: this.props.id,
-            icon: this.props.icon,
             link: value,
-            title: this.props.title,
-            original_title: this.props.originalTitle,
-            type: 'custom_link',
         });
     }
 
@@ -908,10 +954,6 @@ class MenuItemCustomLink extends React.Component {
         this.props.onMenuItemEdit({
             id: this.props.id,
             icon: value,
-            link: this.props.link,
-            title: this.props.title,
-            original_title: this.props.originalTitle,
-            type: 'custom_link',
         });
     }
 
@@ -960,7 +1002,7 @@ class MenuItemCustomLink extends React.Component {
 
         const after_title =
                 <span className="cd-editor-lineitem-form-originaltitle">
-                    {l10n['original_title'] + " "}<strong>{this.props.originalTitle}</strong>
+                    {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
                 </span>
             ;
 
@@ -971,7 +1013,7 @@ class MenuItemCustomLink extends React.Component {
                     <InputText
                         label={l10n['title']}
                         value={this.props.title}
-                        placeholder={this.props.originalTitle}
+                        placeholder={this.props.original_title}
                         onHandleChange={this.titleChange}
                         after={after_title}
                     />
@@ -995,8 +1037,126 @@ class MenuItemCustomLink extends React.Component {
             <LineItemContent
                 key={this.props.id}
                 id={this.props.id}
-                title={this.props.title || this.props.originalTitle}
-                icon={this.props.icon}
+                title={this.props.title || this.props.original_title}
+                icon={this.props.icon || this.props.original_icon}
+                actions={actions}
+                form={this.state.editing ? form : false}
+            />
+        )
+    }
+}
+
+/**
+ * Line item for editing a submenu item custom link.
+ *
+ * @since {{VERSION}}
+ */
+class SubmenuItemCustomLink extends React.Component {
+
+    constructor(props) {
+
+        super(props);
+
+        this.state = {
+            editing: this.props.editing || false,
+        }
+
+        this.toggleEdit = this.toggleEdit.bind(this);
+        this.titleChange = this.titleChange.bind(this);
+        this.linkChange = this.linkChange.bind(this);
+        this.deleteItem = this.deleteItem.bind(this);
+        this.submitForm = this.submitForm.bind(this);
+    }
+
+    toggleEdit() {
+
+        this.setState((prevState) => ({
+            editing: !prevState.editing
+        }));
+    }
+
+    titleChange(value) {
+
+        this.props.onSubmenuItemEdit({
+            id: this.props.id,
+            title: value,
+            link: this.props.link,
+            original_title: this.props.original_title,
+            type: 'custom_link',
+        });
+    }
+
+    linkChange(value) {
+
+        this.props.onSubmenuItemEdit({
+            id: this.props.id,
+            link: value,
+            title: this.props.title,
+            original_title: this.props.original_title,
+            type: 'custom_link',
+        });
+    }
+
+    deleteItem() {
+
+        this.props.onDeleteItem(this.props.id);
+    }
+
+    submitForm(event) {
+
+        this.props.onItemFormSubmit();
+    }
+
+    render() {
+
+        var actions = [
+            <LineItemAction
+                key="menu-action-edit"
+                icon={this.state.editing ? "chevron-up" : "chevron-down"}
+                text={l10n['edit']}
+                onHandleClick={this.toggleEdit}
+            />,
+            <LineItemAction
+                key="menu-action-delete"
+                icon="times"
+                text={l10n['delete']}
+                classes="cd-editor-lineitem-action-close"
+                onHandleClick={this.deleteItem}
+            />
+        ];
+
+        const after_title =
+                <span className="cd-editor-lineitem-form-originaltitle">
+                    {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
+                </span>
+            ;
+
+        const form =
+                <LineItemForm
+                    onSubmit={this.submitForm}
+                >
+                    <InputText
+                        label={l10n['title']}
+                        value={this.props.title}
+                        placeholder={this.props.original_title}
+                        onHandleChange={this.titleChange}
+                        after={after_title}
+                    />
+
+                    <InputText
+                        label={l10n['link']}
+                        value={this.props.link}
+                        placeholder="http://"
+                        onHandleChange={this.linkChange}
+                    />
+                </LineItemForm>
+            ;
+
+        return (
+            <LineItemContent
+                key={this.props.id}
+                id={this.props.id}
+                title={this.props.title || this.props.original_title}
                 actions={actions}
                 form={this.state.editing ? form : false}
             />
@@ -1016,7 +1176,7 @@ class SubmenuItemEdit extends React.Component {
         super(props);
 
         this.state = {
-            editing: false,
+            editing: this.props.editing || false,
             title: this.props.title,
             icon: this.props.icon
         }
@@ -1039,7 +1199,7 @@ class SubmenuItemEdit extends React.Component {
         this.props.onSubmenuItemEdit({
             id: this.props.id,
             title: value,
-            original_title: this.props.originalTitle,
+            original_title: this.props.original_title,
         });
     }
 
@@ -1071,7 +1231,7 @@ class SubmenuItemEdit extends React.Component {
 
         const after_title =
                 <span className="cd-editor-lineitem-form-originaltitle">
-                    {l10n['original_title'] + " "}<strong>{this.props.originalTitle}</strong>
+                    {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
                 </span>
             ;
 
@@ -1082,7 +1242,7 @@ class SubmenuItemEdit extends React.Component {
                     <InputText
                         label={l10n['title']}
                         value={this.props.title}
-                        placeholder={this.props.originalTitle}
+                        placeholder={this.props.original_title}
                         onHandleChange={this.titleChange}
                         after={after_title}
                     />
@@ -1093,7 +1253,135 @@ class SubmenuItemEdit extends React.Component {
         return (
             <LineItemContent
                 key={this.props.id}
-                title={this.props.title || this.props.originalTitle}
+                title={this.props.title || this.props.original_title}
+                actions={actions}
+                form={this.state.editing ? form : false}
+            />
+        )
+    }
+}
+
+/**
+ * Line item for editing a page item.
+ *
+ * @since {{VERSION}}
+ */
+class CDPageEdit extends React.Component {
+
+    constructor(props) {
+
+        super(props);
+
+        this.state = {
+            editing: this.props.editing || false,
+        }
+
+        this.toggleEdit = this.toggleEdit.bind(this);
+        this.titleChange = this.titleChange.bind(this);
+        this.iconChange = this.iconChange.bind(this);
+        this.deleteItem = this.deleteItem.bind(this);
+        this.tabsEdit = this.tabsEdit.bind(this);
+        this.submitForm = this.submitForm.bind(this);
+    }
+
+    toggleEdit() {
+
+        this.setState((prevState) => ({
+            editing: !prevState.editing
+        }));
+    }
+
+    titleChange(value) {
+
+        this.props.onPageEdit({
+            id: this.props.id,
+            title: value,
+        });
+    }
+
+    iconChange(value) {
+
+        this.props.onPageEdit({
+            id: this.props.id,
+            icon: value,
+        });
+    }
+
+    deleteItem() {
+
+        this.props.onPageDelete(this.props.id);
+    }
+
+    tabsEdit() {
+
+        this.props.onPageTabsEdit(this.props.id);
+    }
+
+    submitForm(event) {
+
+        this.props.onItemFormSubmit();
+    }
+
+    render() {
+
+        var actions = [];
+
+        if (this.props.id != 'clientdash') {
+            actions = [
+                <LineItemAction
+                    key="menu-action-submenu"
+                    icon="th-list"
+                    text={l10n['edit_submenu']}
+                    onHandleClick={this.tabsEdit}
+                />,
+                <LineItemAction
+                    key="menu-action-edit"
+                    icon={this.state.editing ? "chevron-up" : "chevron-down"}
+                    text={l10n['edit']}
+                    onHandleClick={this.toggleEdit}
+                />,
+                <LineItemAction
+                    key="menu-action-delete"
+                    icon="times"
+                    text={l10n['delete']}
+                    classes="cd-editor-lineitem-action-close"
+                    onHandleClick={this.deleteItem}
+                />
+            ];
+        }
+
+        const after_title =
+                <span className="cd-editor-lineitem-form-originaltitle">
+                    {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
+                </span>
+            ;
+
+        const form =
+                <LineItemForm
+                    onSubmit={this.submitForm}
+                >
+                    <InputText
+                        label={l10n['title']}
+                        value={this.props.title}
+                        placeholder={this.props.original_title}
+                        onHandleChange={this.titleChange}
+                        after={after_title}
+                    />
+
+                    <DashiconsSelector
+                        dashicon={this.props.icon || this.props.original_icon}
+                        onSelectDashicon={this.iconChange}
+                    />
+
+                </LineItemForm>
+            ;
+
+        return (
+            <LineItemContent
+                key={this.props.id}
+                id={this.props.id}
+                title={this.props.title || this.props.original_title}
+                icon={this.props.icon || this.props.original_icon}
                 actions={actions}
                 form={this.state.editing ? form : false}
             />
@@ -1122,7 +1410,9 @@ class ItemAdd extends React.Component {
             id: this.props.id,
             title: '',
             original_title: this.props.title,
-            icon: this.props.icon,
+            icon: '',
+            original_icon: this.props.icon,
+            type: this.props.type,
         });
     }
 
@@ -1262,7 +1552,7 @@ class PrimaryActions extends React.Component {
                 />
                 <ActionButton
                     text="Preview"
-                    icon={this.props.loadingPreview ? "circle-o-notch fa-spin" : "eye"}
+                    icon={this.props.loadingPreview ? "circle-o-notch fa-spin" : "refresh"}
                     disabled={this.props.saving || this.props.disabled}
                     onHandleClick={this.previewChanges}
                 />
@@ -1314,6 +1604,86 @@ class RoleSwitcher extends React.Component {
 }
 
 /**
+ * Panel for setting visibility of core CD pages.
+ *
+ * @since {{VERSION}}
+ */
+class PanelCDPages extends React.Component {
+
+    constructor(props) {
+
+        super(props);
+
+        this.pageDelete = this.pageDelete.bind(this);
+        this.pageEdit = this.pageEdit.bind(this);
+        this.pageTabsEdit = this.pageTabsEdit.bind(this);
+        this.itemSubmitForm = this.itemSubmitForm.bind(this);
+    }
+
+    pageDelete(ID) {
+
+        this.props.onPageDelete(ID);
+    }
+
+    pageEdit(page) {
+
+        this.props.onPageEdit(page);
+    }
+
+    pageTabsEdit(ID) {
+
+        this.props.onPageTabsEdit(ID);
+    }
+
+    itemSubmitForm(event) {
+
+        this.props.onItemSubmitForm(event);
+    }
+
+    render() {
+
+        var pages = [];
+        var panel_contents;
+
+        if (this.props.pages.length) {
+
+            this.props.pages.map((item) => {
+
+                pages.push(
+                    <CDPageEdit
+                        key={item.id}
+                        id={item.id}
+                        title={item.title}
+                        original_title={item.original_title}
+                        icon={item.icon}
+                        original_icon={item.original_icon}
+                        onPageEdit={this.pageEdit}
+                        onPageDelete={this.pageDelete}
+                        onItemFormSubmit={this.itemSubmitForm}
+                    />
+                );
+            });
+
+            panel_contents =
+                <LineItems items={pages}/>
+            ;
+
+        } else {
+
+            panel_contents =
+                <div className="cd-editor-panel-helptext">
+                    {l10n['no_items_added']}
+                </div>
+        }
+        return (
+            <Panel id="cd-pages">
+                {panel_contents}
+            </Panel>
+        )
+    }
+}
+
+/**
  * The primary (and first loading) panel.
  *
  * @since {{VERSION}}
@@ -1344,6 +1714,11 @@ class PanelPrimary extends React.Component {
                 <PanelLoadButton
                     text={l10n['panel_text_dashboard']}
                     target="dashboard"
+                    onLoadPanel={this.loadPanel}
+                />
+                <PanelLoadButton
+                    text={l10n['panel_text_cd_pages']}
+                    target="cdPages"
                     onLoadPanel={this.loadPanel}
                 />
             </Panel>
@@ -1425,8 +1800,10 @@ class PanelMenu extends React.Component {
                                 id={item.id}
                                 title={item.title}
                                 link={item.link}
-                                originalTitle={item.original_title}
+                                original_title={item.original_title}
                                 icon={item.icon}
+                                original_icon={item.original_icon}
+                                editing={this.props.editing === item.id}
                                 hasSubmenu={item.hasSubmenu}
                                 onMenuItemEdit={this.menuItemEdit}
                                 onSubmenuEdit={this.submenuEdit}
@@ -1442,9 +1819,10 @@ class PanelMenu extends React.Component {
                                 key={item.id}
                                 id={item.id}
                                 title={item.title}
-                                originalTitle={item.original_title}
+                                original_title={item.original_title}
                                 icon={item.icon}
-                                active={this.props.lastAdded === item.id}
+                                original_icon={item.original_icon}
+                                editing={this.props.editing === item.id}
                                 hasSubmenu={item.hasSubmenu}
                                 onMenuItemEdit={this.menuItemEdit}
                                 onSubmenuEdit={this.submenuEdit}
@@ -1531,21 +1909,50 @@ class PanelSubmenu extends React.Component {
         var menu_items = [];
         var panel_contents;
 
+
         if (this.props.submenuItems.length) {
 
             this.props.submenuItems.map((item) => {
 
-                menu_items.push(
-                    <SubmenuItemEdit
-                        key={item.id}
-                        id={item.id}
-                        title={item.title}
-                        onSubmenuItemEdit={this.submenuItemEdit}
-                        originalTitle={item.original_title}
-                        onDeleteItem={this.deleteItem}
-                        onItemFormSubmit={this.itemSubmitForm}
-                    />
-                );
+                let menu_item;
+
+                switch (item.type) {
+
+                    case 'custom_link':
+
+                        menu_item =
+                            <SubmenuItemCustomLink
+                                key={item.id}
+                                id={item.id}
+                                title={item.title}
+                                link={item.link}
+                                original_title={item.original_title}
+                                editing={this.props.editing === item.id}
+                                hasSubmenu={item.hasSubmenu}
+                                onSubmenuItemEdit={this.submenuItemEdit}
+                                onDeleteItem={this.deleteItem}
+                                onItemFormSubmit={this.itemSubmitForm}
+                            />
+                        ;
+                        break;
+
+                    default:
+
+                        menu_item =
+                            <SubmenuItemEdit
+                                key={item.id}
+                                id={item.id}
+                                title={item.title}
+                                editing={this.props.editing === item.id}
+                                onSubmenuItemEdit={this.submenuItemEdit}
+                                original_title={item.original_title}
+                                onDeleteItem={this.deleteItem}
+                                onItemFormSubmit={this.itemSubmitForm}
+                            />
+                        ;
+                }
+
+                menu_items.push(menu_item);
             });
 
             panel_contents =
@@ -1597,25 +2004,26 @@ class PanelAddItems extends React.Component {
 
     render() {
 
-        var menu_items = [];
+        var items = [];
         var panel_contents;
 
         if (this.props.availableItems.length) {
 
             this.props.availableItems.map((item) => {
 
-                menu_items.push(
+                items.push(
                     <ItemAdd
                         key={item.id}
                         id={item.id}
-                        title={item.title}
-                        icon={item.icon}
+                        title={item.title || item.original_title}
+                        icon={item.icon || item.original_icon}
+                        type={item.type || null}
                         onAddItem={this.addItem}
                     />
                 );
             });
 
-            panel_contents = <LineItems items={menu_items}/>;
+            panel_contents = <LineItems items={items}/>;
 
         } else {
 
@@ -1672,7 +2080,7 @@ class PanelDashboard extends React.Component {
         var widgets = [];
         var panel_contents;
 
-        if (Object.keys(this.props.widgets).length) {
+        if (this.props.widgets.length) {
 
             this.props.widgets.map((item) => {
 
@@ -1681,7 +2089,7 @@ class PanelDashboard extends React.Component {
                         key={item.id}
                         id={item.id}
                         title={item.title}
-                        originalTitle={item.original_title}
+                        original_title={item.original_title}
                         onWidgetEdit={this.widgetEdit}
                         onWidgetDelete={this.widgetDelete}
                         onItemFormSubmit={this.itemSubmitForm}
@@ -1773,7 +2181,7 @@ class WidgetEdit extends React.Component {
         this.props.onWidgetEdit({
             id: this.props.id,
             title: value,
-            original_title: this.props.originalTitle,
+            original_title: this.props.original_title,
         });
     }
 
@@ -1805,7 +2213,7 @@ class WidgetEdit extends React.Component {
 
         const after_title =
                 <span className="cd-editor-lineitem-form-originaltitle">
-                    {l10n['original_title'] + " "}<strong>{this.props.originalTitle}</strong>
+                    {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
                 </span>
             ;
 
@@ -1816,7 +2224,7 @@ class WidgetEdit extends React.Component {
                     <InputText
                         label={l10n['title']}
                         value={this.props.title}
-                        placeholder={this.props.originalTitle}
+                        placeholder={this.props.original_title}
                         onHandleChange={this.titleChange}
                         after={after_title}
                     />
@@ -1826,7 +2234,7 @@ class WidgetEdit extends React.Component {
         return (
             <LineItemContent
                 key={this.props.id}
-                title={this.props.title || this.props.originalTitle}
+                title={this.props.title || this.props.original_title}
                 actions={actions}
                 form={this.state.editing ? form : false}
             />
@@ -1958,7 +2366,7 @@ class SecondaryActionsPrimary extends React.Component {
                     {(!this.state.confirming && !this.props.deleting) &&
                     <ActionButton
                         text={l10n['reset_role']}
-                        icon="refresh"
+                        icon="trash"
                         align="left"
                         type="delete"
                         disabled={this.props.resettable}
@@ -2228,7 +2636,7 @@ class Editor extends React.Component {
         this.menuItemAdd = this.menuItemAdd.bind(this);
         this.addSubmenuItem = this.addSubmenuItem.bind(this);
         this.menuItemDelete = this.menuItemDelete.bind(this);
-        this.deleteSubmenuItem = this.deleteSubmenuItem.bind(this);
+        this.submenuItemDelete = this.submenuItemDelete.bind(this);
         this.submenuEdit = this.submenuEdit.bind(this);
         this.menuItemEdit = this.menuItemEdit.bind(this);
         this.reOrderMenu = this.reOrderMenu.bind(this);
@@ -2239,6 +2647,10 @@ class Editor extends React.Component {
         this.widgetEdit = this.widgetEdit.bind(this);
         this.handleEditorClick = this.handleEditorClick.bind(this);
         this.showMessage = this.showMessage.bind(this);
+        this.cdPageTabsEdit = this.cdPageTabsEdit.bind(this);
+        this.cdPageEdit = this.cdPageEdit.bind(this);
+        this.cdPageDelete = this.cdPageDelete.bind(this);
+        this.cdPageAdd = this.cdPageAdd.bind(this);
     }
 
     componentDidMount() {
@@ -2469,9 +2881,6 @@ class Editor extends React.Component {
                     prevState.activePanel = 'primary';
                     prevState.loading = false;
 
-                    // Get the separators indexed
-                    customizations.menu = api.menuIndexItems(customizations.menu);
-
                     prevState.customizations[role] = customizations;
                     prevState.history[role] = {};
 
@@ -2522,55 +2931,19 @@ class Editor extends React.Component {
 
             let menu = prevState.customizations[role].menu;
 
-            // Separator is added differently
-            if (item.id == 'separator') {
+            // Separators and Custom Links are handled differently (dynamically generated IDs)
+            if (item.type == 'separator' || item.type == 'custom_link') {
 
-                let separator_index = 1;
+                let new_item_id = getNewItemID(menu, item.type);
 
-                // Get new separator index
-                menu.map((item) => {
-
-                    if (item.type == 'separator') {
-
-                        separator_index++;
-                    }
-                });
-
-                menu.unshift({
-                    id: "separator" + separator_index,
-                    original_title: l10n['separator'],
-                    type: 'separator',
-                });
-
-                prevState.customizations[role].menu = this.menuIndexItems(menu);
-                prevState.history[role].menuItemLastAdded = "separator" + separator_index;
-
-                return prevState;
-            }
-
-            // Custom link is added differently
-            if (item.id == 'custom_link') {
-
-                let custom_link_index = 1;
-
-                // Get new custom_link index
-                menu.map((item) => {
-
-                    if (item.type == 'custom_link') {
-
-                        custom_link_index++;
-                    }
-                });
-
-                menu.unshift({
-                    id: "custom_link" + custom_link_index,
-                    original_title: l10n['custom_link'],
+                prevState.customizations[role].menu.unshift({
+                    id: new_item_id,
+                    original_title: l10n[item.type],
                     icon: 'dashicons-admin-generic',
-                    type: 'custom_link',
+                    type: item.type,
                 });
 
-                prevState.customizations[role].menu = this.menuIndexItems(menu);
-                prevState.history[role].menuItemLastAdded = "custom_link" + custom_link_index;
+                prevState.history[role].menuItemLastAdded = new_item_id;
 
                 return prevState;
             }
@@ -2579,8 +2952,8 @@ class Editor extends React.Component {
 
             // Move to beginning
             prevState.customizations[role].menu = arrayMove(
-                prevState.customizations[role].menu,
-                getItemIndex(prevState.customizations[role].menu, item.id),
+                menu,
+                getItemIndex(menu, item.id),
                 0
             );
 
@@ -2598,8 +2971,26 @@ class Editor extends React.Component {
 
         let submenu_edit = this.state.submenuEdit;
         let role = this.props.role;
+        let submenu = this.state.customizations[role].submenu[submenu_edit] || [];
 
         this.setState((prevState) => {
+
+            // Custom Links are handled differently (dynamically generated IDs)
+            if (item.type == 'custom_link') {
+
+                let new_item_id = getNewItemID(submenu, item.type);
+
+                submenu.unshift({
+                    id: new_item_id,
+                    original_title: l10n[item.type],
+                    type: item.type,
+                });
+
+                this.state.customizations[role].submenu[submenu_edit] = submenu;
+                prevState.history[role].SubmenuItemLastAdded = new_item_id;
+
+                return prevState;
+            }
 
             prevState.customizations[role].submenu[submenu_edit] = modifyItem(
                 prevState.customizations[role].submenu[submenu_edit],
@@ -2613,6 +3004,8 @@ class Editor extends React.Component {
                 getItemIndex(prevState.customizations[role].submenu[submenu_edit], item.id),
                 0
             );
+
+            prevState.history[role].SubmenuItemLastAdded = item.id;
 
             return prevState;
         });
@@ -2630,12 +3023,10 @@ class Editor extends React.Component {
 
             let item = getItem(prevState.customizations[role].menu, ID);
 
-            // Separator is added differently
+            // Separator and cusotm link are deleted differently
             if (item.type == 'separator' || item.type == 'custom_link') {
 
-                let items = deleteItem(prevState.customizations[role].menu, ID);
-
-                prevState.customizations[role].menu = this.menuIndexItems(items);
+                prevState.customizations[role].menu = deleteItem(prevState.customizations[role].menu, ID);
 
                 return prevState;
             }
@@ -2643,7 +3034,7 @@ class Editor extends React.Component {
             prevState.customizations[role].menu = modifyItem(
                 prevState.customizations[role].menu,
                 ID,
-                {deleted: true}
+                {deleted: true, title: '', icon: ''}
             );
 
             return prevState;
@@ -2653,17 +3044,28 @@ class Editor extends React.Component {
     }
 
 
-    deleteSubmenuItem(ID) {
+    submenuItemDelete(ID) {
 
         let submenu_edit = this.state.submenuEdit;
         let role = this.props.role;
 
         this.setState((prevState) => {
 
+            let item = getItem(prevState.customizations[role].submenu[submenu_edit], ID);
+
+            // Custom link are deleted differently
+            if (item.type == 'custom_link') {
+
+                prevState.customizations[role].submenu[submenu_edit] =
+                    deleteItem(prevState.customizations[role].submenu[submenu_edit], ID);
+
+                return prevState;
+            }
+
             prevState.customizations[role].submenu[submenu_edit] = modifyItem(
                 prevState.customizations[role].submenu[submenu_edit],
                 ID,
-                {deleted: true}
+                {deleted: true, title: ''}
             )
 
             return prevState;
@@ -2722,8 +3124,6 @@ class Editor extends React.Component {
 
         let role = this.props.role;
 
-        new_order = this.menuIndexItems(new_order);
-
         this.setState((prevState) => {
 
             prevState.customizations[role].menu = new_order;
@@ -2747,33 +3147,6 @@ class Editor extends React.Component {
         });
 
         this.dataChange(false);
-    }
-
-    menuIndexItems(menu) {
-
-        let separator_index = 1;
-        let custom_link_index = 1;
-        let new_menu = [];
-
-        menu.map((item) => {
-
-            if (item.type == 'separator') {
-
-                item.id = 'separator' + separator_index;
-
-                separator_index++;
-
-            } else if (item.type == 'custom_link') {
-
-                item.id = 'custom_link' + custom_link_index;
-
-                custom_link_index++;
-            }
-
-            new_menu.push(item);
-        });
-
-        return new_menu;
     }
 
     widgetAdd(widget) {
@@ -2805,7 +3178,7 @@ class Editor extends React.Component {
             prevState.customizations[role].dashboard = modifyItem(
                 prevState.customizations[role].dashboard,
                 ID,
-                {deleted: true}
+                {deleted: true, title: ''}
             );
 
             return prevState;
@@ -2830,6 +3203,71 @@ class Editor extends React.Component {
         });
 
         this.dataChange();
+    }
+
+    cdPageTabsEdit(ID) {
+
+        this.setState({
+            cdPagesTabsEdit: ID
+        });
+
+        this.loadPanel('cdPagesTabsEdit', 'forward');
+    }
+
+    cdPageEdit(page) {
+
+        let role = this.props.role;
+
+        this.setState((prevState) => {
+
+            prevState.customizations[role].cdpages = modifyItem(
+                prevState.customizations[role].cdpages,
+                page.id,
+                page
+            );
+
+            return prevState;
+        });
+
+        this.dataChange();
+    }
+
+    cdPageDelete(ID) {
+
+        let role = this.props.role;
+
+        this.setState((prevState) => {
+
+            prevState.customizations[role].cdpages = modifyItem(
+                prevState.customizations[role].cdpages,
+                ID,
+                {deleted: true, title: '', icon: ''}
+            );
+
+            return prevState;
+        });
+
+        this.dataChange(false);
+    }
+
+    cdPageAdd(page) {
+
+        let role = this.props.role;
+
+        this.setState((prevState) => {
+
+            prevState.customizations[role].cdpages = modifyItem(
+                prevState.customizations[role].cdpages,
+                page.id,
+                {deleted: false}
+            );
+
+            return prevState;
+        });
+
+        this.dataChange(false);
+
+        this.loadPanel('cdPages', 'backward');
     }
 
     handleEditorClick() {
@@ -2888,7 +3326,7 @@ class Editor extends React.Component {
                     <PanelMenu
                         key="menu"
                         menuItems={available_items}
-                        lastAdded={history.menuItemLastAdded || false}
+                        editing={history.menuItemLastAdded || false}
                         onMenuItemEdit={this.menuItemEdit}
                         onDeleteItem={this.menuItemDelete}
                         onSubmenuEdit={this.submenuEdit}
@@ -2928,9 +3366,10 @@ class Editor extends React.Component {
                     <PanelSubmenu
                         key="submenu"
                         itemInfo={item_info}
+                        editing={history.SubmenuItemLastAdded || false}
                         onSubmenuItemEdit={this.submenuItemEdit}
                         submenuItems={available_items}
-                        onDeleteItem={this.deleteSubmenuItem}
+                        onDeleteItem={this.submenuItemDelete}
                         onReOrderSubmenu={this.reOrderSubmenu}
                         onItemSubmitForm={this.previewChanges}
                     />
@@ -2954,8 +3393,6 @@ class Editor extends React.Component {
                 let current_items = customizations.menu;
                 let available_items = getDeletedItems(current_items);
 
-                available_items = setToOriginalTitles(available_items);
-
                 // Skip separators
                 available_items = available_items.filter((item) => {
 
@@ -2965,14 +3402,14 @@ class Editor extends React.Component {
                 // Add custom link
                 available_items.push({
                     id: 'custom_link',
-                    title: l10n['custom_link'],
+                    original_title: l10n['custom_link'],
                     type: 'custom_link',
                 });
 
                 // Add separator to bottom always
                 available_items.push({
                     id: 'separator',
-                    title: l10n['separator'],
+                    original_title: l10n['separator'],
                     type: 'separator',
                 });
 
@@ -2996,19 +3433,24 @@ class Editor extends React.Component {
             }
             case 'addSubmenuItems':
             {
-                let menu_item = getItem(customizations.menu,this.state.submenuEdit);
+                let menu_item = getItem(customizations.menu, this.state.submenuEdit);
                 let item_info =
                         <div className="cd-editor-panel-menuinfo">
                             <span className={"cd-editor-panel-menuinfo-icon dashicons " + menu_item.icon}></span>
-                                <span className="cd-editor-panel-menuinfo-title">
-                                    {menu_item.title || menu_item.original_title}
-                                </span>
+                            <span className="cd-editor-panel-menuinfo-title">
+                                {menu_item.title || menu_item.original_title}
+                            </span>
                         </div>
                     ;
                 let current_items = customizations.submenu[this.state.submenuEdit] || [];
                 let available_items = getDeletedItems(current_items);
 
-                available_items = setToOriginalTitles(available_items);
+                // Add custom link
+                available_items.push({
+                    id: 'custom_link',
+                    original_title: l10n['custom_link'],
+                    type: 'custom_link',
+                });
 
                 panel =
                     <PanelAddItems
@@ -3064,8 +3506,6 @@ class Editor extends React.Component {
                 let current_items = customizations.dashboard;
                 let available_items = getDeletedItems(current_items);
 
-                available_items = setToOriginalTitles(available_items);
-
                 panel =
                     <PanelAddItems
                         key="addWidgets"
@@ -3082,6 +3522,64 @@ class Editor extends React.Component {
                         disabled={this.state.saving || this.state.deleting}
                     />
                 ;
+                break;
+            }
+
+            case 'cdPages':
+            {
+
+                let current_items = customizations.cdpages;
+                let available_items = getAvailableItems(current_items);
+
+                panel =
+                    <PanelCDPages
+                        key="cdPages"
+                        pages={available_items}
+                        onPageTabsEdit={this.cdPageTabsEdit}
+                        onPageEdit={this.cdPageEdit}
+                        onPageDelete={this.cdPageDelete}
+                        onLoadPanel={this.loadPanel}
+                        onItemSubmitForm={this.previewChanges}
+                    />
+                ;
+                secondary_actions =
+                    <SecondaryActions
+                        key="cdPages"
+                        title={l10n['panel_actions_title_cdpages']}
+                        previousPanel="primary"
+                        nextPanel="addCDPages"
+                        loadNextText={l10n['action_button_add_items']}
+                        onLoadPanel={this.loadPanel}
+                        disabled={this.state.saving || this.state.deleting}
+                    />
+                ;
+
+                break;
+            }
+
+            case 'addCDPages':
+            {
+
+                let current_items = customizations.cdpages;
+                let available_items = getDeletedItems(current_items);
+
+                panel =
+                    <PanelAddItems
+                        key="addCDPages"
+                        availableItems={available_items}
+                        onAddItem={this.cdPageAdd}
+                    />
+                ;
+                secondary_actions =
+                    <SecondaryActions
+                        key="addWidgets"
+                        title={l10n['panel_actions_title_cdpages_add']}
+                        previousPanel="cdPages"
+                        onLoadPanel={this.loadPanel}
+                        disabled={this.state.saving || this.state.deleting}
+                    />
+                ;
+
                 break;
             }
 

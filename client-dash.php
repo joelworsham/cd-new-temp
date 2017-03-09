@@ -9,25 +9,6 @@
  * @package ClientDash
  */
 
-
-
-
-
-
-// TODO Auto expand newly added, editable items (menu, submenu, AND dashboard)
-
-// -> Change JS customizations to be arrays instead of object with ID's as keys... better order predicibility. Just
-//    create a function to quickly get an array item by nested ID.
-
-
-// TODO Make sure that custom links are maintaining original, unique ID's, even after re-indexing!
-// TODO Allow custom links to be added to submenus of custom links.
-
-
-
-
-
-
 defined( 'ABSPATH' ) || die;
 
 if ( ! class_exists( 'ClientDash' ) ) {
@@ -90,6 +71,15 @@ if ( ! class_exists( 'ClientDash' ) ) {
 		 */
 		public $modify;
 
+		/**
+		 * Handles core CD pages.
+		 *
+		 * @since {{VERSION}}
+		 *
+		 * @var ClientDash_Core_Pages
+		 */
+		public $core_pages;
+
 		protected function __wakeup() {
 		}
 
@@ -140,10 +130,12 @@ if ( ! class_exists( 'ClientDash' ) ) {
 			require_once CLIENTDASH_DIR . 'core/class-clientdash-db.php';
 			require_once CLIENTDASH_DIR . 'core/api/class-clientdash-api.php';
 			require_once CLIENTDASH_DIR . 'core/customize/class-clientdash-customize.php';
+			require_once CLIENTDASH_DIR . 'core/core-pages/class-clientdash-core-pages.php';
 
-			$this->db        = new ClientDash_DB();
-			$this->api       = new ClientDash_API();
-			$this->customize = new ClientDash_Customize();
+			$this->db         = new ClientDash_DB();
+			$this->api        = new ClientDash_API();
+			$this->customize  = new ClientDash_Customize();
+			$this->core_pages = new ClientDash_Core_Pages();
 
 			if ( is_admin() ) {
 
@@ -151,7 +143,7 @@ if ( ! class_exists( 'ClientDash' ) ) {
 				require_once CLIENTDASH_DIR . 'core/class-clientdash-modify.php';
 
 				$this->pluginpages = new ClientDash_PluginPages();
-				$this->modify   = new ClientDash_Modify();
+				$this->modify      = new ClientDash_Modify();
 			}
 		}
 
@@ -212,11 +204,11 @@ if ( ! class_exists( 'ClientDash' ) ) {
 			) );
 
 			wp_localize_script( 'clientdash-customize-inpreview', 'ClientDashCustomizeInPreview_Data', array(
-				'domain'    => get_bloginfo( 'url' ),
-				'l10n' => array(
+				'domain' => get_bloginfo( 'url' ),
+				'l10n'   => array(
 					'preview_only' => __( 'Preview Only', 'clientdash' ),
 				),
-			));
+			) );
 		}
 
 		/**

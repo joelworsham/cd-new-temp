@@ -182,6 +182,7 @@ class ClientDash_REST_Customizations_Controller {
 			'menu'      => $request['menu'],
 			'submenu'   => $request['submenu'],
 			'dashboard' => $request['dashboard'],
+			'cdpages'   => $request['cdpages'],
 		) );
 
 		if ( $results === false ) {
@@ -228,6 +229,7 @@ class ClientDash_REST_Customizations_Controller {
 			'menu'      => $request['menu'],
 			'submenu'   => $request['submenu'],
 			'dashboard' => $request['dashboard'],
+			'cdpages'   => $request['cdpages'],
 		) );
 
 		if ( $results === false ) {
@@ -293,7 +295,7 @@ class ClientDash_REST_Customizations_Controller {
 		$previous = $this->prepare_item_for_response( $customizations, $request );
 		$response = new WP_REST_Response();
 		$response->set_data( array(
-			'deleted' => true,
+			'deleted'  => true,
 			'previous' => $previous->get_data(),
 		) );
 
@@ -311,11 +313,6 @@ class ClientDash_REST_Customizations_Controller {
 
 		$schema = $this->get_item_schema();
 
-		if ( isset( $schema['properties']['role'] ) ) {
-
-			$response['role'] = $data['role'];
-		}
-
 		if ( isset( $schema['properties']['menu'] ) ) {
 
 			$response['menu'] = $data['menu'];
@@ -329,6 +326,11 @@ class ClientDash_REST_Customizations_Controller {
 		if ( isset( $schema['properties']['dashboard'] ) ) {
 
 			$response['dashboard'] = $data['dashboard'];
+		}
+
+		if ( isset( $schema['properties']['cdpages'] ) ) {
+
+			$response['cdpages'] = $data['cdpages'];
 		}
 
 		return rest_ensure_response( $response );
@@ -350,11 +352,6 @@ class ClientDash_REST_Customizations_Controller {
 
 		$schema = $this->get_item_schema()['customizations'];
 
-		if ( isset( $schema['properties']['role'] ) ) {
-
-			$customizations['role'] = $request->get_param( 'role' );
-		}
-
 		if ( isset( $schema['properties']['menu'] ) ) {
 
 			$customizations['menu'] = $request->get_param( 'menu' );
@@ -368,6 +365,11 @@ class ClientDash_REST_Customizations_Controller {
 		if ( isset( $schema['properties']['dashboard'] ) ) {
 
 			$customizations['dashboard'] = $request->get_param( 'dashboard' );
+		}
+
+		if ( isset( $schema['properties']['cdpages'] ) ) {
+
+			$customizations['cdpages'] = $request->get_param( 'cdpages' );
 		}
 
 		/**
@@ -457,15 +459,9 @@ class ClientDash_REST_Customizations_Controller {
 			'title'      => 'cd_customizations',
 			'type'       => 'object',
 			'properties' => array(
-				'role'      => array(
-					'description' => esc_html__( 'Unique identifier for the object.', 'clientdash' ),
-					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
-					'readonly'    => true,
-				),
 				'menu'      => array(
 					'description' => esc_html__( 'The customizations menu.', 'clientdash' ),
-					'type'        => 'object',
+					'type'        => 'array',
 				),
 				'submenu'   => array(
 					'description' => esc_html__( 'The customizations submenu.', 'clientdash' ),
@@ -473,7 +469,11 @@ class ClientDash_REST_Customizations_Controller {
 				),
 				'dashboard' => array(
 					'description' => esc_html__( 'The customizations dashboard.', 'clientdash' ),
-					'type'        => 'object',
+					'type'        => 'array',
+				),
+				'cdpages' => array(
+					'description' => esc_html__( 'The customizations Client Dash Pages.', 'clientdash' ),
+					'type'        => 'array',
 				),
 			),
 		);

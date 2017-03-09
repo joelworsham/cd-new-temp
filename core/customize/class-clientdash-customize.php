@@ -47,13 +47,19 @@ class ClientDash_Customize {
 		// Save role settings on first role load
 		if ( isset( $_GET['cd_save_role'] ) ) {
 
- 			add_filter( 'custom_menu_order', array(
+			add_filter( 'custom_menu_order', array(
 				$this,
 				'save_menu_preview'
 			), 99998 ); // Priority just before modifying
+
 			add_filter( 'wp_dashboard_widgets', array(
 				$this,
 				'save_dashboard_preview'
+			), 99998 ); // Priority just before modifying
+
+			add_filter( 'cd_core_pages', array(
+				$this,
+				'save_cd_pages'
 			), 99998 ); // Priority just before modifying
 		}
 	}
@@ -197,42 +203,45 @@ class ClientDash_Customize {
 			'domain'    => get_bloginfo( 'url' ),
 			'dashicons' => json_decode( file_get_contents( CLIENTDASH_DIR . 'core/dashicons.json' ) ),
 			'l10n'      => array(
-				'role_switcher_label'             => __( 'Modifying for:', 'clientdash' ),
-				'panel_text_menu'                 => __( 'Menu', 'clientdash' ),
-				'panel_text_dashboard'            => __( 'Dashboard', 'clientdash' ),
-				'panel_actions_title_menu'        => __( 'Editing: Menu', 'clientdash' ),
-				'panel_actions_title_submenu'     => __( 'Editing: Sub-Menu', 'clientdash' ),
-				'panel_actions_title_menu_add'    => __( 'Adding: Menu Items', 'clientdash' ),
-				'panel_actions_title_submenu_add' => __( 'Adding: Sub-Menu Items', 'clientdash' ),
-				'panel_actions_title_dashboard'   => __( 'Editing: Dashboard', 'clientdash' ),
+				'role_switcher_label'               => __( 'Modifying for:', 'clientdash' ),
+				'panel_text_menu'                   => __( 'Menu', 'clientdash' ),
+				'panel_text_dashboard'              => __( 'Dashboard', 'clientdash' ),
+				'panel_text_cd_pages'               => __( 'Special Pages', 'clientdash' ),
+				'panel_actions_title_menu'          => __( 'Editing: Menu', 'clientdash' ),
+				'panel_actions_title_submenu'       => __( 'Editing: Sub-Menu', 'clientdash' ),
+				'panel_actions_title_menu_add'      => __( 'Adding: Menu Items', 'clientdash' ),
+				'panel_actions_title_submenu_add'   => __( 'Adding: Sub-Menu Items', 'clientdash' ),
+				'panel_actions_title_dashboard'     => __( 'Editing: Dashboard', 'clientdash' ),
 				'panel_actions_title_dashboard_add' => __( 'Adding: Widgets', 'clientdash' ),
-				'action_button_back'              => __( 'Back', 'clientdash' ),
-				'action_button_add_items'         => __( 'Add Items', 'clientdash' ),
-				'show_controls'                   => __( 'Show Controls', 'clientdash' ),
-				'title'                           => __( 'Title', 'clientdash' ),
-				'original_title'                  => __( 'Original title:', 'clientdash' ),
-				'icon'                            => __( 'Icon', 'clientdash' ),
-				'link'                            => __( 'Link', 'clientdash' ),
-				'no_items_added'                  => __( 'No items added yet. Click the "Add Items" button to add your first item.', 'clientdash' ),
-				'no_items_available'              => __( 'No items available.', 'clientdash' ),
-				'separator'                       => __( 'Separator', 'clientdash' ),
-				'custom_link'                     => __( 'Custom Link', 'clientdash' ),
-				'click_to_move'                   => __( 'Click to move', 'clientdash' ),
-				'edit'                            => __( 'Edit', 'clientdash' ),
-				'edit_submenu'                    => __( 'Edit submenu', 'clientdash' ),
-				'delete'                          => __( 'Delete', 'clientdash' ),
-				'leave_confirmation'              => __( 'Are you sure you want to leave? Any unsaved changes will be lost.', 'clientdash' ),
-				'save'                            => __( 'Save', 'clientdash' ),
-				'saved'                           => __( 'Changes saved and live!', 'clientdash' ),
-				'role_reset'                      => __( 'Role successfully reset!', 'clientdash' ),
-				'close'                           => __( 'Close', 'clientdash' ),
-				'cancel'                          => __( 'Cancel', 'clientdash' ),
-				'confirm'                         => __( 'Confirm', 'clientdash' ),
-				'reset_role'                      => __( 'Reset Role', 'clientdash' ),
-				'up_do_date'                      => __( 'Up to date', 'clientdash' ),
-				'confirm_role_reset'              => __( 'Are you sure you want to reset all customizations for this role? This can not be undone.', 'clientdash' ),
-				'cannot_submit_form'              => __( 'Preview only. Cannot do that. Sorry!', 'clientdash' ),
-				'cannot_view_link'                => __( 'Only administrative links can be viewed.', 'clientdash' ),
+				'panel_actions_title_cdpages'       => __( 'Editing: Special Pages', 'clientdash' ),
+				'panel_actions_title_cdpages_add'   => __( 'Adding: Special Pages', 'clientdash' ),
+				'action_button_back'                => __( 'Back', 'clientdash' ),
+				'action_button_add_items'           => __( 'Add Items', 'clientdash' ),
+				'show_controls'                     => __( 'Show Controls', 'clientdash' ),
+				'title'                             => __( 'Title', 'clientdash' ),
+				'original_title'                    => __( 'Original title:', 'clientdash' ),
+				'icon'                              => __( 'Icon', 'clientdash' ),
+				'link'                              => __( 'Link', 'clientdash' ),
+				'no_items_added'                    => __( 'No items added yet. Click the add items "+" button to add your first item.', 'clientdash' ),
+				'no_items_available'                => __( 'No items available.', 'clientdash' ),
+				'separator'                         => __( 'Separator', 'clientdash' ),
+				'custom_link'                       => __( 'Custom Link', 'clientdash' ),
+				'click_to_move'                     => __( 'Click to move', 'clientdash' ),
+				'edit'                              => __( 'Edit', 'clientdash' ),
+				'edit_submenu'                      => __( 'Edit submenu', 'clientdash' ),
+				'delete'                            => __( 'Delete', 'clientdash' ),
+				'leave_confirmation'                => __( 'Are you sure you want to leave? Any unsaved changes will be lost.', 'clientdash' ),
+				'save'                              => __( 'Save', 'clientdash' ),
+				'saved'                             => __( 'Changes saved and live!', 'clientdash' ),
+				'role_reset'                        => __( 'Role successfully reset!', 'clientdash' ),
+				'close'                             => __( 'Close', 'clientdash' ),
+				'cancel'                            => __( 'Cancel', 'clientdash' ),
+				'confirm'                           => __( 'Confirm', 'clientdash' ),
+				'reset_role'                        => __( 'Reset Role', 'clientdash' ),
+				'up_do_date'                        => __( 'Up to date', 'clientdash' ),
+				'confirm_role_reset'                => __( 'Are you sure you want to reset all customizations for this role? This can not be undone.', 'clientdash' ),
+				'cannot_submit_form'                => __( 'Preview only. Cannot do that. Sorry!', 'clientdash' ),
+				'cannot_view_link'                  => __( 'Only administrative links can be viewed.', 'clientdash' ),
 			),
 		) );
 	}
@@ -399,7 +408,8 @@ class ClientDash_Customize {
 				'id'             => $menu_item[2],
 				'title'          => '',
 				'original_title' => $menu_item[0],
-				'icon'           => isset( $menu_item[6] ) ? $menu_item[6] : '',
+				'icon'           => '',
+				'original_icon'  => isset( $menu_item[6] ) ? $menu_item[6] : '',
 				'deleted'        => ! empty( $customized_menu ) && empty( $customized_menu_item ),
 				'type'           => $type,
 			) );
@@ -417,7 +427,7 @@ class ClientDash_Customize {
 
 			foreach ( $submenu_items as $submenu_item ) {
 
-				if ( isset( $customized_submenu[ $menu_slug ])) {
+				if ( isset( $customized_submenu[ $menu_slug ] ) ) {
 
 					$customized_submenu_item = cd_array_search_by_key( $customized_submenu[ $menu_slug ], 'id', $submenu_item[2] );
 					$customized_submenu_item = $customized_submenu_item ? $customized_submenu_item : array();
@@ -474,7 +484,7 @@ class ClientDash_Customize {
 
 					foreach ( $widgets as $widget ) {
 
-						$customized_widget = cd_array_search_by_key( $customized_dashboard, 'id', $widget['id']);
+						$customized_widget = cd_array_search_by_key( $customized_dashboard, 'id', $widget['id'] );
 						$customized_widget = $customized_widget ? $customized_widget : array();
 
 						$save_dashboard[] = wp_parse_args( $customized_widget, array(
@@ -494,5 +504,41 @@ class ClientDash_Customize {
 		) );
 
 		return $dashboard_widgets;
+	}
+
+	/**
+	 * Initially save's the cd core pages.
+	 *
+	 * @since {{VERSION}}
+	 * @access private
+	 *
+	 * @param array $pages
+	 *
+	 * @return array
+	 */
+	function save_cd_pages( $pages ) {
+
+		$role = $_GET['role'];
+
+		$customizations = cd_get_customizations( $role );
+
+		$save_pages = $pages;
+
+		if ( $customizations['cdpages']) {
+
+			foreach ( $save_pages as $i => $page ) {
+
+				$custom_page = cd_array_search_by_key( $customizations['cdpages'], 'id', $page['id']);
+
+				$save_pages[ $i ] = wp_parse_args( $custom_page, $page );
+			}
+		}
+
+		// Set current role cd core pages
+		cd_update_role_customizations( "preview_$role", array(
+			'dashboard' => $save_pages,
+		) );
+
+		return $pages;
 	}
 }

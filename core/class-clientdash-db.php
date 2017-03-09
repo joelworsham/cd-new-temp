@@ -34,7 +34,7 @@ class ClientDash_DB {
 
 		$results = $wpdb->get_row(
 			"
-			SELECT menu,submenu,dashboard
+			SELECT menu,submenu,dashboard,cdpages
 			FROM {$wpdb->prefix}cd_customizations
 			WHERE role = '$role'
 			",
@@ -45,6 +45,11 @@ class ClientDash_DB {
 			foreach ( $results as &$item ) {
 
 				$item = maybe_unserialize( $item );
+
+				if ( $item === null ) {
+
+					$item = array();
+				}
 			}
 		}
 
@@ -156,6 +161,37 @@ class ClientDash_DB {
 	}
 
 	/**
+	 * Gets the role's custom pages, if set.
+	 *
+	 * @since {{VERSION}}
+	 *
+	 * @param string $role Role to get pages for.
+	 *
+	 * @return array|bool|mixed|void
+	 */
+	public static function get_role_pages( $role ) {
+
+		if ( ! ( $results = self::get_customizations( $role ) ) ) {
+
+			return false;
+		}
+
+		if ( ! isset( $results['pages'] ) ) {
+
+			return array();
+		}
+
+		/**
+		 * Filters the role's custom pages, if set.
+		 *
+		 * @since {{VERSION}}
+		 */
+		$pages = apply_filters( 'cd_role_pages', $results['pages'] );
+
+		return $pages;
+	}
+
+	/**
 	 * Updates or adds a role customizations.
 	 *
 	 * @since {{VERSION}}
@@ -247,9 +283,9 @@ class ClientDash_DB {
 			return null;
 		}
 
-		$result = $wpdb->delete("{$wpdb->prefix}cd_customizations", array(
+		$result = $wpdb->delete( "{$wpdb->prefix}cd_customizations", array(
 			'role' => $role,
-		));
+		) );
 
 		if ( $result === 1 ) {
 

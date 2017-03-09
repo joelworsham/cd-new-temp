@@ -47,6 +47,15 @@ class ClientDash_Modify {
 	public $dashboard;
 
 	/**
+	 * The customized pages.
+	 *
+	 * @since {{VERSION}}
+	 *
+	 * @var array|null
+	 */
+	public $pages;
+
+	/**
 	 * ClientDash_Modify constructor.
 	 *
 	 * @since {{VERSION}}
@@ -55,6 +64,7 @@ class ClientDash_Modify {
 
 		add_filter( 'custom_menu_order', array( $this, 'modify_menu' ), 99999 );
 		add_action( 'wp_dashboard_setup', array( $this, 'modify_dashboard' ), 99999 );
+		add_filter( 'cd_core_pages', array( $this, 'modify_core_pages' ), 99999 );
 	}
 
 	/**
@@ -100,6 +110,7 @@ class ClientDash_Modify {
 		$this->menu      = $customizations['menu'];
 		$this->submenu   = $customizations['submenu'];
 		$this->dashboard = $customizations['dashboard'];
+		$this->pages     = $customizations['cdpages'];
 	}
 
 	/**
@@ -119,8 +130,7 @@ class ClientDash_Modify {
 			return;
 		}
 
-		$original_menu_map = array_flip( wp_list_pluck( $menu, 2 ) );
-		$new_menu          = array();
+		$new_menu = array();
 
 		foreach ( $this->menu as $menu_item ) {
 
@@ -138,13 +148,13 @@ class ClientDash_Modify {
 				continue;
 			}
 
-			// Separators are handled diferrently
+			// Custom links are handled diferrently
 			if ( $menu_item['type'] == 'custom_link' ) {
 
 				$new_menu[] = array(
 					$menu_item['title'] ? $menu_item['title'] : $menu_item['original_title'],
 					'read',
-					$menu_item['link'],
+					$menu_item['link'] ? $menu_item['link'] : '/wp-admin/',
 					$menu_item['title'] ? $menu_item['title'] : $menu_item['original_title'],
 					"menu-top toplevel_page_$menu_item[id]",
 					"toplevel_page_$menu_item[id]",
@@ -160,7 +170,7 @@ class ClientDash_Modify {
 				continue;
 			}
 
-			$original_menu_item = $menu[ $original_menu_map[ $menu_item['id'] ] ];
+			$original_menu_item = cd_array_search_by_key( $menu, 2, $menu_item['id'] );
 
 			$new_menu[] = array(
 				$menu_item['title'] ? $menu_item['title'] : $menu_item['original_title'],
@@ -169,7 +179,7 @@ class ClientDash_Modify {
 				$original_menu_item[3],
 				$original_menu_item[4],
 				$original_menu_item[5],
-				$menu_item['icon'],
+				$menu_item['icon'] ? $menu_item['icon'] : $menu_item['original_icon'],
 			);
 		}
 
@@ -177,13 +187,25 @@ class ClientDash_Modify {
 
 		foreach ( $this->submenu as $menu_ID => $submenu_items ) {
 
-			$original_submenu_map = array_flip( wp_list_pluck( $submenu[ $menu_ID ], 2 ) );
-			$new_submenu          = array();
+			$new_submenu = array();
+			$menu_item   = cd_array_search_by_key( $this->menu, 'id', $menu_ID );
 
 			foreach ( $submenu_items as $submenu_item ) {
 
 				// Skip deleted items
 				if ( $submenu_item['deleted'] ) {
+
+					continue;
+				}
+
+				// Custom links are handled diferrently
+				if ( $submenu_item['type'] == 'custom_link' ) {
+
+					$new_submenu[] = array(
+						$submenu_item['title'] ? $submenu_item['title'] : $submenu_item['original_title'],
+						'read',
+						$submenu_item['link'] ? $submenu_item['link'] : '/wp-admin/',
+					);
 
 					continue;
 				}
@@ -206,13 +228,20 @@ class ClientDash_Modify {
 					}
 				}
 
-				$original_submenu_item = $submenu[ $menu_ID ][ $original_submenu_map[ $submenu_item['id'] ] ];
+				$original_submenu_item = cd_array_search_by_key( $submenu[ $menu_ID ], 2, $submenu_item['id'] );
 
 				$new_submenu[] = array(
 					$submenu_item['title'] ? $submenu_item['title'] : $submenu_item['original_title'],
 					$original_submenu_item[1],
 					$submenu_item['id'],
 				);
+			}
+
+			// Custom links are added differently
+			if ( $menu_item['type'] == 'custom_link' ) {
+
+				$submenu[ $menu_item['link'] ? $menu_item['link'] : '/wp-admin/' ] = $new_submenu;
+				continue;
 			}
 
 			$submenu[ $menu_ID ] = $new_submenu;
@@ -267,5 +296,48 @@ class ClientDash_Modify {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Modifies core CD pages.
+	 *
+	 * @since {{VERSION}}
+	 * @access private
+	 *
+	 * @param array $pages
+	 *
+	 * @return array
+	 */
+	function modify_core_pages( $pages ) {
+
+		$this->get_customizations();
+
+		if ( ! $this->pages ) {
+
+			return;
+		}
+
+		foreach ( $pages as $i => $page ) {
+
+			$custom_page = cd_array_search_by_key( $this->pages, 'id', $page['id'] );
+
+			if ( ! $custom_page ) {
+
+				continue;
+			}
+
+			if ( $custom_page['deleted'] ) {
+
+				unset( $pages[ $i ] );
+				continue;
+			}
+
+			$pages[ $i ] = wp_parse_args( $custom_page, $page );
+		}
+
+		// Re-index
+		$pages = array_values( $pages );
+
+		return $pages;
 	}
 }

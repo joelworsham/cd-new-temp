@@ -50,6 +50,7 @@ class ClientDash_Install {
 		  menu LONGTEXT,
 		  submenu LONGTEXT,
 		  dashboard LONGTEXT,
+		  cdpages LONGTEXT,
  		  PRIMARY KEY  (role)
 		) $charset_collate;";
 

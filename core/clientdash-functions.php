@@ -115,3 +115,79 @@ function cd_array_search_by_key( $array, $key, $value ) {
 
 	return false;
 }
+
+/**
+ * Adds a core CD page.
+ *
+ * @since {{VERSION}}
+ *
+ * @param array $page
+ */
+function cd_add_core_page( $page ) {
+
+	global $clientdash_pages;
+}
+
+/**
+ * Returns the core CD pages.
+ *
+ * @since {{VERSION}}
+ */
+function cd_get_core_pages() {
+
+	$pages = ClientDash_Core_Pages::get_pages();
+
+	return $pages;
+}
+
+/**
+ * Loads a template file from the theme if it exists, otherwise from the plugin.
+ *
+ * @since {{VERSION}}}}
+ *
+ * @param string $template Template file to load.
+ *
+ * @return string File to load
+ */
+function cd_get_template( $template ) {
+
+	/**
+	 * Filter the template to be located.
+	 *
+	 * @since {{VERSION}}}}
+	 */
+	$template = apply_filters( 'cd_get_template', $template );
+
+	$template_file = locate_template( array( "/client-dash/{$template}" ) );
+
+	if ( $template_file ) {
+
+		return $template_file;
+
+	} else {
+
+		return CLIENTDASH_DIR . "templates/{$template}";
+	}
+}
+
+/**
+ * Loads a template.
+ *
+ * @since {{VERSION}}}}
+ *
+ * @param string $template Template file to load.
+ * @param array $args Arguments to extract for the template.
+ */
+function cd_template( $template, $args = array() ) {
+
+	/**
+	 * Filter the args to use in the template.
+	 *
+	 * @since {{VERSION}}}}
+	 */
+	$args = apply_filters( 'cd_get_template_args', $args, $template );
+
+	extract( $args );
+
+	include cd_get_template( $template );
+}
