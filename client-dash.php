@@ -172,21 +172,21 @@ if ( ! class_exists( 'ClientDash' ) ) {
 			// Customize assets
 			wp_register_style(
 				'clientdash-customize',
-				CLIENTDASH_URI . '/assets/dist/css/clientdash.customize.min.css',
+				CLIENTDASH_URI . '/assets/dist/css/clientdash-customize.min.css',
 				array(),
 				defined( 'WP_DEBUG' ) && WP_DEBUG ? time() : CLIENTDASH_VERSION
 			);
 
 			wp_register_style(
 				'clientdash-customize-inpreview',
-				CLIENTDASH_URI . '/assets/dist/css/clientdash.customize.inpreview.min.css',
+				CLIENTDASH_URI . '/assets/dist/css/clientdash-customize-inpreview.min.css',
 				array(),
 				defined( 'WP_DEBUG' ) && WP_DEBUG ? time() : CLIENTDASH_VERSION
 			);
 
 			wp_register_script(
 				'clientdash-customize',
-				CLIENTDASH_URI . '/assets/dist/js/clientdash.customize.min.js',
+				CLIENTDASH_URI . '/assets/dist/js/clientdash-customize.min.js',
 				array(),
 				defined( 'WP_DEBUG' ) && WP_DEBUG ? time() : CLIENTDASH_VERSION,
 				true
