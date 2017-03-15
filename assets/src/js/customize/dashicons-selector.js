@@ -1,6 +1,6 @@
 import React from 'react';
 
-const l10n = ClientdashCustomize_Data.l10n || false;
+const l10n      = ClientdashCustomize_Data.l10n || false;
 const dashicons = ClientdashCustomize_Data.dashicons || false;
 
 /**
@@ -19,7 +19,7 @@ class DashiconsSelector extends React.Component {
             open: false
         }
 
-        this.toggleWindow = this.toggleWindow.bind(this);
+        this.toggleWindow   = this.toggleWindow.bind(this);
         this.selectDashicon = this.selectDashicon.bind(this);
     }
 

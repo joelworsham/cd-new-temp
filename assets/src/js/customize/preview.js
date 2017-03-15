@@ -14,7 +14,7 @@ class Preview extends React.Component {
         super(props);
 
         this.handleFrameTasks = this.handleFrameTasks.bind(this);
-        this.loaded = this.loaded.bind(this);
+        this.loaded           = this.loaded.bind(this);
     }
 
     shouldComponentUpadte() {
@@ -30,16 +30,16 @@ class Preview extends React.Component {
 
     handleFrameTasks(e) {
 
-        if (!e.data.id) {
+        if ( !e.data.id ) {
 
             return;
         }
 
-        switch (e.data.id) {
+        switch ( e.data.id ) {
 
             case 'cd_customize_preview_link_clicked' :
 
-                if (!this.isLinkValid(e.data.link)) {
+                if ( !this.isLinkValid(e.data.link) ) {
 
                     this.props.onShowMessage({
                         type: 'error',
@@ -50,7 +50,7 @@ class Preview extends React.Component {
                 }
 
                 var link_base = e.data.link.includes('?') ? e.data.link + '&' : e.data.link + '?';
-                var link = link_base + 'cd_customizing=1&role=' + this.props.role;
+                var link      = link_base + 'cd_customizing=1&role=' + this.props.role;
 
                 this.load(link);
 
@@ -70,13 +70,13 @@ class Preview extends React.Component {
     isLinkValid(link) {
 
         // Not admin
-        if (!link.includes('/wp-admin')) {
+        if ( !link.includes('/wp-admin') ) {
 
             return false;
         }
 
         // Not customizer
-        if (link.includes('customize.php')) {
+        if ( link.includes('customize.php') ) {
 
             return false;
         }
@@ -102,7 +102,7 @@ class Preview extends React.Component {
     refresh() {
 
         // If the iframe contains the "cd_save_role" param, remove it for subsequent loads.
-        if (this.iframe.src.includes('&cd_save_role=1')) {
+        if ( this.iframe.src.includes('&cd_save_role=1') ) {
 
             this.iframe.src = this.getSrc();
 

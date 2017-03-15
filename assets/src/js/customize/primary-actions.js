@@ -17,15 +17,15 @@ class PrimaryActions extends React.Component {
 
         super(props);
 
-        this.saveChanges = this.saveChanges.bind(this);
-        this.previewChanges = this.previewChanges.bind(this);
-        this.hideCustomizer = this.hideCustomizer.bind(this);
+        this.saveChanges     = this.saveChanges.bind(this);
+        this.previewChanges  = this.previewChanges.bind(this);
+        this.hideCustomizer  = this.hideCustomizer.bind(this);
         this.closeCustomizer = this.closeCustomizer.bind(this);
     }
 
     saveChanges() {
 
-        if (this.props.saving) {
+        if ( this.props.saving ) {
 
             return;
         }

@@ -3,7 +3,7 @@ import React from 'react';
 import {Select} from './form-fields';
 
 const roles = ClientdashCustomize_Data.roles || false;
-const l10n = ClientdashCustomize_Data.l10n || false;
+const l10n  = ClientdashCustomize_Data.l10n || false;
 
 /**
  * Select box for switching witch role is being edited.

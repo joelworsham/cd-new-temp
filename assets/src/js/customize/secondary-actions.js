@@ -15,7 +15,7 @@ class SecondaryActions extends React.Component {
 
         super(props);
 
-        this.loadNextPanel = this.loadNextPanel.bind(this);
+        this.loadNextPanel     = this.loadNextPanel.bind(this);
         this.loadPreviousPanel = this.loadPreviousPanel.bind(this);
     }
 
@@ -82,14 +82,14 @@ class SecondaryActionsPrimary extends React.Component {
             confirming: false
         }
 
-        this.resetRole = this.resetRole.bind(this);
-        this.cancelReset = this.cancelReset.bind(this);
+        this.resetRole    = this.resetRole.bind(this);
+        this.cancelReset  = this.cancelReset.bind(this);
         this.confirmReset = this.confirmReset.bind(this);
     }
 
     resetRole() {
 
-        if (this.props.deleting) {
+        if ( this.props.deleting ) {
 
             return;
         }

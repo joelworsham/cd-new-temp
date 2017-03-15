@@ -122,9 +122,9 @@ class PanelCDPages extends React.Component {
 
         super(props);
 
-        this.pageDelete = this.pageDelete.bind(this);
-        this.pageEdit = this.pageEdit.bind(this);
-        this.pageTabsEdit = this.pageTabsEdit.bind(this);
+        this.pageDelete     = this.pageDelete.bind(this);
+        this.pageEdit       = this.pageEdit.bind(this);
+        this.pageTabsEdit   = this.pageTabsEdit.bind(this);
         this.itemSubmitForm = this.itemSubmitForm.bind(this);
     }
 
@@ -153,7 +153,7 @@ class PanelCDPages extends React.Component {
         var pages = [];
         var panel_contents;
 
-        if (this.props.pages.length) {
+        if ( this.props.pages.length ) {
 
             this.props.pages.map((item) => {
 
@@ -204,10 +204,10 @@ class PanelMenu extends React.Component {
 
         super(props);
 
-        this.onSortEnd = this.onSortEnd.bind(this);
-        this.deleteItem = this.deleteItem.bind(this);
-        this.menuItemEdit = this.menuItemEdit.bind(this);
-        this.submenuEdit = this.submenuEdit.bind(this);
+        this.onSortEnd      = this.onSortEnd.bind(this);
+        this.deleteItem     = this.deleteItem.bind(this);
+        this.menuItemEdit   = this.menuItemEdit.bind(this);
+        this.submenuEdit    = this.submenuEdit.bind(this);
         this.itemSubmitForm = this.itemSubmitForm.bind(this);
     }
 
@@ -243,11 +243,11 @@ class PanelMenu extends React.Component {
         var menu_items = [];
         var panel_contents;
 
-        if (this.props.menuItems.length) {
+        if ( this.props.menuItems.length ) {
 
             this.props.menuItems.map((item) => {
 
-                if (item.type == 'separator') {
+                if ( item.type == 'separator' ) {
 
                     var menu_item =
                             <MenuItemSeparator
@@ -257,7 +257,7 @@ class PanelMenu extends React.Component {
                             />
                         ;
 
-                } else if (item.type == 'custom_link') {
+                } else if ( item.type == 'custom_link' ) {
 
                     var menu_item =
                             <MenuItemCustomLink
@@ -341,10 +341,10 @@ class PanelSubmenu extends React.Component {
 
         super(props);
 
-        this.onSortEnd = this.onSortEnd.bind(this);
-        this.deleteItem = this.deleteItem.bind(this);
+        this.onSortEnd       = this.onSortEnd.bind(this);
+        this.deleteItem      = this.deleteItem.bind(this);
         this.submenuItemEdit = this.submenuItemEdit.bind(this);
-        this.itemSubmitForm = this.itemSubmitForm.bind(this);
+        this.itemSubmitForm  = this.itemSubmitForm.bind(this);
     }
 
     onSortEnd(args) {
@@ -375,13 +375,13 @@ class PanelSubmenu extends React.Component {
         var panel_contents;
 
 
-        if (this.props.submenuItems.length) {
+        if ( this.props.submenuItems.length ) {
 
             this.props.submenuItems.map((item) => {
 
                 let menu_item;
 
-                switch (item.type) {
+                switch ( item.type ) {
 
                     case 'custom_link':
 
@@ -472,7 +472,7 @@ class PanelAddItems extends React.Component {
         var items = [];
         var panel_contents;
 
-        if (this.props.availableItems.length) {
+        if ( this.props.availableItems.length ) {
 
             this.props.availableItems.map((item) => {
 
@@ -520,8 +520,8 @@ class PanelDashboard extends React.Component {
 
         super(props);
 
-        this.widgetDelete = this.widgetDelete.bind(this);
-        this.widgetEdit = this.widgetEdit.bind(this);
+        this.widgetDelete   = this.widgetDelete.bind(this);
+        this.widgetEdit     = this.widgetEdit.bind(this);
         this.itemSubmitForm = this.itemSubmitForm.bind(this);
     }
 
@@ -545,7 +545,7 @@ class PanelDashboard extends React.Component {
         var widgets = [];
         var panel_contents;
 
-        if (this.props.widgets.length) {
+        if ( this.props.widgets.length ) {
 
             this.props.widgets.map((item) => {
 

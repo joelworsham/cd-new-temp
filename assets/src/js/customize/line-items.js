@@ -184,12 +184,12 @@ class MenuItemEdit extends React.Component {
             editing: this.props.editing || false,
         }
 
-        this.toggleEdit = this.toggleEdit.bind(this);
+        this.toggleEdit  = this.toggleEdit.bind(this);
         this.titleChange = this.titleChange.bind(this);
-        this.iconChange = this.iconChange.bind(this);
-        this.deleteItem = this.deleteItem.bind(this);
+        this.iconChange  = this.iconChange.bind(this);
+        this.deleteItem  = this.deleteItem.bind(this);
         this.submenuEdit = this.submenuEdit.bind(this);
-        this.submitForm = this.submitForm.bind(this);
+        this.submitForm  = this.submitForm.bind(this);
     }
 
     toggleEdit() {
@@ -234,7 +234,7 @@ class MenuItemEdit extends React.Component {
 
         var actions = [];
 
-        if (this.props.id != 'clientdash') {
+        if ( this.props.id != 'clientdash' ) {
             actions = [
                 <LineItemAction
                     key="menu-action-submenu"
@@ -259,29 +259,29 @@ class MenuItemEdit extends React.Component {
         }
 
         const after_title =
-                <span className="cd-editor-lineitem-form-originaltitle">
+                  <span className="cd-editor-lineitem-form-originaltitle">
                     {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
                 </span>
             ;
 
         const form =
-                <LineItemForm
-                    onSubmit={this.submitForm}
-                >
-                    <InputText
-                        label={l10n['title']}
-                        value={this.props.title}
-                        placeholder={this.props.original_title}
-                        onHandleChange={this.titleChange}
-                        after={after_title}
-                    />
+                  <LineItemForm
+                      onSubmit={this.submitForm}
+                  >
+                      <InputText
+                          label={l10n['title']}
+                          value={this.props.title}
+                          placeholder={this.props.original_title}
+                          onHandleChange={this.titleChange}
+                          after={after_title}
+                      />
 
-                    <DashiconsSelector
-                        dashicon={this.props.icon || this.props.original_icon}
-                        onSelectDashicon={this.iconChange}
-                    />
+                      <DashiconsSelector
+                          dashicon={this.props.icon || this.props.original_icon}
+                          onSelectDashicon={this.iconChange}
+                      />
 
-                </LineItemForm>
+                  </LineItemForm>
             ;
 
         return (
@@ -354,13 +354,13 @@ class MenuItemCustomLink extends React.Component {
             editing: this.props.editing || false,
         }
 
-        this.toggleEdit = this.toggleEdit.bind(this);
+        this.toggleEdit  = this.toggleEdit.bind(this);
         this.titleChange = this.titleChange.bind(this);
-        this.linkChange = this.linkChange.bind(this);
-        this.iconChange = this.iconChange.bind(this);
-        this.deleteItem = this.deleteItem.bind(this);
+        this.linkChange  = this.linkChange.bind(this);
+        this.iconChange  = this.iconChange.bind(this);
+        this.deleteItem  = this.deleteItem.bind(this);
         this.submenuEdit = this.submenuEdit.bind(this);
-        this.submitForm = this.submitForm.bind(this);
+        this.submitForm  = this.submitForm.bind(this);
     }
 
     toggleEdit() {
@@ -413,7 +413,7 @@ class MenuItemCustomLink extends React.Component {
 
         var actions = [];
 
-        if (this.props.id != 'clientdash') {
+        if ( this.props.id != 'clientdash' ) {
             actions = [
                 <LineItemAction
                     key="menu-action-submenu"
@@ -438,36 +438,36 @@ class MenuItemCustomLink extends React.Component {
         }
 
         const after_title =
-                <span className="cd-editor-lineitem-form-originaltitle">
+                  <span className="cd-editor-lineitem-form-originaltitle">
                     {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
                 </span>
             ;
 
         const form =
-                <LineItemForm
-                    onSubmit={this.submitForm}
-                >
-                    <InputText
-                        label={l10n['title']}
-                        value={this.props.title}
-                        placeholder={this.props.original_title}
-                        onHandleChange={this.titleChange}
-                        after={after_title}
-                    />
+                  <LineItemForm
+                      onSubmit={this.submitForm}
+                  >
+                      <InputText
+                          label={l10n['title']}
+                          value={this.props.title}
+                          placeholder={this.props.original_title}
+                          onHandleChange={this.titleChange}
+                          after={after_title}
+                      />
 
-                    <InputText
-                        label={l10n['link']}
-                        value={this.props.link}
-                        placeholder="http://"
-                        onHandleChange={this.linkChange}
-                    />
+                      <InputText
+                          label={l10n['link']}
+                          value={this.props.link}
+                          placeholder="http://"
+                          onHandleChange={this.linkChange}
+                      />
 
-                    <DashiconsSelector
-                        dashicon={this.props.icon}
-                        onSelectDashicon={this.iconChange}
-                    />
+                      <DashiconsSelector
+                          dashicon={this.props.icon}
+                          onSelectDashicon={this.iconChange}
+                      />
 
-                </LineItemForm>
+                  </LineItemForm>
             ;
 
         return (
@@ -498,11 +498,11 @@ class SubmenuItemCustomLink extends React.Component {
             editing: this.props.editing || false,
         }
 
-        this.toggleEdit = this.toggleEdit.bind(this);
+        this.toggleEdit  = this.toggleEdit.bind(this);
         this.titleChange = this.titleChange.bind(this);
-        this.linkChange = this.linkChange.bind(this);
-        this.deleteItem = this.deleteItem.bind(this);
-        this.submitForm = this.submitForm.bind(this);
+        this.linkChange  = this.linkChange.bind(this);
+        this.deleteItem  = this.deleteItem.bind(this);
+        this.submitForm  = this.submitForm.bind(this);
     }
 
     toggleEdit() {
@@ -563,30 +563,30 @@ class SubmenuItemCustomLink extends React.Component {
         ];
 
         const after_title =
-                <span className="cd-editor-lineitem-form-originaltitle">
+                  <span className="cd-editor-lineitem-form-originaltitle">
                     {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
                 </span>
             ;
 
         const form =
-                <LineItemForm
-                    onSubmit={this.submitForm}
-                >
-                    <InputText
-                        label={l10n['title']}
-                        value={this.props.title}
-                        placeholder={this.props.original_title}
-                        onHandleChange={this.titleChange}
-                        after={after_title}
-                    />
+                  <LineItemForm
+                      onSubmit={this.submitForm}
+                  >
+                      <InputText
+                          label={l10n['title']}
+                          value={this.props.title}
+                          placeholder={this.props.original_title}
+                          onHandleChange={this.titleChange}
+                          after={after_title}
+                      />
 
-                    <InputText
-                        label={l10n['link']}
-                        value={this.props.link}
-                        placeholder="http://"
-                        onHandleChange={this.linkChange}
-                    />
-                </LineItemForm>
+                      <InputText
+                          label={l10n['link']}
+                          value={this.props.link}
+                          placeholder="http://"
+                          onHandleChange={this.linkChange}
+                      />
+                  </LineItemForm>
             ;
 
         return (
@@ -618,10 +618,10 @@ class SubmenuItemEdit extends React.Component {
             icon: this.props.icon
         }
 
-        this.toggleEdit = this.toggleEdit.bind(this);
+        this.toggleEdit  = this.toggleEdit.bind(this);
         this.titleChange = this.titleChange.bind(this);
-        this.deleteItem = this.deleteItem.bind(this);
-        this.submitForm = this.submitForm.bind(this);
+        this.deleteItem  = this.deleteItem.bind(this);
+        this.submitForm  = this.submitForm.bind(this);
     }
 
     toggleEdit() {
@@ -667,23 +667,23 @@ class SubmenuItemEdit extends React.Component {
         ];
 
         const after_title =
-                <span className="cd-editor-lineitem-form-originaltitle">
+                  <span className="cd-editor-lineitem-form-originaltitle">
                     {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
                 </span>
             ;
 
         const form =
-                <LineItemForm
-                    onSubmit={this.submitForm}
-                >
-                    <InputText
-                        label={l10n['title']}
-                        value={this.props.title}
-                        placeholder={this.props.original_title}
-                        onHandleChange={this.titleChange}
-                        after={after_title}
-                    />
-                </LineItemForm>
+                  <LineItemForm
+                      onSubmit={this.submitForm}
+                  >
+                      <InputText
+                          label={l10n['title']}
+                          value={this.props.title}
+                          placeholder={this.props.original_title}
+                          onHandleChange={this.titleChange}
+                          after={after_title}
+                      />
+                  </LineItemForm>
             ;
 
 
@@ -713,12 +713,12 @@ class CDPageEdit extends React.Component {
             editing: this.props.editing || false,
         }
 
-        this.toggleEdit = this.toggleEdit.bind(this);
+        this.toggleEdit  = this.toggleEdit.bind(this);
         this.titleChange = this.titleChange.bind(this);
-        this.iconChange = this.iconChange.bind(this);
-        this.deleteItem = this.deleteItem.bind(this);
-        this.tabsEdit = this.tabsEdit.bind(this);
-        this.submitForm = this.submitForm.bind(this);
+        this.iconChange  = this.iconChange.bind(this);
+        this.deleteItem  = this.deleteItem.bind(this);
+        this.tabsEdit    = this.tabsEdit.bind(this);
+        this.submitForm  = this.submitForm.bind(this);
     }
 
     toggleEdit() {
@@ -763,7 +763,7 @@ class CDPageEdit extends React.Component {
 
         var actions = [];
 
-        if (this.props.id != 'clientdash') {
+        if ( this.props.id != 'clientdash' ) {
             actions = [
                 <LineItemAction
                     key="menu-action-submenu"
@@ -788,29 +788,29 @@ class CDPageEdit extends React.Component {
         }
 
         const after_title =
-                <span className="cd-editor-lineitem-form-originaltitle">
+                  <span className="cd-editor-lineitem-form-originaltitle">
                     {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
                 </span>
             ;
 
         const form =
-                <LineItemForm
-                    onSubmit={this.submitForm}
-                >
-                    <InputText
-                        label={l10n['title']}
-                        value={this.props.title}
-                        placeholder={this.props.original_title}
-                        onHandleChange={this.titleChange}
-                        after={after_title}
-                    />
+                  <LineItemForm
+                      onSubmit={this.submitForm}
+                  >
+                      <InputText
+                          label={l10n['title']}
+                          value={this.props.title}
+                          placeholder={this.props.original_title}
+                          onHandleChange={this.titleChange}
+                          after={after_title}
+                      />
 
-                    <DashiconsSelector
-                        dashicon={this.props.icon || this.props.original_icon}
-                        onSelectDashicon={this.iconChange}
-                    />
+                      <DashiconsSelector
+                          dashicon={this.props.icon || this.props.original_icon}
+                          onSelectDashicon={this.iconChange}
+                      />
 
-                </LineItemForm>
+                  </LineItemForm>
             ;
 
         return (
@@ -891,10 +891,10 @@ class WidgetEdit extends React.Component {
             editing: false,
         }
 
-        this.toggleEdit = this.toggleEdit.bind(this);
-        this.titleChange = this.titleChange.bind(this);
+        this.toggleEdit   = this.toggleEdit.bind(this);
+        this.titleChange  = this.titleChange.bind(this);
         this.widgetDelete = this.widgetDelete.bind(this);
-        this.submitForm = this.submitForm.bind(this);
+        this.submitForm   = this.submitForm.bind(this);
     }
 
     toggleEdit() {
@@ -940,23 +940,23 @@ class WidgetEdit extends React.Component {
         ];
 
         const after_title =
-                <span className="cd-editor-lineitem-form-originaltitle">
+                  <span className="cd-editor-lineitem-form-originaltitle">
                     {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
                 </span>
             ;
 
         const form =
-                <LineItemForm
-                    onSubmit={this.submitForm}
-                >
-                    <InputText
-                        label={l10n['title']}
-                        value={this.props.title}
-                        placeholder={this.props.original_title}
-                        onHandleChange={this.titleChange}
-                        after={after_title}
-                    />
-                </LineItemForm>
+                  <LineItemForm
+                      onSubmit={this.submitForm}
+                  >
+                      <InputText
+                          label={l10n['title']}
+                          value={this.props.title}
+                          placeholder={this.props.original_title}
+                          onHandleChange={this.titleChange}
+                          after={after_title}
+                      />
+                  </LineItemForm>
             ;
 
         return (

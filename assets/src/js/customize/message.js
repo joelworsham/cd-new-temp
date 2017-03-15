@@ -25,7 +25,7 @@ class Message extends React.Component {
         clearTimeout(this.hideFinish);
         clearTimeout(this.hiding);
 
-        if (nextProps.text) {
+        if ( nextProps.text ) {
 
             this.setState({
                 visible: true
@@ -45,7 +45,7 @@ class Message extends React.Component {
 
     render() {
 
-        if (this.state.visible && !this.props.noHide) {
+        if ( this.state.visible && !this.props.noHide ) {
 
             this.hiding = setTimeout(() => this.hide(), 4000);
         }
@@ -55,7 +55,7 @@ class Message extends React.Component {
             'cd-editor-message-' + this.props.type
         ]
 
-        if (this.props.text && this.state.visible) {
+        if ( this.props.text && this.state.visible ) {
 
             classes.push('cd-editor-message-visible');
         }

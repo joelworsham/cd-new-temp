@@ -15,9 +15,9 @@ function getFirstAvailableIndex(indexes) {
     indexes.sort((a, b) => a - b);
 
     let index = 1;
-    let i = 0;
+    let i     = 0;
 
-    while (index === indexes[i]) {
+    while ( index === indexes[i] ) {
         i++;
         index++;
     }
@@ -41,12 +41,12 @@ function getNewItemID(items, type) {
     // Get all current item indexes
     items.map((item) => {
 
-        if (item.type == type) {
+        if ( item.type == type ) {
 
-            let regex = new RegExp(type + '(\\d+)');
+            let regex   = new RegExp(type + '(\\d+)');
             let matches = item.id.match(regex);
 
-            if (matches) {
+            if ( matches ) {
 
                 indexes.push(parseInt(matches[1]));
             }
@@ -71,7 +71,7 @@ function getItem(items, ID) {
 
     items.map((item) => {
 
-        if (item.id === ID) {
+        if ( item.id === ID ) {
 
             found = item;
         }
@@ -95,7 +95,7 @@ function getItemIndex(items, ID) {
 
     items.map((item, i) => {
 
-        if (item.id === ID) {
+        if ( item.id === ID ) {
 
             index = i;
         }
@@ -137,7 +137,7 @@ function modifyItem(items, ID, new_item) {
 
     items = items.map((item) => {
 
-        if (item.id === ID) {
+        if ( item.id === ID ) {
 
             Object.keys(new_item).map((key) => {
 
@@ -236,13 +236,13 @@ function sortableCancelStart(e) {
 
     unallowed_classes.map((className) => {
 
-        if (e.target.className.includes(className) || e.target.parentNode.className.includes(className)) {
+        if ( e.target.className.includes(className) || e.target.parentNode.className.includes(className) ) {
 
             cancel = true;
         }
     });
 
-    if (!cancel) {
+    if ( !cancel ) {
 
         cancel = unallowed_tags.indexOf(e.target.tagName.toLowerCase()) !== -1;
     }

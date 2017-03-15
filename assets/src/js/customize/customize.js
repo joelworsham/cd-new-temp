@@ -5,10 +5,10 @@ import './functions';
 import Editor from './editor';
 import Preview from './preview';
 
-const l10n = ClientdashCustomize_Data.l10n || false;
-const roles = ClientdashCustomize_Data.roles || false;
-const adminurl = ClientdashCustomize_Data.adminurl || false;
-const domain = ClientdashCustomize_Data.domain || false;
+const l10n      = ClientdashCustomize_Data.l10n || false;
+const roles     = ClientdashCustomize_Data.roles || false;
+const adminurl  = ClientdashCustomize_Data.adminurl || false;
+const domain    = ClientdashCustomize_Data.domain || false;
 const dashicons = ClientdashCustomize_Data.dashicons || false;
 
 /**
@@ -32,17 +32,17 @@ class Customize extends React.Component {
 
         this.hideCustomizer = this.hideCustomizer.bind(this);
         this.showCustomizer = this.showCustomizer.bind(this);
-        this.switchRole = this.switchRole.bind(this);
-        this.resetRole = this.resetRole.bind(this);
-        this.loadData = this.loadData.bind(this);
+        this.switchRole     = this.switchRole.bind(this);
+        this.resetRole      = this.resetRole.bind(this);
+        this.loadData       = this.loadData.bind(this);
         this.refreshPreview = this.refreshPreview.bind(this);
-        this.showMessage = this.showMessage.bind(this);
+        this.showMessage    = this.showMessage.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState) {
 
         // Don't reload if setting saveRole to false
-        if (this.state.saveRole === true && nextState.saveRole === false) {
+        if ( this.state.saveRole === true && nextState.saveRole === false ) {
 
             return false;
         }
@@ -68,10 +68,10 @@ class Customize extends React.Component {
 
         this.setState((prevState) => {
 
-            prevState.saveRole = true;
+            prevState.saveRole       = true;
             prevState.previewLoading = true;
-            prevState.role = role;
-            prevState.saveRole = true;
+            prevState.role           = role;
+            prevState.saveRole       = true;
 
             return prevState;
         });
@@ -81,11 +81,11 @@ class Customize extends React.Component {
 
     switchRole(role) {
 
-        if (this.state.loadedRoles.indexOf(role) === -1) {
+        if ( this.state.loadedRoles.indexOf(role) === -1 ) {
 
             this.setState((prevState) => {
 
-                prevState.role = role;
+                prevState.role     = role;
                 prevState.saveRole = true;
                 prevState.loadedRoles.push(role);
 
