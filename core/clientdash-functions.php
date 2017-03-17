@@ -143,7 +143,7 @@ function cd_get_core_pages() {
 /**
  * Loads a template file from the theme if it exists, otherwise from the plugin.
  *
- * @since {{VERSION}}}}
+ * @since {{VERSION}}
  *
  * @param string $template Template file to load.
  *
@@ -154,7 +154,7 @@ function cd_get_template( $template ) {
 	/**
 	 * Filter the template to be located.
 	 *
-	 * @since {{VERSION}}}}
+	 * @since {{VERSION}}
 	 */
 	$template = apply_filters( 'cd_get_template', $template );
 
@@ -173,7 +173,7 @@ function cd_get_template( $template ) {
 /**
  * Loads a template.
  *
- * @since {{VERSION}}}}
+ * @since {{VERSION}}
  *
  * @param string $template Template file to load.
  * @param array $args Arguments to extract for the template.
@@ -183,7 +183,7 @@ function cd_template( $template, $args = array() ) {
 	/**
 	 * Filter the args to use in the template.
 	 *
-	 * @since {{VERSION}}}}
+	 * @since {{VERSION}}
 	 */
 	$args = apply_filters( 'cd_get_template_args', $args, $template );
 
@@ -209,4 +209,72 @@ function cd_is_core_page( $ID ) {
 		'cd_help',
 		'cd_webmaster',
 	) );
+}
+
+
+/**
+ * Gets the size of a directory on the server.
+ *
+ * @since 1.1.0
+ *
+ * @param $path
+ *
+ * @return mixed
+ */
+function cd_get_dir_size( $path ) {
+
+	$totalsize  = 0;
+	$totalcount = 0;
+	$dircount   = 0;
+	if ( $handle = opendir( $path ) ) {
+		while ( false !== ( $file = readdir( $handle ) ) ) {
+			$nextpath = $path . '/' . $file;
+			if ( $file != '.' && $file != '..' && ! is_link( $nextpath ) ) {
+				if ( is_dir( $nextpath ) ) {
+					$dircount ++;
+					$result = cd_get_dir_size( $nextpath );
+					$totalsize += $result['size'];
+					$totalcount += $result['count'];
+					$dircount += $result['dircount'];
+				} elseif ( is_file( $nextpath ) ) {
+					$totalsize += filesize( $nextpath );
+					$totalcount ++;
+				}
+			}
+		}
+	}
+	closedir( $handle );
+	$total['size']     = $totalsize;
+	$total['count']    = $totalcount;
+	$total['dircount'] = $dircount;
+
+	return $total;
+}
+
+/**
+ * Correctly formats the bytes size into a more readable size.
+ *
+ * @since 1.1.0
+ *
+ * @param int $size Size in bytes
+ *
+ * @return string
+ */
+function cd_format_dir_size( $size ) {
+
+	if ( $size < 1024 ) {
+		return $size . " bytes";
+	} else if ( $size < ( 1024 * 1024 ) ) {
+		$size = round( $size / 1024, 1 );
+
+		return $size . " KB";
+	} else if ( $size < ( 1024 * 1024 * 1024 ) ) {
+		$size = round( $size / ( 1024 * 1024 ), 1 );
+
+		return $size . " MB";
+	} else {
+		$size = round( $size / ( 1024 * 1024 * 1024 ), 1 );
+
+		return $size . " GB";
+	}
 }
