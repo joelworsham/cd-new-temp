@@ -34,8 +34,6 @@ class InputText extends React.Component {
     render() {
         return (
             <div className="cd-editor-input cd-editor-input-text">
-                {this.props.before}
-
                 <label>
                     {this.props.label}
                     <input
@@ -46,8 +44,6 @@ class InputText extends React.Component {
                         onChange={this.handleChange}
                     />
                 </label>
-
-                {this.props.after}
             </div>
         )
     }

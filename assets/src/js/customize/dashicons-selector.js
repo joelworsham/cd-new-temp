@@ -15,12 +15,12 @@ class DashiconsSelector extends React.Component {
         super(props);
 
         this.state = {
-            selected: this.props.dashicon || '',
             open: false
         }
 
         this.toggleWindow   = this.toggleWindow.bind(this);
         this.selectDashicon = this.selectDashicon.bind(this);
+        this.handleClear    = this.handleClear.bind(this);
     }
 
     toggleWindow() {
@@ -33,11 +33,21 @@ class DashiconsSelector extends React.Component {
     selectDashicon(dashicon) {
 
         this.setState({
-            selected: dashicon,
             open: false
         });
 
         this.props.onSelectDashicon(dashicon);
+    }
+
+    handleClear(e) {
+
+        e.stopPropagation();
+
+        this.setState({
+            open: false
+        });
+
+        this.props.onSelectDashicon('');
     }
 
     render() {
@@ -55,16 +65,21 @@ class DashiconsSelector extends React.Component {
         });
 
         return (
-            <div className="cd-editor-dashicons-selector">
+            <div className="cd-editor-dashicons-selector cd-editor-input">
                 <div className="cd-editor-dashicons-selector-label" onClick={this.toggleWindow}>
                     {l10n['icon']}
                 </div>
 
                 <div className="cd-editor-dashicons-selector-field" onClick={this.toggleWindow}>
-                    <span className={"dashicons " + this.state.selected}/>
+                    <span className={"dashicons " +
+                    (this.props.value || this.props.placeholder + " cd-editor-dashicons-placeholder")}/>
 
-                    <span className={"cd-editor-dashicons-selector-field-icon " +
+                    <span className={"cd-editor-dashicons-selector-open " +
                     "fa fa-chevron-" + (this.state.open ? "up" : "down")}/>
+
+                    {this.props.value &&
+                    <span className="cd-editor-dashicons-selector-clear dashicons dashicons-no"
+                          onClick={this.handleClear}/>}
                 </div>
 
                 {this.state.open &&

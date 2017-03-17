@@ -67,7 +67,7 @@ function getNewItemID(items, type) {
  */
 function getItem(items, ID) {
 
-    var found = false;
+    let found = false;
 
     items.map((item) => {
 

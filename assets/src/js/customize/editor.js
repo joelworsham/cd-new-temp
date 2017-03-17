@@ -1,7 +1,16 @@
 import React from 'react';
 import ReactCSSTransitionReplace from 'react-css-transition-replace';
+import {arrayMove} from 'react-sortable-hoc';
 
-import {modifyItem, getItem, getDeletedItems, getAvailableItems, getNewItemID} from './functions';
+import {
+    getItem,
+    deleteItem,
+    modifyItem,
+    getDeletedItems,
+    getAvailableItems,
+    getNewItemID,
+    getItemIndex
+} from './functions';
 import {
     PanelPrimary,
     PanelAddItems,
@@ -31,6 +40,10 @@ class Editor extends React.Component {
 
         super(props);
 
+        // TODO CD Pages modification method
+        // it needs to not truly exist in the menu, but rather moving it around in the menu modifies the cd pages state
+        // itself whenenver moving, removing, adding.
+
         this.state = {
             nextPanel: null,
             panelDirection: 'forward',
@@ -42,6 +55,7 @@ class Editor extends React.Component {
             deleting: false,
             loading: true,
             changes: false,
+            // cd_pages: ClientdashCustomize_Data.cd_pages || [],
             message: {
                 type: 'default',
                 text: null
@@ -50,39 +64,39 @@ class Editor extends React.Component {
             history: {},
         }
 
-        this.loadPanel       = this.loadPanel.bind(this);
-        this.saveChanges     = this.saveChanges.bind(this);
-        this.confirmReset    = this.confirmReset.bind(this);
-        this.cancelReset     = this.cancelReset.bind(this);
-        this.resetRole       = this.resetRole.bind(this);
-        this.resetMessage    = this.resetMessage.bind(this);
-        this.previewChanges  = this.previewChanges.bind(this);
-        this.hideCustomizer  = this.hideCustomizer.bind(this);
-        this.closeCustomizer = this.closeCustomizer.bind(this);
-        this.switchRole      = this.switchRole.bind(this);
-        this.menuItemAdd     = this.menuItemAdd.bind(this);
-        this.addSubmenuItem  = this.addSubmenuItem.bind(this);
-        this.menuItemDelete  = this.menuItemDelete.bind(this);
+        this.loadPanel         = this.loadPanel.bind(this);
+        this.saveChanges       = this.saveChanges.bind(this);
+        this.confirmReset      = this.confirmReset.bind(this);
+        this.cancelReset       = this.cancelReset.bind(this);
+        this.resetRole         = this.resetRole.bind(this);
+        this.resetMessage      = this.resetMessage.bind(this);
+        this.previewChanges    = this.previewChanges.bind(this);
+        this.hideCustomizer    = this.hideCustomizer.bind(this);
+        this.closeCustomizer   = this.closeCustomizer.bind(this);
+        this.switchRole        = this.switchRole.bind(this);
+        this.menuItemAdd       = this.menuItemAdd.bind(this);
+        this.submenuItemAdd    = this.submenuItemAdd.bind(this);
+        this.menuItemDelete    = this.menuItemDelete.bind(this);
         this.submenuItemDelete = this.submenuItemDelete.bind(this);
-        this.submenuEdit     = this.submenuEdit.bind(this);
-        this.menuItemEdit    = this.menuItemEdit.bind(this);
-        this.reOrderMenu     = this.reOrderMenu.bind(this);
-        this.reOrderSubmenu  = this.reOrderSubmenu.bind(this);
-        this.submenuItemEdit = this.submenuItemEdit.bind(this);
-        this.widgetAdd       = this.widgetAdd.bind(this);
-        this.widgetDelete    = this.widgetDelete.bind(this);
-        this.widgetEdit      = this.widgetEdit.bind(this);
+        this.submenuEdit       = this.submenuEdit.bind(this);
+        this.menuItemEdit      = this.menuItemEdit.bind(this);
+        this.reOrderMenu       = this.reOrderMenu.bind(this);
+        this.reOrderSubmenu    = this.reOrderSubmenu.bind(this);
+        this.submenuItemEdit   = this.submenuItemEdit.bind(this);
+        this.widgetAdd         = this.widgetAdd.bind(this);
+        this.widgetDelete      = this.widgetDelete.bind(this);
+        this.widgetEdit        = this.widgetEdit.bind(this);
         this.handleEditorClick = this.handleEditorClick.bind(this);
-        this.showMessage     = this.showMessage.bind(this);
-        this.cdPageTabsEdit  = this.cdPageTabsEdit.bind(this);
-        this.cdPageEdit      = this.cdPageEdit.bind(this);
-        this.cdPageDelete    = this.cdPageDelete.bind(this);
-        this.cdPageAdd       = this.cdPageAdd.bind(this);
+        this.showMessage       = this.showMessage.bind(this);
+        this.cdPageTabsEdit    = this.cdPageTabsEdit.bind(this);
+        this.cdPageEdit        = this.cdPageEdit.bind(this);
+        this.cdPageDelete      = this.cdPageDelete.bind(this);
+        this.cdPageAdd         = this.cdPageAdd.bind(this);
     }
 
     componentDidMount() {
 
-        var api = this;
+        let api = this;
 
         // Confirm before leave
         window.onbeforeunload = function () {
@@ -131,11 +145,7 @@ class Editor extends React.Component {
             headers: new Headers({
                 'Content-Type': 'application/json'
             }),
-            body: JSON.stringify({
-                menu: this.state.customizations[this.props.role].menu,
-                submenu: this.state.customizations[this.props.role].submenu,
-                dashboard: this.state.customizations[this.props.role].dashboard
-            })
+            body: JSON.stringify(this.state.customizations[this.props.role])
         }).then(function (response) {
 
             return response.json();
@@ -219,8 +229,8 @@ class Editor extends React.Component {
 
     resetRole() {
 
-        var role = this.props.role;
-        var api = this;
+        let role = this.props.role;
+        let api  = this;
 
         this.setState({
             deleting: true,
@@ -285,7 +295,7 @@ class Editor extends React.Component {
         if ( !this.state.customizations[this.props.role] ) {
 
             let role = this.props.role;
-            let api = this;
+            let api  = this;
 
             this.setState({
                 activePanel: 'loading',
@@ -306,10 +316,10 @@ class Editor extends React.Component {
                 api.setState((prevState) => {
 
                     prevState.activePanel = 'primary';
-                    prevState.loading       = false;
+                    prevState.loading     = false;
 
                     prevState.customizations[role] = customizations;
-                    prevState.history[role] = {};
+                    prevState.history[role]        = {};
 
                     return prevState;
                 });
@@ -321,11 +331,24 @@ class Editor extends React.Component {
 
         } else if ( this.state.activePanel == 'loading' ) {
 
-            this.setState({
-                activePanel: 'primary',
-                loading: false
+            this.setState((prevState) => {
+
+                prevState.activePanel = 'primary';
+                prevState.loading     = false;
             });
         }
+    }
+
+    getAvailableCDPages() {
+
+        let available_pages = this.state.customizations[this.props.role].cdpages;
+
+        available_pages = available_pages.filter((item) => {
+
+            return !item.deleted && !item.parent;
+        });
+
+        return available_pages;
     }
 
     dataChange(refreshDelay) {
@@ -358,33 +381,58 @@ class Editor extends React.Component {
 
             let menu = prevState.customizations[role].menu;
 
-            // Separators and Custom Links are handled differently (dynamically generated IDs)
-            if ( item.type == 'separator' || item.type == 'custom_link' ) {
+            switch ( item.type ) {
+                case 'separator':
+                case 'custom_link':
 
-                let new_item_id = getNewItemID(menu, item.type);
+                    let new_item_id = getNewItemID(menu, item.type);
 
-                prevState.customizations[role].menu.unshift({
-                    id: new_item_id,
-                    original_title: l10n[item.type],
-                    icon: 'dashicons-admin-generic',
-                    type: item.type,
-                });
+                    prevState.customizations[role].menu.unshift({
+                        id: new_item_id,
+                        original_title: l10n[item.type],
+                        icon: 'dashicons-admin-generic',
+                        type: item.type,
+                    });
 
-                prevState.history[role].menuItemLastAdded = new_item_id;
+                    prevState.history[role].menuItemLastAdded = new_item_id;
 
-                return prevState;
+                    break;
+
+                case 'cd_page':
+
+                    prevState.customizations[role].cdpages = modifyItem(
+                        prevState.customizations[role].cdpages,
+                        item.id,
+                        {
+                            parent: 'toplevel',
+                            position: getItemIndex(menu, item.id)
+                        }
+                    );
+
+                    prevState.customizations[role].menu.unshift({
+                        id: item.id,
+                        original_title: item.title || item.original_title,
+                        original_icon: item.icon || item.original_icon,
+                        type: 'cd_page',
+                    });
+
+                    prevState.history[role].menuItemLastAdded = item.id;
+
+                    break;
+
+                default:
+
+                    prevState.customizations[role].menu = modifyItem(menu, item.id, {deleted: false});
+
+                    // Move to beginning
+                    prevState.customizations[role].menu = arrayMove(
+                        menu,
+                        getItemIndex(menu, item.id),
+                        0
+                    );
+
+                    prevState.history[role].menuItemLastAdded = item.id;
             }
-
-            prevState.customizations[role].menu = modifyItem(menu, item.id, {deleted: false});
-
-            // Move to beginning
-            prevState.customizations[role].menu = arrayMove(
-                menu,
-                getItemIndex(menu, item.id),
-                0
-            );
-
-            prevState.history[role].menuItemLastAdded = item.id;
 
             return prevState;
         });
@@ -394,45 +442,66 @@ class Editor extends React.Component {
         this.loadPanel('menu', 'backward');
     }
 
-    addSubmenuItem(item) {
+    submenuItemAdd(item) {
 
         let submenu_edit = this.state.submenuEdit;
-        let role    = this.props.role;
-        let submenu = this.state.customizations[role].submenu[submenu_edit] || [];
+        let role         = this.props.role;
+        let submenu      = this.state.customizations[role].submenu[submenu_edit] || [];
 
         this.setState((prevState) => {
 
-            // Custom Links are handled differently (dynamically generated IDs)
-            if ( item.type == 'custom_link' ) {
+            switch ( item.type ) {
+                case 'custom_link':
 
-                let new_item_id = getNewItemID(submenu, item.type);
+                    let new_item_id = getNewItemID(submenu, item.type);
 
-                submenu.unshift({
-                    id: new_item_id,
-                    original_title: l10n[item.type],
-                    type: item.type,
-                });
+                    submenu.unshift({
+                        id: new_item_id,
+                        original_title: l10n[item.type],
+                        type: item.type,
+                    });
 
-                this.state.customizations[role].submenu[submenu_edit] = submenu;
-                prevState.history[role].SubmenuItemLastAdded = new_item_id;
+                    this.state.customizations[role].submenu[submenu_edit] = submenu;
+                    prevState.history[role].SubmenuItemLastAdded          = new_item_id;
 
-                return prevState;
+                    break;
+
+                case 'cd_page':
+
+                    prevState.customizations[role].cdpages = modifyItem(
+                        prevState.customizations[role].cdpages,
+                        item.id,
+                        {parent: submenu_edit}
+                    );
+
+                    submenu.unshift({
+                        id: item.id,
+                        original_title: item.title || item.original_title,
+                        type: 'cd_page',
+                    });
+
+                    this.state.customizations[role].submenu[submenu_edit] = submenu;
+                    prevState.history[role].SubmenuItemLastAdded          = item.id;
+
+                    break;
+
+                default:
+
+                    prevState.customizations[role].submenu[submenu_edit] = modifyItem(
+                        prevState.customizations[role].submenu[submenu_edit],
+                        item.id,
+                        {deleted: false}
+                    );
+
+                    // Move to beginning
+                    prevState.customizations[role].submenu[submenu_edit] = arrayMove(
+                        prevState.customizations[role].submenu[submenu_edit],
+                        getItemIndex(prevState.customizations[role].submenu[submenu_edit], item.id),
+                        0
+                    );
+
+                    prevState.history[role].SubmenuItemLastAdded = item.id;
             }
-
-            prevState.customizations[role].submenu[submenu_edit] = modifyItem(
-                prevState.customizations[role].submenu[submenu_edit],
-                item.id,
-                {deleted: false}
-            );
-
-            // Move to beginning
-            prevState.customizations[role].submenu[submenu_edit] = arrayMove(
-                prevState.customizations[role].submenu[submenu_edit],
-                getItemIndex(prevState.customizations[role].submenu[submenu_edit], item.id),
-                0
-            );
-
-            prevState.history[role].SubmenuItemLastAdded = item.id;
 
             return prevState;
         });
@@ -450,19 +519,32 @@ class Editor extends React.Component {
 
             let item = getItem(prevState.customizations[role].menu, ID);
 
-            // Separator and cusotm link are deleted differently
-            if ( item.type == 'separator' || item.type == 'custom_link' ) {
+            switch ( item.type ) {
+                case 'separator':
+                case 'custom_link':
+                case 'cd_page':
 
-                prevState.customizations[role].menu = deleteItem(prevState.customizations[role].menu, ID);
+                    if ( item.type == 'cd_page' ) {
 
-                return prevState;
+                        prevState.customizations[role].cdpages = modifyItem(
+                            prevState.customizations[role].cdpages,
+                            item.id,
+                            {parent: false}
+                        );
+                    }
+
+                    prevState.customizations[role].menu = deleteItem(prevState.customizations[role].menu, ID);
+
+                    break;
+
+                default:
+
+                    prevState.customizations[role].menu = modifyItem(
+                        prevState.customizations[role].menu,
+                        ID,
+                        {deleted: true, title: '', icon: ''}
+                    );
             }
-
-            prevState.customizations[role].menu = modifyItem(
-                prevState.customizations[role].menu,
-                ID,
-                {deleted: true, title: '', icon: ''}
-            );
 
             return prevState;
         });
@@ -474,26 +556,39 @@ class Editor extends React.Component {
     submenuItemDelete(ID) {
 
         let submenu_edit = this.state.submenuEdit;
-        let role = this.props.role;
+        let role         = this.props.role;
+        let submenu      = this.state.customizations[role].submenu[submenu_edit];
 
         this.setState((prevState) => {
 
-            let item = getItem(prevState.customizations[role].submenu[submenu_edit], ID);
+            let item = getItem(submenu, ID);
 
-            // Custom link are deleted differently
-            if ( item.type == 'custom_link' ) {
+            switch ( item.type ) {
+                case 'custom_link':
+                case 'cd_page':
 
-                prevState.customizations[role].submenu[submenu_edit] =
-                    deleteItem(prevState.customizations[role].submenu[submenu_edit], ID);
+                    if ( item.type == 'cd_page' ) {
 
-                return prevState;
+                        prevState.customizations[role].cdpages = modifyItem(
+                            prevState.customizations[role].cdpages,
+                            item.id,
+                            {parent: false}
+                        );
+                    }
+
+                    prevState.customizations[role].submenu[submenu_edit] =
+                        deleteItem(submenu, ID);
+
+                    break;
+
+                default:
+
+                    prevState.customizations[role].submenu[submenu_edit] = modifyItem(
+                        submenu,
+                        ID,
+                        {deleted: true, title: ''}
+                    )
             }
-
-            prevState.customizations[role].submenu[submenu_edit] = modifyItem(
-                prevState.customizations[role].submenu[submenu_edit],
-                ID,
-                {deleted: true, title: ''}
-            )
 
             return prevState;
         });
@@ -531,7 +626,7 @@ class Editor extends React.Component {
     submenuItemEdit(item) {
 
         let submenu_edit = this.state.submenuEdit;
-        let role = this.props.role;
+        let role         = this.props.role;
 
         this.setState((prevState) => {
 
@@ -564,7 +659,7 @@ class Editor extends React.Component {
     reOrderSubmenu(new_order) {
 
         let submenu_edit = this.state.submenuEdit;
-        let role = this.props.role;
+        let role         = this.props.role;
 
         this.setState((prevState) => {
 
@@ -653,6 +748,26 @@ class Editor extends React.Component {
                 page
             );
 
+            // Edit CD page accordingly within menu
+            let cdpage = getItem(prevState.customizations[role].cdpages, page.id);
+
+            if ( cdpage.parent == 'toplevel' ) {
+
+                prevState.customizations[role].menu = modifyItem(
+                    prevState.customizations[role].menu,
+                    cdpage.id,
+                    page
+                );
+
+            } else if ( cdpage.parent !== false ) {
+
+                prevState.customizations[role].submenu[cdpage.parent] = modifyItem(
+                    prevState.customizations[role].submenu[cdpage.parent],
+                    cdpage.id,
+                    page
+                );
+            }
+
             return prevState;
         });
 
@@ -714,22 +829,23 @@ class Editor extends React.Component {
 
     render() {
 
-        var customizations = this.state.customizations[this.props.role];
-        var panel;
-        var secondary_actions;
-        var history = this.state.history[this.props.role] || {};
+        let customizations = this.state.customizations[this.props.role];
+        let panel;
+        let secondary_actions;
+        let history        = this.state.history[this.props.role] || {};
 
         switch ( this.state.activePanel ) {
 
             case 'primary':
             case 'confirmReset':
             case 'deleting': {
-                panel             =
+                panel =
                     <PanelPrimary
                         key="primary"
                         onLoadPanel={this.loadPanel}
                     />
                 ;
+
                 secondary_actions =
                     <SecondaryActionsPrimary
                         key="primary"
@@ -744,10 +860,26 @@ class Editor extends React.Component {
             }
             case 'menu': {
 
-                let current_items = customizations.menu;
+                let current_items   = customizations.menu;
                 let available_items = getAvailableItems(current_items);
 
-                panel               =
+                // Filter out disabled CD Pages
+                available_items = available_items.filter((item) => {
+
+                    if (item.type == 'cd_page' && !item.deleted) {
+
+                        let page = getItem(customizations.cdpages, item.id);
+
+                        if (page.deleted) {
+
+                            return false;
+                        }
+                    }
+
+                    return true;
+                });
+
+                panel =
                     <PanelMenu
                         key="menu"
                         menuItems={available_items}
@@ -759,7 +891,8 @@ class Editor extends React.Component {
                         onItemSubmitForm={this.previewChanges}
                     />
                 ;
-                secondary_actions   =
+
+                secondary_actions =
                     <SecondaryActions
                         key="menu"
                         title={l10n['panel_actions_title_menu']}
@@ -774,10 +907,10 @@ class Editor extends React.Component {
             }
             case 'submenu': {
 
-                let current_items = customizations.submenu[this.state.submenuEdit] || [];
+                let current_items   = customizations.submenu[this.state.submenuEdit] || [];
                 let available_items = getAvailableItems(current_items);
-                let menu_item     = getItem(customizations.menu, this.state.submenuEdit);
-                let item_info     =
+                let menu_item       = getItem(customizations.menu, this.state.submenuEdit);
+                let item_info       =
                         <div className="cd-editor-panel-menuinfo">
                             <span className={"cd-editor-panel-menuinfo-icon dashicons " + menu_item.icon}></span>
                             <span className="cd-editor-panel-menuinfo-title">
@@ -786,7 +919,7 @@ class Editor extends React.Component {
                         </div>
                     ;
 
-                panel               =
+                panel =
                     <PanelSubmenu
                         key="submenu"
                         itemInfo={item_info}
@@ -798,7 +931,8 @@ class Editor extends React.Component {
                         onItemSubmitForm={this.previewChanges}
                     />
                 ;
-                secondary_actions   =
+
+                secondary_actions =
                     <SecondaryActions
                         key="submenu"
                         title={l10n['panel_actions_title_submenu']}
@@ -813,7 +947,7 @@ class Editor extends React.Component {
             }
             case 'addMenuItems': {
 
-                let current_items = customizations.menu;
+                let current_items   = customizations.menu;
                 let available_items = getDeletedItems(current_items);
 
                 // Skip separators
@@ -836,13 +970,26 @@ class Editor extends React.Component {
                     type: 'separator',
                 });
 
-                panel               =
+                // Add CD Pages
+                let available_cd_pages = this.getAvailableCDPages();
+                available_cd_pages.map((item) => {
+
+                    available_items.push({
+                        id: item.id,
+                        original_title: item.title || item.original_title,
+                        original_icon: item.icon || item.original_icon,
+                        type: 'cd_page',
+                    });
+                });
+
+                panel =
                     <PanelAddItems
                         key="addMenuItems"
                         availableItems={available_items}
                         onAddItem={this.menuItemAdd}
                     />
                 ;
+
                 secondary_actions =
                     <SecondaryActions
                         key="addMenuItems"
@@ -855,8 +1002,8 @@ class Editor extends React.Component {
                 break;
             }
             case 'addSubmenuItems': {
-                let menu_item     = getItem(customizations.menu, this.state.submenuEdit);
-                let item_info     =
+                let menu_item       = getItem(customizations.menu, this.state.submenuEdit);
+                let item_info       =
                         <div className="cd-editor-panel-menuinfo">
                             <span className={"cd-editor-panel-menuinfo-icon dashicons " + menu_item.icon}></span>
                             <span className="cd-editor-panel-menuinfo-title">
@@ -864,7 +1011,7 @@ class Editor extends React.Component {
                             </span>
                         </div>
                     ;
-                let current_items = customizations.submenu[this.state.submenuEdit] || [];
+                let current_items   = customizations.submenu[this.state.submenuEdit] || [];
                 let available_items = getDeletedItems(current_items);
 
                 // Add custom link
@@ -874,15 +1021,27 @@ class Editor extends React.Component {
                     type: 'custom_link',
                 });
 
-                panel               =
+                // Add CD Pages
+                let available_cd_pages = this.getAvailableCDPages();
+                available_cd_pages.map((item) => {
+
+                    available_items.push({
+                        id: item.id,
+                        original_title: item.title || item.original_title,
+                        type: 'cd_page',
+                    });
+                });
+
+                panel =
                     <PanelAddItems
                         key="addSubmenuItems"
                         itemInfo={item_info}
                         availableItems={available_items}
-                        onAddItem={this.addSubmenuItem}
+                        onAddItem={this.submenuItemAdd}
                     />
                 ;
-                secondary_actions   =
+
+                secondary_actions =
                     <SecondaryActions
                         key="addSubmenuItems"
                         title={l10n['panel_actions_title_submenu_add']}
@@ -895,10 +1054,10 @@ class Editor extends React.Component {
             }
             case 'dashboard': {
 
-                let current_items = customizations.dashboard;
+                let current_items   = customizations.dashboard;
                 let available_items = getAvailableItems(current_items);
 
-                panel               =
+                panel =
                     <PanelDashboard
                         key="dashboard"
                         widgets={available_items}
@@ -908,7 +1067,8 @@ class Editor extends React.Component {
                         onItemSubmitForm={this.previewChanges}
                     />
                 ;
-                secondary_actions   =
+
+                secondary_actions =
                     <SecondaryActions
                         key="dashboard"
                         title={l10n['panel_actions_title_dashboard']}
@@ -923,17 +1083,18 @@ class Editor extends React.Component {
             }
             case 'addWidgets': {
 
-                let current_items = customizations.dashboard;
+                let current_items   = customizations.dashboard;
                 let available_items = getDeletedItems(current_items);
 
-                panel               =
+                panel =
                     <PanelAddItems
                         key="addWidgets"
                         availableItems={available_items}
                         onAddItem={this.widgetAdd}
                     />
                 ;
-                secondary_actions   =
+
+                secondary_actions =
                     <SecondaryActions
                         key="addWidgets"
                         title={l10n['panel_actions_title_dashboard_add']}
@@ -947,10 +1108,30 @@ class Editor extends React.Component {
 
             case 'cdPages': {
 
-                let current_items = customizations.cdpages;
+                let current_items   = customizations.cdpages;
                 let available_items = getAvailableItems(current_items);
 
-                panel               =
+                available_items.map((item) => {
+
+                    if ( item.parent == 'toplevel' ) {
+
+                        item.parent_label = l10n['toplevel'];
+
+                    } else if ( item.parent !== false ) {
+
+                        let parent = getItem(customizations.menu, item.parent);
+
+                        item.parent_label = parent.title || parent.original_title;
+
+                    } else {
+
+                        item.parent_label = l10n['none'];
+                    }
+
+                    return item;
+                });
+
+                panel =
                     <PanelCDPages
                         key="cdPages"
                         pages={available_items}
@@ -961,7 +1142,8 @@ class Editor extends React.Component {
                         onItemSubmitForm={this.previewChanges}
                     />
                 ;
-                secondary_actions   =
+
+                secondary_actions =
                     <SecondaryActions
                         key="cdPages"
                         title={l10n['panel_actions_title_cdpages']}
@@ -978,17 +1160,18 @@ class Editor extends React.Component {
 
             case 'addCDPages': {
 
-                let current_items = customizations.cdpages;
+                let current_items   = customizations.cdpages;
                 let available_items = getDeletedItems(current_items);
 
-                panel               =
+                panel =
                     <PanelAddItems
                         key="addCDPages"
                         availableItems={available_items}
                         onAddItem={this.cdPageAdd}
                     />
                 ;
-                secondary_actions   =
+
+                secondary_actions =
                     <SecondaryActions
                         key="addWidgets"
                         title={l10n['panel_actions_title_cdpages_add']}
@@ -1003,11 +1186,12 @@ class Editor extends React.Component {
 
             case 'loading': {
 
-                panel             =
+                panel =
                     <PanelLoading
                         key="loading"
                     />
                 ;
+
                 secondary_actions =
                     <SecondaryActions
                         key="loading"
@@ -1018,11 +1202,12 @@ class Editor extends React.Component {
 
             case 'blank': {
 
-                panel             =
+                panel =
                     <PanelBlank
                         key="blank"
                     />
                 ;
+
                 secondary_actions =
                     <SecondaryActions
                         key="blank"

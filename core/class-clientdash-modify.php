@@ -53,7 +53,7 @@ class ClientDash_Modify {
 	 *
 	 * @var array|null
 	 */
-	public $pages;
+	public $cdpages;
 
 	/**
 	 * ClientDash_Modify constructor.
@@ -64,7 +64,7 @@ class ClientDash_Modify {
 
 		add_filter( 'custom_menu_order', array( $this, 'modify_menu' ), 99999 );
 		add_action( 'wp_dashboard_setup', array( $this, 'modify_dashboard' ), 99999 );
-		add_filter( 'cd_core_pages', array( $this, 'modify_core_pages' ), 99999 );
+		add_filter( 'cd_core_pages', array( $this, 'modify_cd_pages' ), 99999 );
 	}
 
 	/**
@@ -110,7 +110,7 @@ class ClientDash_Modify {
 		$this->menu      = $customizations['menu'];
 		$this->submenu   = $customizations['submenu'];
 		$this->dashboard = $customizations['dashboard'];
-		$this->pages     = $customizations['cdpages'];
+		$this->cdpages   = $customizations['cdpages'];
 	}
 
 	/**
@@ -308,18 +308,18 @@ class ClientDash_Modify {
 	 *
 	 * @return array
 	 */
-	function modify_core_pages( $pages ) {
+	function modify_cd_pages( $pages ) {
 
 		$this->get_customizations();
 
-		if ( ! $this->pages ) {
+		if ( ! $this->cdpages ) {
 
-			return;
+			return $pages;
 		}
 
 		foreach ( $pages as $i => $page ) {
 
-			$custom_page = cd_array_search_by_key( $this->pages, 'id', $page['id'] );
+			$custom_page = cd_array_search_by_key( $this->cdpages, 'id', $page['id'] );
 
 			if ( ! $custom_page ) {
 

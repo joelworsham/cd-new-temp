@@ -42,7 +42,7 @@ gulp.task('customize_sass', function () {
             suffix: '.min'
         }))
         .pipe(gulp.dest('./assets/dist/css'))
-        .pipe(notify({message: 'SASS Customize Inpreview complete'}));
+        .pipe(notify({message: 'SASS Customize complete'}));
 });
 
 gulp.task('customize_inpreview_sass', function () {

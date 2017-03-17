@@ -70,7 +70,6 @@ class LineItemAction extends React.Component {
 
     handleClick(e) {
 
-
         this.props.onHandleClick();
     }
 
@@ -140,7 +139,7 @@ class LineItems extends React.Component {
         return (
             <ul className="cd-editor-lineitems">
                 {this.props.items.map((item, index) =>
-                    <LineItem key={`item-${index}`} id={item.id}>
+                    <LineItem key={`item-${index}`} id={item.props.id}>
                         {item}
                     </LineItem>
                 )}
@@ -232,9 +231,9 @@ class MenuItemEdit extends React.Component {
 
     render() {
 
-        var actions = [];
+        let actions = [];
 
-        if ( this.props.id != 'clientdash' ) {
+        if ( this.props.type != 'clientdash' ) {
             actions = [
                 <LineItemAction
                     key="menu-action-submenu"
@@ -259,7 +258,7 @@ class MenuItemEdit extends React.Component {
         }
 
         const after_title =
-                  <span className="cd-editor-lineitem-form-originaltitle">
+                  <span className="cd-editor-lineitem-form-subtext">
                     {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
                 </span>
             ;
@@ -411,9 +410,9 @@ class MenuItemCustomLink extends React.Component {
 
     render() {
 
-        var actions = [];
+        let actions = [];
 
-        if ( this.props.id != 'clientdash' ) {
+        if ( this.props.type != 'clientdash' ) {
             actions = [
                 <LineItemAction
                     key="menu-action-submenu"
@@ -438,7 +437,7 @@ class MenuItemCustomLink extends React.Component {
         }
 
         const after_title =
-                  <span className="cd-editor-lineitem-form-originaltitle">
+                  <span className="cd-editor-lineitem-form-subtext">
                     {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
                 </span>
             ;
@@ -476,6 +475,104 @@ class MenuItemCustomLink extends React.Component {
                 id={this.props.id}
                 title={this.props.title || this.props.original_title}
                 icon={this.props.icon || this.props.original_icon}
+                actions={actions}
+                form={this.state.editing ? form : false}
+            />
+        )
+    }
+}
+
+/**
+ * Line item for editing a sub menu item.
+ *
+ * @since {{VERSION}}
+ */
+class SubmenuItemEdit extends React.Component {
+
+    constructor(props) {
+
+        super(props);
+
+        this.state = {
+            editing: this.props.editing || false,
+            title: this.props.title,
+            icon: this.props.icon
+        }
+
+        this.toggleEdit  = this.toggleEdit.bind(this);
+        this.titleChange = this.titleChange.bind(this);
+        this.deleteItem  = this.deleteItem.bind(this);
+        this.submitForm  = this.submitForm.bind(this);
+    }
+
+    toggleEdit() {
+
+        this.setState((prevState) => ({
+            editing: !prevState.editing
+        }));
+    }
+
+    titleChange(value) {
+
+        this.props.onSubmenuItemEdit({
+            id: this.props.id,
+            title: value,
+            original_title: this.props.original_title,
+        });
+    }
+
+    deleteItem() {
+
+        this.props.onDeleteItem(this.props.id);
+    }
+
+    submitForm(event) {
+
+        this.props.onItemFormSubmit();
+    }
+
+    render() {
+
+        const actions = [
+            <LineItemAction
+                key="menu-action-edit"
+                icon={this.state.editing ? "chevron-up" : "chevron-down"}
+                onHandleClick={this.toggleEdit}
+            />,
+            <LineItemAction
+                key="menu-action-delete"
+                icon="times"
+                classes="cd-editor-lineitem-action-close"
+                onHandleClick={this.deleteItem}
+            />
+        ];
+
+        const after_title =
+                  <span className="cd-editor-lineitem-form-subtext">
+                    {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
+                </span>
+            ;
+
+        const form =
+                  <LineItemForm
+                      onSubmit={this.submitForm}
+                  >
+                      <InputText
+                          label={l10n['title']}
+                          value={this.props.title}
+                          placeholder={this.props.original_title}
+                          onHandleChange={this.titleChange}
+                          after={after_title}
+                      />
+                  </LineItemForm>
+            ;
+
+
+        return (
+            <LineItemContent
+                key={this.props.id}
+                id={this.props.id}
+                title={this.props.title || this.props.original_title}
                 actions={actions}
                 form={this.state.editing ? form : false}
             />
@@ -563,7 +660,7 @@ class SubmenuItemCustomLink extends React.Component {
         ];
 
         const after_title =
-                  <span className="cd-editor-lineitem-form-originaltitle">
+                  <span className="cd-editor-lineitem-form-subtext">
                     {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
                 </span>
             ;
@@ -602,11 +699,11 @@ class SubmenuItemCustomLink extends React.Component {
 }
 
 /**
- * Line item for editing a sub menu item.
+ * Line item for editing a submenu item CD page.
  *
  * @since {{VERSION}}
  */
-class SubmenuItemEdit extends React.Component {
+class MenuItemCDPage extends React.Component {
 
     constructor(props) {
 
@@ -614,30 +711,9 @@ class SubmenuItemEdit extends React.Component {
 
         this.state = {
             editing: this.props.editing || false,
-            title: this.props.title,
-            icon: this.props.icon
         }
 
-        this.toggleEdit  = this.toggleEdit.bind(this);
-        this.titleChange = this.titleChange.bind(this);
-        this.deleteItem  = this.deleteItem.bind(this);
-        this.submitForm  = this.submitForm.bind(this);
-    }
-
-    toggleEdit() {
-
-        this.setState((prevState) => ({
-            editing: !prevState.editing
-        }));
-    }
-
-    titleChange(value) {
-
-        this.props.onSubmenuItemEdit({
-            id: this.props.id,
-            title: value,
-            original_title: this.props.original_title,
-        });
+        this.deleteItem = this.deleteItem.bind(this);
     }
 
     deleteItem() {
@@ -645,54 +721,25 @@ class SubmenuItemEdit extends React.Component {
         this.props.onDeleteItem(this.props.id);
     }
 
-    submitForm(event) {
-
-        this.props.onItemFormSubmit();
-    }
-
     render() {
 
-        const actions = [
-            <LineItemAction
-                key="menu-action-edit"
-                icon={this.state.editing ? "chevron-up" : "chevron-down"}
-                onHandleClick={this.toggleEdit}
-            />,
+        let actions = [
             <LineItemAction
                 key="menu-action-delete"
                 icon="times"
+                text={l10n['delete']}
                 classes="cd-editor-lineitem-action-close"
                 onHandleClick={this.deleteItem}
             />
         ];
 
-        const after_title =
-                  <span className="cd-editor-lineitem-form-originaltitle">
-                    {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
-                </span>
-            ;
-
-        const form =
-                  <LineItemForm
-                      onSubmit={this.submitForm}
-                  >
-                      <InputText
-                          label={l10n['title']}
-                          value={this.props.title}
-                          placeholder={this.props.original_title}
-                          onHandleChange={this.titleChange}
-                          after={after_title}
-                      />
-                  </LineItemForm>
-            ;
-
-
         return (
             <LineItemContent
                 key={this.props.id}
+                id={this.props.id}
+                icon={this.props.icon || this.props.original_icon}
                 title={this.props.title || this.props.original_title}
                 actions={actions}
-                form={this.state.editing ? form : false}
             />
         )
     }
@@ -761,54 +808,51 @@ class CDPageEdit extends React.Component {
 
     render() {
 
-        var actions = [];
-
-        if ( this.props.id != 'clientdash' ) {
-            actions = [
-                <LineItemAction
-                    key="menu-action-submenu"
-                    icon="th-list"
-                    text={l10n['edit_submenu']}
-                    onHandleClick={this.tabsEdit}
-                />,
-                <LineItemAction
-                    key="menu-action-edit"
-                    icon={this.state.editing ? "chevron-up" : "chevron-down"}
-                    text={l10n['edit']}
-                    onHandleClick={this.toggleEdit}
-                />,
-                <LineItemAction
-                    key="menu-action-delete"
-                    icon="times"
-                    text={l10n['delete']}
-                    classes="cd-editor-lineitem-action-close"
-                    onHandleClick={this.deleteItem}
-                />
-            ];
-        }
-
-        const after_title =
-                  <span className="cd-editor-lineitem-form-originaltitle">
-                    {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
-                </span>
-            ;
+        let actions = [
+            <LineItemAction
+                key="menu-action-edit"
+                icon={this.state.editing ? "chevron-up" : "chevron-down"}
+                text={l10n['edit']}
+                onHandleClick={this.toggleEdit}
+            />,
+            <LineItemAction
+                key="menu-action-delete"
+                icon="times"
+                text={l10n['delete']}
+                classes="cd-editor-lineitem-action-close"
+                onHandleClick={this.deleteItem}
+            />
+        ];
 
         const form =
                   <LineItemForm
                       onSubmit={this.submitForm}
                   >
+
+                      <p>
+                          {l10n['current_location']}: <strong>{this.props.parent_label}</strong>
+                      </p>
+
                       <InputText
                           label={l10n['title']}
                           value={this.props.title}
                           placeholder={this.props.original_title}
                           onHandleChange={this.titleChange}
-                          after={after_title}
                       />
 
+                      <p className="cd-editor-lineitem-form-subfield cd-editor-lineitem-form-subtext">
+                          {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
+                      </p>
+
                       <DashiconsSelector
-                          dashicon={this.props.icon || this.props.original_icon}
+                          value={this.props.icon}
+                          placeholder={this.props.original_icon}
                           onSelectDashicon={this.iconChange}
                       />
+
+                      <p className="cd-editor-lineitem-form-subfield cd-editor-lineitem-form-subtext">
+                          {l10n['original_icon'] + " "}<span className={"dashicons " + this.props.original_icon} />
+                      </p>
 
                   </LineItemForm>
             ;
@@ -819,6 +863,7 @@ class CDPageEdit extends React.Component {
                 id={this.props.id}
                 title={this.props.title || this.props.original_title}
                 icon={this.props.icon || this.props.original_icon}
+                classes={this.props.parent === false && 'cd-editor-lineitem-disabled'}
                 actions={actions}
                 form={this.state.editing ? form : false}
             />
@@ -867,6 +912,7 @@ class ItemAdd extends React.Component {
         return (
             <LineItemContent
                 key={this.props.id}
+                id={this.props.id}
                 title={this.props.title}
                 icon={this.props.icon}
                 actions={actions}
@@ -940,7 +986,7 @@ class WidgetEdit extends React.Component {
         ];
 
         const after_title =
-                  <span className="cd-editor-lineitem-form-originaltitle">
+                  <span className="cd-editor-lineitem-form-subtext">
                     {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
                 </span>
             ;
@@ -962,6 +1008,7 @@ class WidgetEdit extends React.Component {
         return (
             <LineItemContent
                 key={this.props.id}
+                id={this.props.id}
                 title={this.props.title || this.props.original_title}
                 actions={actions}
                 form={this.state.editing ? form : false}
@@ -982,6 +1029,7 @@ export {
     MenuItemEdit,
     MenuItemSeparator,
     MenuItemCustomLink,
+    MenuItemCDPage,
     SubmenuItemEdit,
     SubmenuItemCustomLink,
     WidgetEdit,

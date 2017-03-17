@@ -7,6 +7,7 @@ import {
     MenuItemEdit,
     MenuItemSeparator,
     MenuItemCustomLink,
+    MenuItemCDPage,
     SubmenuItemEdit,
     SubmenuItemCustomLink,
     SortableLineItems,
@@ -150,8 +151,8 @@ class PanelCDPages extends React.Component {
 
     render() {
 
-        var pages = [];
-        var panel_contents;
+        let pages = [];
+        let panel_contents;
 
         if ( this.props.pages.length ) {
 
@@ -165,6 +166,8 @@ class PanelCDPages extends React.Component {
                         original_title={item.original_title}
                         icon={item.icon}
                         original_icon={item.original_icon}
+                        parent={item.parent}
+                        parent_label={item.parent_label}
                         onPageEdit={this.pageEdit}
                         onPageDelete={this.pageDelete}
                         onItemFormSubmit={this.itemSubmitForm}
@@ -213,7 +216,7 @@ class PanelMenu extends React.Component {
 
     onSortEnd(args) {
 
-        var new_order = arrayMove(this.props.menuItems, args.oldIndex, args.newIndex);
+        const new_order = arrayMove(this.props.menuItems, args.oldIndex, args.newIndex);
 
         this.props.onReOrderMenu(new_order);
     }
@@ -240,61 +243,83 @@ class PanelMenu extends React.Component {
 
     render() {
 
-        var menu_items = [];
-        var panel_contents;
+        let menu_items = [];
+        let menu_item;
+        let panel_contents;
 
         if ( this.props.menuItems.length ) {
 
             this.props.menuItems.map((item) => {
 
-                if ( item.type == 'separator' ) {
+                switch ( item.type ) {
 
-                    var menu_item =
-                            <MenuItemSeparator
+                    case 'separator':
+
+                        menu_item =
+                                <MenuItemSeparator
+                                    key={item.id}
+                                    id={item.id}
+                                    onDeleteItem={this.deleteItem}
+                                />
+                            ;
+
+                        break;
+
+                    case 'custom_link':
+
+                        menu_item =
+                                <MenuItemCustomLink
+                                    key={item.id}
+                                    id={item.id}
+                                    title={item.title}
+                                    link={item.link}
+                                    original_title={item.original_title}
+                                    icon={item.icon}
+                                    original_icon={item.original_icon}
+                                    editing={this.props.editing === item.id}
+                                    hasSubmenu={item.hasSubmenu}
+                                    onMenuItemEdit={this.menuItemEdit}
+                                    onSubmenuEdit={this.submenuEdit}
+                                    onDeleteItem={this.deleteItem}
+                                    onItemFormSubmit={this.itemSubmitForm}
+                                />
+                            ;
+
+                        break;
+
+                    case 'cd_page':
+
+                        menu_item =
+                            <MenuItemCDPage
                                 key={item.id}
                                 id={item.id}
+                                title={item.title || item.original_title}
+                                icon={item.icon || item.original_icon}
                                 onDeleteItem={this.deleteItem}
                             />
                         ;
 
-                } else if ( item.type == 'custom_link' ) {
+                        break;
 
-                    var menu_item =
-                            <MenuItemCustomLink
-                                key={item.id}
-                                id={item.id}
-                                title={item.title}
-                                link={item.link}
-                                original_title={item.original_title}
-                                icon={item.icon}
-                                original_icon={item.original_icon}
-                                editing={this.props.editing === item.id}
-                                hasSubmenu={item.hasSubmenu}
-                                onMenuItemEdit={this.menuItemEdit}
-                                onSubmenuEdit={this.submenuEdit}
-                                onDeleteItem={this.deleteItem}
-                                onItemFormSubmit={this.itemSubmitForm}
-                            />
-                        ;
+                    default:
 
-                } else {
-
-                    var menu_item =
-                            <MenuItemEdit
-                                key={item.id}
-                                id={item.id}
-                                title={item.title}
-                                original_title={item.original_title}
-                                icon={item.icon}
-                                original_icon={item.original_icon}
-                                editing={this.props.editing === item.id}
-                                hasSubmenu={item.hasSubmenu}
-                                onMenuItemEdit={this.menuItemEdit}
-                                onSubmenuEdit={this.submenuEdit}
-                                onDeleteItem={this.deleteItem}
-                                onItemFormSubmit={this.itemSubmitForm}
-                            />
-                        ;
+                        menu_item =
+                                <MenuItemEdit
+                                    key={item.id}
+                                    id={item.id}
+                                    title={item.title}
+                                    original_title={item.original_title}
+                                    icon={item.icon}
+                                    type={item.type}
+                                    original_icon={item.original_icon}
+                                    editing={this.props.editing === item.id}
+                                    hasSubmenu={item.hasSubmenu}
+                                    onMenuItemEdit={this.menuItemEdit}
+                                    onSubmenuEdit={this.submenuEdit}
+                                    onDeleteItem={this.deleteItem}
+                                    onItemFormSubmit={this.itemSubmitForm}
+                                />
+                            ;
                 }
 
 
@@ -349,7 +374,7 @@ class PanelSubmenu extends React.Component {
 
     onSortEnd(args) {
 
-        var new_order = arrayMove(this.props.submenuItems, args.oldIndex, args.newIndex);
+        let new_order = arrayMove(this.props.submenuItems, args.oldIndex, args.newIndex);
 
         this.props.onReOrderSubmenu(new_order);
     }
@@ -371,9 +396,8 @@ class PanelSubmenu extends React.Component {
 
     render() {
 
-        var menu_items = [];
-        var panel_contents;
-
+        let menu_items = [];
+        let panel_contents;
 
         if ( this.props.submenuItems.length ) {
 
@@ -393,12 +417,22 @@ class PanelSubmenu extends React.Component {
                                 link={item.link}
                                 original_title={item.original_title}
                                 editing={this.props.editing === item.id}
-                                hasSubmenu={item.hasSubmenu}
                                 onSubmenuItemEdit={this.submenuItemEdit}
                                 onDeleteItem={this.deleteItem}
                                 onItemFormSubmit={this.itemSubmitForm}
                             />
                         ;
+                        break;
+
+                    case 'cd_page':
+
+                        menu_item =
+                            <MenuItemCDPage
+                                key={item.id}
+                                id={item.id}
+                                title={item.title || item.original_title}
+                                onDeleteItem={this.deleteItem}
+                            />
                         break;
 
                     default:
@@ -408,6 +442,7 @@ class PanelSubmenu extends React.Component {
                                 key={item.id}
                                 id={item.id}
                                 title={item.title}
+                                type={item.type}
                                 editing={this.props.editing === item.id}
                                 onSubmenuItemEdit={this.submenuItemEdit}
                                 original_title={item.original_title}
@@ -469,8 +504,8 @@ class PanelAddItems extends React.Component {
 
     render() {
 
-        var items = [];
-        var panel_contents;
+        let items = [];
+        let panel_contents;
 
         if ( this.props.availableItems.length ) {
 

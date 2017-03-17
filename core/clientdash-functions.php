@@ -191,3 +191,22 @@ function cd_template( $template, $args = array() ) {
 
 	include cd_get_template( $template );
 }
+
+/**
+ * Takes an ID and determines if it's a Client Dash core page.
+ *
+ * @since {{VERSION}}
+ *
+ * @param string $ID Menu/page ID.
+ *
+ * return bool
+ */
+function cd_is_core_page( $ID ) {
+
+	return in_array( $ID, array(
+		'cd_account',
+		'cd_reports',
+		'cd_help',
+		'cd_webmaster',
+	) );
+}

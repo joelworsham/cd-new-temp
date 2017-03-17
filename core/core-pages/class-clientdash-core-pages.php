@@ -130,7 +130,7 @@ class ClientDash_Core_Pages {
 		// Add toplevel
 		foreach ( $this->pages as $page ) {
 
-			if ( $page['parent'] ) {
+			if ( $page['parent'] != 'toplevel' ) {
 
 				continue;
 			}
@@ -141,7 +141,7 @@ class ClientDash_Core_Pages {
 				'read',
 				$page['id'],
 				array( $this, 'load_page' ),
-				$page['icon'],
+				$page['icon'] ? $page['icon'] : $page['original_icon'],
 				$page['position']
 			);
 		}
@@ -149,7 +149,7 @@ class ClientDash_Core_Pages {
 		// Add submenu
 		foreach ( $this->pages as $page ) {
 
-			if ( ! $page['parent'] ) {
+			if ( $page['parent'] == 'toplevel' ) {
 
 				continue;
 			}

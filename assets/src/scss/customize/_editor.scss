@@ -190,6 +190,11 @@
   margin: 0;
   padding: 0;
 
+  p {
+    margin-top: 0;
+    margin-bottom: 1em;
+  }
+
   &.sortable {
     .cd-editor-lineitem {
       cursor: move;
@@ -204,10 +209,19 @@
     margin-bottom: 0;
   }
 
-  &[data-id="clientdash"] {
-    background-color: $primary-color;
-    color: #fff;
+  &[data-id="clientdash"],
+  &[data-id="cd_account"],
+  &[data-id="cd_reports"],
+  &[data-id="cd_help"],
+  &[data-id="cd_webmaster"] {
 
+    .cd-editor-lineitem-block {
+      background-color: $primary-color;
+      color: #fff;
+    }
+  }
+
+  &[data-id="clientdash"] {
     .cd-editor-lineitem-icon {
       &:before {
         font-family: 'ClientDash';
@@ -225,7 +239,7 @@ body > .cd-editor-lineitem-li {
   margin-left: 1em;
   font-size: 14px;
 
-  .cd-editor-lineitem{
+  .cd-editor-lineitem {
     border-color: darken($medium-gray, 20%);
   }
 }
@@ -241,6 +255,13 @@ body > .cd-editor-lineitem-li {
     content: '';
     display: table;
     clear: both;
+  }
+
+  &.cd-editor-lineitem-disabled {
+    .cd-editor-lineitem-block {
+      background-color: $light-gray;
+      color: $dark-gray;
+    }
   }
 }
 
@@ -286,6 +307,7 @@ body > .cd-editor-lineitem-li {
   margin: 0;
   border-left: 1px solid $medium-gray;
   background-color: transparent;
+  background-color: #fff;
   outline: none;
   box-shadow: none;
   vertical-align: top;
@@ -318,17 +340,20 @@ body > .cd-editor-lineitem-li {
 
   input, select, textarea {
     width: 100%;
-    margin: 0.2em 0;
     padding: 0.3em;
   }
 
-  .cd-editor-lineitem-form-originaltitle {
+  .cd-editor-lineitem-form-subtext {
     font-style: italic;
     color: $medium-gray;
   }
 
   .cd-editor-input {
     margin-bottom: 1em;
+
+    & + .cd-editor-lineitem-form-subfield {
+      margin-top: -0.8em;
+    }
   }
 }
 
@@ -342,13 +367,13 @@ body > .cd-editor-lineitem-li {
 }
 
 .panel-forward-enter.panel-forward-enter-active,
-.panel-backward-enter.panel-backward-enter-active{
+.panel-backward-enter.panel-backward-enter-active {
   transform: translateX(0);
   transition: transform 300ms;
 }
 
 .panel-forward-leave,
-.panel-backward-leave{
+.panel-backward-leave {
   transform: translateX(0);
 }
 

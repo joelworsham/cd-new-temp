@@ -6,16 +6,27 @@
     position: relative;
     border: 1px solid $medium-gray;
     width: 100%;
-    margin: 0.2em 0;
     padding: 0.3em;
-    z-index: 110;
+    z-index: 120;
 
-    .cd-editor-dashicons-selector-field-icon {
+    .cd-editor-dashicons-placeholder {
+      color: $dark-gray;
+    }
+
+    .cd-editor-dashicons-selector-open,
+    .cd-editor-dashicons-selector-clear {
       position: absolute;
-      right: 0.5em;
       top: 50%;
       color: $medium-gray;
       transform: translateY(-50%);
+    }
+
+    .cd-editor-dashicons-selector-open {
+      right: 0.5em;
+    }
+
+    .cd-editor-dashicons-selector-clear {
+      right: 1.5em;
     }
   }
 

@@ -101,15 +101,7 @@ class Preview extends React.Component {
 
     refresh() {
 
-        // If the iframe contains the "cd_save_role" param, remove it for subsequent loads.
-        if ( this.iframe.src.includes('&cd_save_role=1') ) {
-
-            this.iframe.src = this.getSrc();
-
-        } else {
-
-            this.iframe.contentWindow.location.reload();
-        }
+        this.iframe.src = this.getSrc();
     }
 
     render() {

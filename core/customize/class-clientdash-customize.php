@@ -202,24 +202,26 @@ class ClientDash_Customize {
 			'adminurl'  => admin_url(),
 			'domain'    => get_bloginfo( 'url' ),
 			'dashicons' => json_decode( file_get_contents( CLIENTDASH_DIR . 'core/dashicons.json' ) ),
+			'cd_pages'  => ClientDash_Core_Pages::get_pages(),
 			'l10n'      => array(
 				'role_switcher_label'               => __( 'Modifying for:', 'clientdash' ),
 				'panel_text_menu'                   => __( 'Menu', 'clientdash' ),
 				'panel_text_dashboard'              => __( 'Dashboard', 'clientdash' ),
-				'panel_text_cd_pages'               => __( 'Special Pages', 'clientdash' ),
+				'panel_text_cd_pages'               => __( 'Pages', 'clientdash' ),
 				'panel_actions_title_menu'          => __( 'Editing: Menu', 'clientdash' ),
 				'panel_actions_title_submenu'       => __( 'Editing: Sub-Menu', 'clientdash' ),
 				'panel_actions_title_menu_add'      => __( 'Adding: Menu Items', 'clientdash' ),
 				'panel_actions_title_submenu_add'   => __( 'Adding: Sub-Menu Items', 'clientdash' ),
 				'panel_actions_title_dashboard'     => __( 'Editing: Dashboard', 'clientdash' ),
 				'panel_actions_title_dashboard_add' => __( 'Adding: Widgets', 'clientdash' ),
-				'panel_actions_title_cdpages'       => __( 'Editing: Special Pages', 'clientdash' ),
-				'panel_actions_title_cdpages_add'   => __( 'Adding: Special Pages', 'clientdash' ),
+				'panel_actions_title_cdpages'       => __( 'Editing: Pages', 'clientdash' ),
+				'panel_actions_title_cdpages_add'   => __( 'Adding: Pages', 'clientdash' ),
 				'action_button_back'                => __( 'Back', 'clientdash' ),
 				'action_button_add_items'           => __( 'Add Items', 'clientdash' ),
 				'show_controls'                     => __( 'Show Controls', 'clientdash' ),
 				'title'                             => __( 'Title', 'clientdash' ),
 				'original_title'                    => __( 'Original title:', 'clientdash' ),
+				'original_icon'                     => __( 'Original icon:', 'clientdash' ),
 				'icon'                              => __( 'Icon', 'clientdash' ),
 				'link'                              => __( 'Link', 'clientdash' ),
 				'no_items_added'                    => __( 'No items added yet. Click the add items "+" button to add your first item.', 'clientdash' ),
@@ -237,11 +239,14 @@ class ClientDash_Customize {
 				'close'                             => __( 'Close', 'clientdash' ),
 				'cancel'                            => __( 'Cancel', 'clientdash' ),
 				'confirm'                           => __( 'Confirm', 'clientdash' ),
+				'none'                              => __( 'None', 'clientdash' ),
 				'reset_role'                        => __( 'Reset Role', 'clientdash' ),
 				'up_do_date'                        => __( 'Up to date', 'clientdash' ),
 				'confirm_role_reset'                => __( 'Are you sure you want to reset all customizations for this role? This can not be undone.', 'clientdash' ),
 				'cannot_submit_form'                => __( 'Preview only. Cannot do that. Sorry!', 'clientdash' ),
 				'cannot_view_link'                  => __( 'Only administrative links can be viewed.', 'clientdash' ),
+				'current_location'                  => __( 'Current location', 'clientdash' ),
+				'toplevel'                          => __( 'Top Level', 'clientdash' ),
 			),
 		) );
 	}
@@ -404,6 +409,11 @@ class ClientDash_Customize {
 				$type = 'separator';
 			}
 
+			if ( $menu_item[2] == 'clientdash' ) {
+
+				$type = 'clientdash';
+			}
+
 			$save_menu[] = wp_parse_args( $customized_menu_item, array(
 				'id'             => $menu_item[2],
 				'title'          => '',
@@ -437,11 +447,19 @@ class ClientDash_Customize {
 					$customized_submenu_item = array();
 				}
 
+				$type = 'submenu_item';
+
+				if ( cd_is_core_page( $submenu_item[2] ) ) {
+
+					$type = 'cd_page';
+				}
+
 				$save_submenu[ $menu_slug ][] = wp_parse_args( $customized_submenu_item, array(
 					'id'             => $submenu_item[2],
 					'title'          => '',
 					'original_title' => $submenu_item[0],
 					'deleted'        => false,
+					'type'           => $type,
 				) );
 			}
 		}
@@ -524,11 +542,11 @@ class ClientDash_Customize {
 
 		$save_pages = $pages;
 
-		if ( $customizations['cdpages']) {
+		if ( $customizations['cdpages'] ) {
 
 			foreach ( $save_pages as $i => $page ) {
 
-				$custom_page = cd_array_search_by_key( $customizations['cdpages'], 'id', $page['id']);
+				$custom_page = cd_array_search_by_key( $customizations['cdpages'], 'id', $page['id'] );
 
 				$save_pages[ $i ] = wp_parse_args( $custom_page, $page );
 			}
@@ -536,7 +554,7 @@ class ClientDash_Customize {
 
 		// Set current role cd core pages
 		cd_update_role_customizations( "preview_$role", array(
-			'dashboard' => $save_pages,
+			'cdpages' => $save_pages,
 		) );
 
 		return $pages;
