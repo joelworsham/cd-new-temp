@@ -20,14 +20,16 @@ defined( 'ABSPATH' ) || die();
 		<?php echo esc_html( $cd_page['title'] ); ?>
     </h2>
 
-    <p class="nav-tab-wrapper">
-		<?php foreach ( $cd_page['tabs'] as $tab_ID => $tab ) : ?>
-            <a href="?page=<?php echo esc_attr( $_GET['page'] ); ?>&amp;tab=<?php echo esc_attr( $tab_ID ); ?>"
-               class="nav-tab <?php echo $tab_ID == $active_tab ? 'nav-tab-active' : ''; ?>">
-				<?php echo esc_html( $tab['label'] ); ?>
-            </a>
-		<?php endforeach; ?>
-    </p>
+	<?php if ( count( $cd_page['tabs'] ) > 1 ) : ?>
+        <p class="nav-tab-wrapper">
+			<?php foreach ( $cd_page['tabs'] as $tab_ID => $tab ) : ?>
+                <a href="?page=<?php echo esc_attr( $_GET['page'] ); ?>&amp;tab=<?php echo esc_attr( $tab_ID ); ?>"
+                   class="nav-tab <?php echo $tab_ID == $active_tab ? 'nav-tab-active' : ''; ?>">
+					<?php echo esc_html( $tab['label'] ); ?>
+                </a>
+			<?php endforeach; ?>
+        </p>
+	<?php endif; ?>
 
 	<?php
 	if ( is_callable( $cd_page['tabs'][ $active_tab ]['callback'] ) ) {

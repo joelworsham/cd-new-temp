@@ -49,8 +49,8 @@ class Preview extends React.Component {
                     return;
                 }
 
-                var link_base = e.data.link.includes('?') ? e.data.link + '&' : e.data.link + '?';
-                var link      = link_base + 'cd_customizing=1&role=' + this.props.role;
+                let link_base = e.data.link.includes('?') ? e.data.link + '&' : e.data.link + '?';
+                let link      = link_base + 'cd_customizing=1&role=' + this.props.role;
 
                 this.load(link);
 
@@ -101,7 +101,7 @@ class Preview extends React.Component {
 
     refresh() {
 
-        this.iframe.src = this.getSrc();
+        this.iframe.src = this.iframe.src.includes('cd_save_role') ? this.getSrc() : this.iframe.src;
     }
 
     render() {

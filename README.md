@@ -4,7 +4,7 @@
 
 [Releases](https://github.com/brashrebel/client-dash/releases)
 
-At long last, a vastly improved interface for clients has arrived. Client Dash seeks to provide a simplified and intuitive admin user experience for customers who login to WordPress sites which were developed and are managed by an agency/webmaster.
+At long last, a vastly improved interface for clients has arrived. Client Dash seeks to provide a simplified and intuitive admin user experience for customers who login to WordPress sites which were developed and are managed by an agency/admin_page.
 
 ## What does Client Dash do?
 
@@ -144,7 +144,7 @@ Using this plugin is very simple. All you have to do is:
 * Added Addons page for browsing available addons.
 * Added alert for empty Webmaster tab.
 * Added ability to change number of feed entries pulled.
-* Added webmaster dashboard widget.
+* Added admin_page dashboard widget.
 * Re-worded media-library size under reports.
 * Added error catching for feeds.
 * Added current user URL to Account- >About.
@@ -178,9 +178,9 @@ Using this plugin is very simple. All you have to do is:
 * Allow extensions to add tabs to specific pages.
 * Increase extensibility of settings page.
 * Added "Webmaster" tab to the settings page.
-* Allow user to disable/enable webmaster page.
-* Allow user to rename webmaster page/menu-item.
-* Allow user to add custom html content to a custom tab on webmaster page.
+* Allow user to disable/enable admin_page page.
+* Allow user to rename admin_page page/menu-item.
+* Allow user to add custom html content to a custom tab on admin_page page.
 
 ### [1.1.2](https://github.com/brashrebel/client-dash/releases/tag/v1.1.2)
 * Patch to fix potential fatal error when running on older versions of PHP.

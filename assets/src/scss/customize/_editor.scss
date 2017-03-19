@@ -104,6 +104,20 @@
   overflow-y: scroll;
   height: calc(100% - 200px);
   z-index: 5;
+
+  &.cd-editor-panels-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.cd-editor-panels-cover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 100;
 }
 
 .cd-editor-panel {
@@ -213,7 +227,7 @@
   &[data-id="cd_account"],
   &[data-id="cd_reports"],
   &[data-id="cd_help"],
-  &[data-id="cd_webmaster"] {
+  &[data-id="cd_admin_page"] {
 
     .cd-editor-lineitem-block {
       background-color: $primary-color;

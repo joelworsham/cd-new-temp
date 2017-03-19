@@ -49,31 +49,6 @@ class ClientDash_Settings {
 	 */
 	function register_settings() {
 
-		// Widgets Tab
-		register_setting( 'cd_options_widgets', 'cd_remove_which_widgets' );
-
-		// Icons Tab
-		register_setting( 'cd_options_icons', 'cd_dashicon_account' );
-		register_setting( 'cd_options_icons', 'cd_dashicon_reports' );
-		register_setting( 'cd_options_icons', 'cd_dashicon_help' );
-		register_setting( 'cd_options_icons', 'cd_dashicon_webmaster' );
-
-		// Webmaster Tab
-		register_setting( 'cd_options_webmaster', 'cd_webmaster_name', 'sanitize_text_field' );
-		register_setting( 'cd_options_webmaster', 'cd_webmaster_enable' );
-		register_setting( 'cd_options_webmaster', 'cd_webmaster_main_tab_name' );
-		register_setting( 'cd_options_webmaster', 'cd_webmaster_main_tab_content' );
-		register_setting( 'cd_options_webmaster', 'cd_webmaster_feed' );
-		register_setting( 'cd_options_webmaster', 'cd_webmaster_feed_url', 'esc_url' );
-		register_setting( 'cd_options_webmaster', 'cd_webmaster_feed_count' );
-
-		// Display Tab
-		register_setting( 'cd_options_display', 'cd_content_sections_roles' );
-		register_setting( 'cd_options_display', 'cd_display_settings_updated' );
-
-		// Widgets Tab
-		register_setting( 'cd_options_widgets', 'cd_widgets' );
-
 		do_action( 'cd_register_settings' );
 	}
 

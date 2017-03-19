@@ -503,14 +503,25 @@ class ClientDash_Customize {
 					foreach ( $widgets as $widget ) {
 
 						$customized_widget = cd_array_search_by_key( $customized_dashboard, 'id', $widget['id'] );
-						$customized_widget = $customized_widget ? $customized_widget : array();
 
-						$save_dashboard[] = wp_parse_args( $customized_widget, array(
-							'id'             => $widget['id'],
-							'title'          => '',
-							'original_title' => $widget['title'],
-							'deleted'        => false,
-						) );
+						if ( $customized_widget ) {
+
+							$save_dashboard[] = wp_parse_args( $customized_widget, array(
+								'id'             => $widget['id'],
+								'title'          => '',
+								'original_title' => $widget['title'],
+								'deleted'        => false,
+							) );
+
+						} else {
+
+							$save_dashboard[] = array(
+								'id'             => $widget['id'],
+								'title'          => '',
+								'original_title' => $widget['title'],
+								'deleted'        => false,
+							);
+						}
 					}
 				}
 			}

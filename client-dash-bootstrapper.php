@@ -39,7 +39,7 @@ class ClientDash_Bootstrapper {
 	 */
 	function __construct() {
 
-		add_action( 'plugins_loaded', array( $this, 'maybe_load' ) );
+		add_action( 'plugins_loaded', array( $this, 'maybe_load' ), 1 );
 	}
 
 	/**

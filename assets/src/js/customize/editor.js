@@ -1255,13 +1255,17 @@ class Editor extends React.Component {
                     />
                 </div>
 
-                <div className="cd-editor-panels" onClick={this.handleEditorClick}>
+                <div className={'cd-editor-panels' +
+                (this.state.saving || this.state.deleting ? ' cd-editor-panels-disabled' : '')} onClick={this.handleEditorClick}>
                     <ReactCSSTransitionReplace
                         transitionName={"panel-" + this.state.panelDirection}
                         transitionEnterTimeout={300}
                         transitionLeaveTimeout={300}>
                         {panel}
                     </ReactCSSTransitionReplace>
+
+                    {(this.state.saving || this.state.deleting) &&
+                    <div className="cd-editor-panels-cover"/>}
                 </div>
 
                 <div className="cd-editor-footer">

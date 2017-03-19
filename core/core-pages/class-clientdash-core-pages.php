@@ -124,14 +124,20 @@ class ClientDash_Core_Pages {
 				),
 			),
 			array(
-				'id'             => 'cd_webmaster',
+				'id'             => 'cd_admin_page',
 				'title'          => '',
-				'original_title' => __( 'Webmaster', 'clientdash' ),
+				'original_title' => __( 'Admin Page', 'clientdash' ),
 				'icon'           => '',
-				'original_icon'  => 'dashicons-businessman',
+				'original_icon'  => 'dashicons-admin-generic',
 				'parent'         => 'index.php',
 				'deleted'        => false,
 				'position'       => 100,
+				'tabs'           => array(
+					'about' => array(
+						'label'    => __( 'Main', 'client-dash' ),
+						'callback' => array( __CLASS__, 'load_cd_page_admin_page_tab_main' ),
+					),
+				),
 			),
 		) );
 
@@ -341,5 +347,20 @@ class ClientDash_Core_Pages {
 		$attachments = wp_count_posts( 'attachment' );
 
 		include_once CLIENTDASH_DIR . 'core/core-pages/views/reports/site.php';
+	}
+
+	/**
+	 * Loads the Admin Page tab Main.
+	 *
+	 * @since {{VERSION}}
+	 */
+	static public function load_cd_page_admin_page_tab_main() {
+
+		$title   = get_option( 'cd_admin_page_title' );
+		$content = get_option( 'cd_admin_page_content' );
+
+		$content = apply_filters( 'the_content', $content );
+
+		include_once CLIENTDASH_DIR . 'core/core-pages/views/admin-page.php';
 	}
 }

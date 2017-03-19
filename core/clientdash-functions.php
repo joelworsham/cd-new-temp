@@ -207,7 +207,7 @@ function cd_is_core_page( $ID ) {
 		'cd_account',
 		'cd_reports',
 		'cd_help',
-		'cd_webmaster',
+		'cd_admin_page',
 	) );
 }
 

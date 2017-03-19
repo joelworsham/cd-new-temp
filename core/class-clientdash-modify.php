@@ -234,6 +234,7 @@ class ClientDash_Modify {
 					$submenu_item['title'] ? $submenu_item['title'] : $submenu_item['original_title'],
 					$original_submenu_item[1],
 					$submenu_item['id'],
+					isset( $original_submenu_item[3] ) ? $original_submenu_item[3] : null,
 				);
 			}
 

@@ -577,8 +577,8 @@ class PanelDashboard extends React.Component {
 
     render() {
 
-        var widgets = [];
-        var panel_contents;
+        let widgets = [];
+        let panel_contents;
 
         if ( this.props.widgets.length ) {
 
