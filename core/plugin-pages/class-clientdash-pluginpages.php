@@ -151,6 +151,28 @@ class ClientDash_PluginPages {
 	 */
 	static function load_addons() {
 
+		$addons = get_transient( 'clientdash_addons' );
+
+		if ( ! $addons ) {
+
+			$response = wp_remote_get( 'https://realbigplugins.com/edd-api/v2/products?category=client-dash&number=-1' );
+
+			if ( is_wp_error( $response ) ) {
+
+				$addons = array();
+
+			} else {
+
+				$body = json_decode( wp_remote_retrieve_body( $response ) );
+
+				$addons = isset( $body->products ) ? $body->products : array();
+
+				set_transient( 'clientdash_addons', $addons, DAY_IN_SECONDS );
+			}
+		}
+
+		add_action( 'clientdash_sidebar', array( __CLASS__, 'sidebar_addons_rbp_promote' ), 5 );
+
 		include_once CLIENTDASH_DIR . 'core/plugin-pages/views/addons.php';
 	}
 
@@ -214,5 +236,16 @@ class ClientDash_PluginPages {
 	static function sidebar_admin_page_actions() {
 
 		include_once CLIENTDASH_DIR . 'core/plugin-pages/views/sidebar/admin-page-actions.php';
+	}
+
+	/**
+	 * Outputs the sidebar addons Real Big Plugins promote section.
+	 *
+	 * @since {{VERSION}}
+	 * @access private
+	 */
+	static function sidebar_addons_rbp_promote() {
+
+		include_once CLIENTDASH_DIR . 'core/plugin-pages/views/sidebar/addons-rbp-promote.php';
 	}
 }

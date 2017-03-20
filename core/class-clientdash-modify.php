@@ -230,6 +230,11 @@ class ClientDash_Modify {
 
 				$original_submenu_item = cd_array_search_by_key( $submenu[ $menu_ID ], 2, $submenu_item['id'] );
 
+				if ( $original_submenu_item === false ) {
+
+					continue;
+				}
+
 				$new_submenu[] = array(
 					$submenu_item['title'] ? $submenu_item['title'] : $submenu_item['original_title'],
 					$original_submenu_item[1],

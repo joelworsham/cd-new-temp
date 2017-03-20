@@ -257,12 +257,6 @@ class MenuItemEdit extends React.Component {
             ];
         }
 
-        const after_title =
-                  <span className="cd-editor-lineitem-form-subtext">
-                    {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
-                </span>
-            ;
-
         const form =
                   <LineItemForm
                       onSubmit={this.submitForm}
@@ -272,13 +266,21 @@ class MenuItemEdit extends React.Component {
                           value={this.props.title}
                           placeholder={this.props.original_title}
                           onHandleChange={this.titleChange}
-                          after={after_title}
                       />
 
+                      <p className="cd-editor-lineitem-form-subfield cd-editor-lineitem-form-subtext">
+                          {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
+                      </p>
+
                       <DashiconsSelector
-                          dashicon={this.props.icon || this.props.original_icon}
+                          value={this.props.icon}
+                          placeholder={this.props.original_icon}
                           onSelectDashicon={this.iconChange}
                       />
+
+                      <p className="cd-editor-lineitem-form-subfield cd-editor-lineitem-form-subtext">
+                          {l10n['original_icon'] + " "}<span className={"dashicons " + this.props.original_icon} />
+                      </p>
 
                   </LineItemForm>
             ;
@@ -436,12 +438,6 @@ class MenuItemCustomLink extends React.Component {
             ];
         }
 
-        const after_title =
-                  <span className="cd-editor-lineitem-form-subtext">
-                    {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
-                </span>
-            ;
-
         const form =
                   <LineItemForm
                       onSubmit={this.submitForm}
@@ -451,8 +447,11 @@ class MenuItemCustomLink extends React.Component {
                           value={this.props.title}
                           placeholder={this.props.original_title}
                           onHandleChange={this.titleChange}
-                          after={after_title}
                       />
+
+                      <p className="cd-editor-lineitem-form-subfield cd-editor-lineitem-form-subtext">
+                          {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
+                      </p>
 
                       <InputText
                           label={l10n['link']}
@@ -462,9 +461,14 @@ class MenuItemCustomLink extends React.Component {
                       />
 
                       <DashiconsSelector
-                          dashicon={this.props.icon}
+                          value={this.props.icon}
+                          placeholder={this.props.original_icon}
                           onSelectDashicon={this.iconChange}
                       />
+
+                      <p className="cd-editor-lineitem-form-subfield cd-editor-lineitem-form-subtext">
+                          {l10n['original_icon'] + " "}<span className={"dashicons " + this.props.original_icon} />
+                      </p>
 
                   </LineItemForm>
             ;
@@ -562,8 +566,11 @@ class SubmenuItemEdit extends React.Component {
                           value={this.props.title}
                           placeholder={this.props.original_title}
                           onHandleChange={this.titleChange}
-                          after={after_title}
                       />
+
+                      <p className="cd-editor-lineitem-form-subfield cd-editor-lineitem-form-subtext">
+                          {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
+                      </p>
                   </LineItemForm>
             ;
 
@@ -659,12 +666,6 @@ class SubmenuItemCustomLink extends React.Component {
             />
         ];
 
-        const after_title =
-                  <span className="cd-editor-lineitem-form-subtext">
-                    {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
-                </span>
-            ;
-
         const form =
                   <LineItemForm
                       onSubmit={this.submitForm}
@@ -674,8 +675,11 @@ class SubmenuItemCustomLink extends React.Component {
                           value={this.props.title}
                           placeholder={this.props.original_title}
                           onHandleChange={this.titleChange}
-                          after={after_title}
                       />
+
+                      <p className="cd-editor-lineitem-form-subfield cd-editor-lineitem-form-subtext">
+                          {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
+                      </p>
 
                       <InputText
                           label={l10n['link']}
@@ -985,12 +989,6 @@ class WidgetEdit extends React.Component {
             />
         ];
 
-        const after_title =
-                  <span className="cd-editor-lineitem-form-subtext">
-                    {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
-                </span>
-            ;
-
         const form =
                   <LineItemForm
                       onSubmit={this.submitForm}
@@ -1000,8 +998,11 @@ class WidgetEdit extends React.Component {
                           value={this.props.title}
                           placeholder={this.props.original_title}
                           onHandleChange={this.titleChange}
-                          after={after_title}
                       />
+
+                      <p className="cd-editor-lineitem-form-subfield cd-editor-lineitem-form-subtext">
+                          {l10n['original_title'] + " "}<strong>{this.props.original_title}</strong>
+                      </p>
                   </LineItemForm>
             ;
 

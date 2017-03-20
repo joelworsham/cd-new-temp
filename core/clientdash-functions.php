@@ -90,6 +90,33 @@ function cd_delete_customizations( $role ) {
 /**
  * Searches an array by a nested key and returns the match.
  *
+ * @param array $array
+ * @param string $key
+ * @param string $value
+ *
+ * @return bool|mixed
+ */
+function cd_array_get_index_by_key( $array, $key, $value ) {
+
+	foreach ( $array as $i => $array_item ) {
+
+		if ( ! isset( $array_item[ $key ] ) ) {
+
+			continue;
+		}
+
+		if ( $array_item[ $key ] === $value ) {
+
+			return $i;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Searches an array by a nested key and returns the match.
+ *
  * @since {{VERSION}}
  *
  * @param array $array
@@ -100,17 +127,11 @@ function cd_delete_customizations( $role ) {
  */
 function cd_array_search_by_key( $array, $key, $value ) {
 
-	foreach ( $array as $array_item ) {
+	$found_key = cd_array_get_index_by_key( $array, $key, $value );
 
-		if ( ! isset( $array_item[ $key ] ) ) {
+	if ( $found_key ) {
 
-			continue;
-		}
-
-		if ( $array_item[ $key ] === $value ) {
-
-			return $array_item;
-		}
+		return $array[ $found_key ];
 	}
 
 	return false;

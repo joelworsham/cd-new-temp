@@ -16,13 +16,15 @@ defined( 'ABSPATH' ) || die;
 
 <div class="wrap clientdash">
 
-    <form method="post" action="options.php">
+    <form method="post" action="options.php" id="clientdash-admin-page-form">
 
         <?php settings_fields( 'clientdash_admin_page' ); ?>
 
         <h1 class="clientdash-page-title">
 			<?php echo get_admin_page_title(); ?>
         </h1>
+
+	    <?php settings_errors(); ?>
 
         <section class="clientdash-page-wrap">
 

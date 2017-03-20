@@ -1,19 +1,19 @@
 'use strict';
 
-var gulp = require('gulp');
-var fs = require('fs');
-var sass = require('gulp-sass');
-var sourcemaps = require('gulp-sourcemaps');
-var rename = require('gulp-rename');
-var notify = require('gulp-notify');
-var concat = require('gulp-concat');
-var uglify = require('gulp-uglify');
-var browserify = require('browserify');
-var babelify = require('babelify');
-var source = require('vinyl-source-stream');
-var buffer = require('vinyl-buffer');
-var gutil = require('gulp-util');
-var reactify = require('reactify');
+const gulp = require('gulp');
+const fs = require('fs');
+const sass = require('gulp-sass');
+const sourcemaps = require('gulp-sourcemaps');
+const rename = require('gulp-rename');
+const notify = require('gulp-notify');
+const concat = require('gulp-concat');
+const uglify = require('gulp-uglify');
+const browserify = require('browserify');
+const babelify = require('babelify');
+const source = require('vinyl-source-stream');
+const buffer = require('vinyl-buffer');
+const gutil = require('gulp-util');
+const reactify = require('reactify');
 
 gulp.task('sass', function () {
     return gulp.src('./assets/src/scss/*.scss')
@@ -72,7 +72,7 @@ gulp.task('scripts', function () {
 });
 
 gulp.task('customize_inpreview_js', function () {
-    return gulp.src('./assets/src/js/customize-inpreview.js')
+    return gulp.src('./assets/src/js/customize-inpreview/*.js')
         .pipe(concat('clientdash-inpreview.min.js'))
         .pipe(gulp.dest('./assets/dist/js/'))
         .pipe(sourcemaps.init())

@@ -38,8 +38,10 @@ class ClientDash_Core_Pages {
 		if ( is_admin() ) {
 
 			add_action( 'init', array( $this, 'load_pages' ) );
-			add_action( 'admin_menu', array( $this, 'add_pages' ) );
 		}
+
+		add_action( 'admin_menu', array( $this, 'add_pages' ) );
+		add_action( 'wp_dashboard_setup', array( $this, 'add_widgets' ) );
 	}
 
 	/**
@@ -198,6 +200,35 @@ class ClientDash_Core_Pages {
 	}
 
 	/**
+	 * Adds dashboard widgets for the Core CD Pages.
+	 *
+	 * @since {{VERSION}}
+	 * @access private
+	 */
+	function add_widgets() {
+
+		foreach ( $this->pages as $page ) {
+
+			if ( $page['deleted'] || ! $page['parent'] ) {
+
+				continue;
+			}
+
+			wp_add_dashboard_widget(
+				$page['id'],
+				$page['title'] ? $page['title'] : $page['original_title'],
+				array( $this, 'load_widget' ),
+				null,
+				array(
+					'icon' => $page['icon'] ? $page['icon'] : $page['original_icon'],
+					'link' => admin_url( ( $page['parent'] == 'toplevel' ? 'admin.php' : $page['parent'] ) .
+					                     "?page=$page[id]" ),
+				)
+			);
+		}
+	}
+
+	/**
 	 * Sets up the page with defaults and such.
 	 *
 	 * @since {{VERSION}}
@@ -255,6 +286,23 @@ class ClientDash_Core_Pages {
 		}
 
 		include_once $page_template;
+	}
+
+	/**
+	 * Loads Core CD Page widgets.
+	 *
+	 * @since {{VERSION}}
+	 * @access private
+	 *
+	 * @param mixed $object Who the heck knows...
+	 * @param array $widget Widget args.
+	 */
+	function load_widget( $object, $widget ) {
+
+		$icon = $widget['args']['icon'];
+		$link = $widget['args']['link'];
+
+		include CLIENTDASH_DIR . 'core/core-pages/views/widget.php';
 	}
 
 	/**
@@ -342,9 +390,9 @@ class ClientDash_Core_Pages {
 		$post_types     = get_post_types( array(
 			'public' => true,
 		), 'objects' );
-		$upload_dir  = wp_upload_dir();
-		$dir_info    = cd_get_dir_size( $upload_dir['basedir'] );
-		$attachments = wp_count_posts( 'attachment' );
+		$upload_dir     = wp_upload_dir();
+		$dir_info       = cd_get_dir_size( $upload_dir['basedir'] );
+		$attachments    = wp_count_posts( 'attachment' );
 
 		include_once CLIENTDASH_DIR . 'core/core-pages/views/reports/site.php';
 	}

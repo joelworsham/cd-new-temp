@@ -866,11 +866,11 @@ class Editor extends React.Component {
                 // Filter out disabled CD Pages
                 available_items = available_items.filter((item) => {
 
-                    if (item.type == 'cd_page' && !item.deleted) {
+                    if ( item.type == 'cd_page' && !item.deleted ) {
 
                         let page = getItem(customizations.cdpages, item.id);
 
-                        if (page.deleted) {
+                        if ( page.deleted ) {
 
                             return false;
                         }
@@ -912,7 +912,8 @@ class Editor extends React.Component {
                 let menu_item       = getItem(customizations.menu, this.state.submenuEdit);
                 let item_info       =
                         <div className="cd-editor-panel-menuinfo">
-                            <span className={"cd-editor-panel-menuinfo-icon dashicons " + menu_item.icon}></span>
+                            <span className={"cd-editor-panel-menuinfo-icon dashicons " +
+                            (menu_item.icon || menu_item.original_icon)}></span>
                             <span className="cd-editor-panel-menuinfo-title">
                                     {menu_item.title || menu_item.original_title}
                                 </span>
@@ -1005,7 +1006,8 @@ class Editor extends React.Component {
                 let menu_item       = getItem(customizations.menu, this.state.submenuEdit);
                 let item_info       =
                         <div className="cd-editor-panel-menuinfo">
-                            <span className={"cd-editor-panel-menuinfo-icon dashicons " + menu_item.icon}></span>
+                            <span className={"cd-editor-panel-menuinfo-icon dashicons " +
+                            (menu_item.icon || menu_item.original_icon)}></span>
                             <span className="cd-editor-panel-menuinfo-title">
                                 {menu_item.title || menu_item.original_title}
                             </span>
@@ -1256,7 +1258,8 @@ class Editor extends React.Component {
                 </div>
 
                 <div className={'cd-editor-panels' +
-                (this.state.saving || this.state.deleting ? ' cd-editor-panels-disabled' : '')} onClick={this.handleEditorClick}>
+                (this.state.saving || this.state.deleting ? ' cd-editor-panels-disabled' : '')}
+                     onClick={this.handleEditorClick}>
                     <ReactCSSTransitionReplace
                         transitionName={"panel-" + this.state.panelDirection}
                         transitionEnterTimeout={300}

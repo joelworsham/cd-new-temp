@@ -162,6 +162,14 @@ if ( ! class_exists( 'ClientDash' ) ) {
 				defined( 'WP_DEBUG' ) && WP_DEBUG ? time() : CLIENTDASH_VERSION
 			);
 
+			wp_register_script(
+				'clientdash',
+				CLIENTDASH_URI . '/assets/dist/js/clientdash.min.js',
+				array( 'jquery' ),
+				defined( 'WP_DEBUG' ) && WP_DEBUG ? time() : CLIENTDASH_VERSION,
+				true
+			);
+
 			wp_register_style(
 				'clientdash-fontawesome',
 				CLIENTDASH_URI . '/local/font-awesome/font-awesome.min.css',

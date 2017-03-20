@@ -395,12 +395,14 @@ class ClientDash_Customize {
 		ksort( $menu );
 
 		$save_menu       = array();
+		$save_menu_new   = array();
 		$customized_menu = isset( $customizations['menu'] ) ? $customizations['menu'] : array();
 
 		foreach ( $menu as $menu_item ) {
 
-			$customized_menu_item = cd_array_search_by_key( $customized_menu, 'id', $menu_item[2] );
-			$customized_menu_item = $customized_menu_item ? $customized_menu_item : array();
+			$customized_menu_item_key = cd_array_get_index_by_key( $customized_menu, 'id', $menu_item[2] );
+			$customized_menu_item     = $customized_menu_item_key !== false ?
+				$customized_menu[ $customized_menu_item_key ] : false;
 
 			$type = 'menu_item';
 
@@ -414,16 +416,34 @@ class ClientDash_Customize {
 				$type = 'clientdash';
 			}
 
-			$save_menu[] = wp_parse_args( $customized_menu_item, array(
-				'id'             => $menu_item[2],
-				'title'          => '',
-				'original_title' => $menu_item[0],
-				'icon'           => '',
-				'original_icon'  => isset( $menu_item[6] ) ? $menu_item[6] : '',
-				'deleted'        => ! empty( $customized_menu ) && empty( $customized_menu_item ),
-				'type'           => $type,
-			) );
+			if ( $customized_menu_item ) {
+
+				$save_menu[ $customized_menu_item_key ] = array(
+					'id'             => $menu_item[2],
+					'title'          => $customized_menu_item['title'],
+					'original_title' => $menu_item[0],
+					'icon'           => $customized_menu_item['icon'],
+					'original_icon'  => isset( $menu_item[6] ) ? $menu_item[6] : '',
+					'deleted'        => $customized_menu_item['deleted'],
+					'type'           => $customized_menu_item['type'],
+				);
+
+			} else {
+
+				$save_menu_new[] = array(
+					'id'             => $menu_item[2],
+					'title'          => '',
+					'original_title' => $menu_item[0],
+					'icon'           => '',
+					'original_icon'  => isset( $menu_item[6] ) ? $menu_item[6] : '',
+					'deleted'        => $customized_menu || false,
+					'type'           => $type,
+				);
+			}
 		}
+
+		ksort( $save_menu );
+		$save_menu = array_merge( $save_menu, $save_menu_new );
 
 		// Get original submenu merged with customizations
 		$save_submenu       = array();

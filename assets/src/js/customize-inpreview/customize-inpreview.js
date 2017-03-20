@@ -43,12 +43,6 @@ function cd_customize_links(e) {
  */
 function cd_customize_overlay() {
 
-    // Don't load on dashboard
-    //if (document.body.className.indexOf('index-php') !== -1) {
-    //
-    //    return;
-    //}
-
     var content = document.getElementById('wpwrap');
     var cover = document.createElement('div');
     var cover_text = document.createElement('div');
