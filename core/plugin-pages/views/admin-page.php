@@ -24,7 +24,6 @@ defined( 'ABSPATH' ) || die;
 			<?php echo get_admin_page_title(); ?>
         </h1>
 
-	    <?php settings_errors(); ?>
 
         <section class="clientdash-page-wrap">
 

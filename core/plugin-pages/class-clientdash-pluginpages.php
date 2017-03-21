@@ -42,6 +42,47 @@ class ClientDash_PluginPages {
 		add_action( 'clientdash_sidebar', array( __CLASS__, 'sidebar_pro_prompt' ), 10 );
 		add_action( 'clientdash_sidebar', array( __CLASS__, 'sidebar_review_support' ), 15 );
 		add_action( 'clientdash_sidebar', array( __CLASS__, 'sidebar_rbp_signup' ), 20 );
+
+		add_action( 'clientdash_reset_all_settings', array( __CLASS__, 'reset_admin_page' ) );
+
+		if ( isset( $_REQUEST['cd_reset_settings'] ) ) {
+
+			add_action( 'admin_init', array( $this, 'reset_all_settings' ) );
+		}
+	}
+
+	/**
+	 * Handles resetting all settings.
+	 *
+	 * @since {{VERSION}}
+	 * @access private
+	 */
+	function reset_all_settings() {
+
+		cd_reset_all_settings();
+
+		add_settings_error(
+			'cd_reset_settings',
+			'',
+			__( 'All settings successfully reset.', 'client-dash' ),
+			'updated clientdash-notice'
+		);
+
+		set_transient( 'settings_errors', get_settings_errors(), 30 );
+
+		wp_redirect( admin_url( 'admin.php?page=clientdash_settings&settings-updated=1' ) );
+		exit();
+	}
+
+	/**
+	 * Resets the Admin Page.
+	 *
+	 * @since {{VERSION}}
+	 */
+	public static function reset_admin_page() {
+
+		delete_option( 'cd_admin_page_title' );
+		delete_option( 'cd_admin_page_content' );
 	}
 
 	/**
@@ -183,6 +224,8 @@ class ClientDash_PluginPages {
 	 * @access private
 	 */
 	static function load_settings() {
+
+		$reset_settings_link = admin_url( 'admin.php?page=clientdash_settings&cd_reset_settings' );
 
 		include_once CLIENTDASH_DIR . 'core/plugin-pages/views/settings.php';
 	}

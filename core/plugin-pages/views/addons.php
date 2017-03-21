@@ -15,9 +15,9 @@ defined( 'ABSPATH' ) || die;
 
 <div class="wrap clientdash">
 
-    <h2 class="clientdash-page-title">
+    <h1 class="clientdash-page-title">
 		<?php echo get_admin_page_title(); ?>
-    </h2>
+    </h1>
 
     <section class="clientdash-page-wrap">
 

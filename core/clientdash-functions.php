@@ -299,3 +299,27 @@ function cd_format_dir_size( $size ) {
 		return $size . " GB";
 	}
 }
+
+/**
+ * Resets ALL Client Dash settings.
+ *
+ * @since {{VERSION}}
+ *
+ * @global WPDB $wpdb
+ */
+function cd_reset_all_settings() {
+
+	global $wpdb;
+
+	// Totally empty customizations table
+	$wpdb->query("TRUNCATE TABLE `{$wpdb->prefix}cd_customizations`");
+
+	/**
+	 * Fires during Client Dash settings reset.
+	 *
+	 * @since {{VERSION}}
+	 *
+	 * @hooked ClientDash_PluginPages::reset_admin_page 10
+	 */
+	do_action( 'clientdash_reset_all_settings' );
+}
