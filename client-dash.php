@@ -172,18 +172,10 @@ if ( ! class_exists( 'ClientDash' ) ) {
 
 			wp_register_style(
 				'clientdash-fontawesome',
-				CLIENTDASH_URI . '/local/font-awesome/font-awesome.min.css',
+				'https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',
 				array(),
 				'4.7.0'
 			);
-
-			// TODO Enable live icons
-//			wp_register_style(
-//				'clientdash-fontawesome',
-//				'https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',
-//				array(),
-//				'4.7.0'
-//			);
 
 			// Customize assets
 			wp_register_style(

@@ -163,7 +163,7 @@ class ClientDash_PluginPages {
 
 		$submenu['clientdash'][0] = array(
 			__( 'Customize Admin', 'clientdash' ),
-			'manage_options', // TODO create custom cap
+			'customize_admin',
 			'/?clientdash_customize=1'
 		);
 	}

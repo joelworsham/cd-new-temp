@@ -172,7 +172,7 @@ class ClientDash_Core_Pages {
 			add_menu_page(
 				$page['title'] ? $page['title'] : $page['original_title'],
 				$page['title'] ? $page['title'] : $page['original_title'],
-				'read',
+				$page['capability'],
 				$page['id'],
 				array( $this, 'load_page' ),
 				$page['icon'] ? $page['icon'] : $page['original_icon'],
@@ -192,7 +192,7 @@ class ClientDash_Core_Pages {
 				$page['parent'],
 				$page['title'] ? $page['title'] : $page['original_title'],
 				$page['title'] ? $page['title'] : $page['original_title'],
-				'read',
+				$page['capability'],
 				$page['id'],
 				array( $this, 'load_page' )
 			);

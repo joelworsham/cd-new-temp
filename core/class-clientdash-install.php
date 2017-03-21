@@ -29,6 +29,7 @@ class ClientDash_Install {
 		add_option( 'clientdash_db_version', '1.0.0' );
 
 		self::setup_tables();
+		self::setup_capabilities();
 	}
 
 	/**
@@ -56,5 +57,18 @@ class ClientDash_Install {
 
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		dbDelta( $sql );
+	}
+
+	/**
+	 * Sets up custom capabilities
+	 *
+	 * @since {{VERSION}}
+	 * @access private
+	 */
+	private static function setup_capabilities() {
+
+		$administrator = get_role( 'administrator' );
+
+		$administrator->add_cap( 'customize_admin' );
 	}
 }

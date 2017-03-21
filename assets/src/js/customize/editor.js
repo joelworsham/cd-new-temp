@@ -40,10 +40,6 @@ class Editor extends React.Component {
 
         super(props);
 
-        // TODO CD Pages modification method
-        // it needs to not truly exist in the menu, but rather moving it around in the menu modifies the cd pages state
-        // itself whenenver moving, removing, adding.
-
         this.state = {
             nextPanel: null,
             panelDirection: 'forward',
