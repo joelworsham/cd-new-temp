@@ -436,7 +436,7 @@ class ClientDash_Customize {
 					'original_title' => $menu_item[0],
 					'icon'           => '',
 					'original_icon'  => isset( $menu_item[6] ) ? $menu_item[6] : '',
-					'deleted'        => $customized_menu || false,
+					'deleted'        => false,
 					'type'           => $type,
 				);
 			}

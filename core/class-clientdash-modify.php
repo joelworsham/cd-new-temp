@@ -130,128 +130,94 @@ class ClientDash_Modify {
 			return;
 		}
 
-		$new_menu = array();
+		$uncustomized_menu = array();
+		$new_menu          = array();
 
-		foreach ( $this->menu as $menu_item ) {
+		foreach ( $menu as $i => $menu_item ) {
 
-			// Separators are handled diferrently
-			if ( $menu_item['type'] == 'separator' ) {
+			$customized_menu_item_key = cd_array_get_index_by_key( $this->menu, 'id', $menu_item[2] );
 
-				$new_menu[] = array(
-					'',
-					'read',
-					$menu_item['id'],
-					'',
-					'wp-menu-separator',
-				);
+			if ( $customized_menu_item_key === false) {
+
+				$uncustomized_menu[] = $menu_item;
+				continue;
+			}
+
+			$customized_menu_item = $this->menu[ $customized_menu_item_key ];
+
+			// Deleted item
+			if ( $customized_menu_item['deleted'] ) {
 
 				continue;
 			}
 
-			// Custom links are handled diferrently
-			if ( $menu_item['type'] == 'custom_link' ) {
-
-				$new_menu[] = array(
-					$menu_item['title'] ? $menu_item['title'] : $menu_item['original_title'],
-					'read',
-					$menu_item['link'] ? $menu_item['link'] : '/wp-admin/',
-					$menu_item['title'] ? $menu_item['title'] : $menu_item['original_title'],
-					"menu-top toplevel_page_$menu_item[id]",
-					"toplevel_page_$menu_item[id]",
-					$menu_item['icon'],
-				);
-
-				continue;
-			}
-
-			// Skip deleted items
-			if ( $menu_item['deleted'] ) {
-
-				continue;
-			}
-
-			$original_menu_item = cd_array_search_by_key( $menu, 2, $menu_item['id'] );
-
-			$new_menu[] = array(
-				$menu_item['title'] ? $menu_item['title'] : $menu_item['original_title'],
-				$original_menu_item[1],
-				$menu_item['id'],
-				$original_menu_item[3],
-				$original_menu_item[4],
-				$original_menu_item[5],
-				$menu_item['icon'] ? $menu_item['icon'] : $menu_item['original_icon'],
+			// Modify item
+			$new_menu[ $customized_menu_item_key ] = array(
+				$customized_menu_item['title'] ? $customized_menu_item['title'] : $menu_item[0],
+				$menu_item[1],
+				$menu_item[2],
+				$customized_menu_item['title'] ? $customized_menu_item['title'] : $menu_item[3],
+				$menu_item[4],
+				$menu_item[5],
+				$customized_menu_item['icon'] ? $customized_menu_item['icon'] : $menu_item[6],
 			);
 		}
 
-		$menu = $new_menu;
+		ksort( $new_menu );
+		$new_menu = array_merge( $new_menu, $uncustomized_menu );
 
-		foreach ( $this->submenu as $menu_ID => $submenu_items ) {
+		$new_submenu = array();
 
-			$new_submenu = array();
-			$menu_item   = cd_array_search_by_key( $this->menu, 'id', $menu_ID );
+		foreach ( $submenu as $menu_parent => $submenu_items ) {
 
-			foreach ( $submenu_items as $submenu_item ) {
+			$menu_parent_i = cd_array_get_index_by_key( $menu, 2, $menu_parent );
 
-				// Skip deleted items
-				if ( $submenu_item['deleted'] ) {
+			// Parent has been deleted
+			if ( $menu_parent_i === false ) {
 
-					continue;
-				}
-
-				// Custom links are handled diferrently
-				if ( $submenu_item['type'] == 'custom_link' ) {
-
-					$new_submenu[] = array(
-						$submenu_item['title'] ? $submenu_item['title'] : $submenu_item['original_title'],
-						'read',
-						$submenu_item['link'] ? $submenu_item['link'] : '/wp-admin/',
-					);
-
-					continue;
-				}
-
-				// Handle weird Customize URL
-				// The Customize URL is dynamic, so it won't match what was saved. This ensures it matches.
-				if ( strpos( $submenu_item['id'], 'customize.php' ) === 0 ) {
-
-					$customize_url = add_query_arg( 'return', urlencode( wp_unslash( $_SERVER['REQUEST_URI'] ) ), 'customize.php' );
-
-					if ( $submenu_item['original_title'] == __( 'Customize' ) ) {
-
-						$submenu_item['id'] = esc_url( $customize_url );
-
-					} elseif ( $submenu_item['original_title'] == __( 'Header' ) ) {
-
-						$submenu_item['id'] = esc_url(
-							add_query_arg( array( 'autofocus' => array( 'control' => 'header_image' ) ), $customize_url )
-						);
-					}
-				}
-
-				$original_submenu_item = cd_array_search_by_key( $submenu[ $menu_ID ], 2, $submenu_item['id'] );
-
-				if ( $original_submenu_item === false ) {
-
-					continue;
-				}
-
-				$new_submenu[] = array(
-					$submenu_item['title'] ? $submenu_item['title'] : $submenu_item['original_title'],
-					$original_submenu_item[1],
-					$submenu_item['id'],
-					isset( $original_submenu_item[3] ) ? $original_submenu_item[3] : null,
-				);
-			}
-
-			// Custom links are added differently
-			if ( $menu_item['type'] == 'custom_link' ) {
-
-				$submenu[ $menu_item['link'] ? $menu_item['link'] : '/wp-admin/' ] = $new_submenu;
 				continue;
 			}
 
-			$submenu[ $menu_ID ] = $new_submenu;
+			$uncustomized_submenu        = array();
+			$new_submenu[ $menu_parent ] = array();
+
+			foreach ( $submenu_items as $i => $submenu_item ) {
+
+				$customized_submenu_item_key = cd_array_get_index_by_key(
+					$this->submenu[ $menu_parent ],
+					'id',
+					$submenu_item[2]
+				);
+
+				if ( $customized_submenu_item_key === false ) {
+
+					$uncustomized_submenu[] = $submenu_item;
+					continue;
+				}
+
+				$customized_submenu_item = $this->submenu[ $menu_parent ][ $customized_submenu_item_key ];
+
+				// Deleted item
+				if ( $customized_submenu_item['deleted'] ) {
+
+					continue;
+				}
+
+				// Modify item
+				$new_submenu[ $menu_parent ][ $customized_submenu_item_key ] = array(
+					$customized_submenu_item['title'] ? $customized_submenu_item['title'] : $submenu_item[0],
+					$submenu_item[1],
+					$submenu_item[2],
+					$customized_submenu_item['title'] ? $customized_submenu_item['title'] : $submenu_item[3],
+				);
+			}
+
+			ksort( $new_submenu[ $menu_parent ] );
+			$new_submenu[ $menu_parent ] = array_merge( $new_submenu[ $menu_parent ], $uncustomized_submenu );
 		}
+
+		$menu    = $new_menu;
+		$submenu = $new_submenu;
 
 		return $bool;
 	}

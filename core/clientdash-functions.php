@@ -129,7 +129,7 @@ function cd_array_search_by_key( $array, $key, $value ) {
 
 	$found_key = cd_array_get_index_by_key( $array, $key, $value );
 
-	if ( $found_key ) {
+	if ( $found_key !== false ) {
 
 		return $array[ $found_key ];
 	}
