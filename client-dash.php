@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Client Dash
  * Description: Creating a more intuitive admin interface for clients.
- * Version: 1.7.0
+ * Version: 2.0.0-beta.1
  * Author: Real Big Plugins
  * Author URI: https://realbigplugins.com
  *
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || die;
 
 if ( ! class_exists( 'ClientDash' ) ) {
 
-	define( 'CLIENTDASH_VERSION', '1.0.0' );
+	define( 'CLIENTDASH_VERSION', '2.0.0-beta.1' );
 	define( 'CLIENTDASH_DIR', plugin_dir_path( __FILE__ ) );
 	define( 'CLIENTDASH_URI', plugins_url( '', __FILE__ ) );
 
