@@ -14,6 +14,7 @@
     "babel-preset-react": "^6.23.0",
     "babelify": "^7.3.0",
     "browserify": "^14.1.0",
+    "fetchify": "0.0.2",
     "gulp": "^3.9.0",
     "gulp-autoprefixer": "^3.1.0",
     "gulp-concat": "^2.6.0",
@@ -27,14 +28,16 @@
     "gulp-uglify": "^2.0.0",
     "gulp-util": "^3.0.8",
     "gulp-wp-pot": "^2.0.3",
+    "promise-polyfill": "^6.0.2",
+    "react": "^15.4.2",
+    "react-css-transition-replace": "^2.1.0",
+    "react-dom": "^15.4.2",
+    "react-sortable-hoc": "^0.4.12",
     "reactify": "^1.1.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
     "vinyl-transform": "^1.0.0",
-    "react": "^15.4.2",
-    "react-css-transition-replace": "^2.1.0",
-    "react-dom": "^15.4.2",
-    "react-sortable-hoc": "^0.4.12"
+    "whatwg-fetch": "^2.0.3"
   },
   "private": true
 }

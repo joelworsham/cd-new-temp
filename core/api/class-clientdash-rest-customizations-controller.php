@@ -81,13 +81,13 @@ class ClientDash_REST_Customizations_Controller {
 	 */
 	public function get_item_permissions_check( $request ) {
 
-		// TODO Get this working
+		global $current_user;
 
-		// TODO Custom capability
-//		if ( ! current_user_can( 'read' ) ) {
-//
-//			return new WP_Error( 'rest_forbidden', esc_html__( 'You cannot view the customizations resource.' ), array( 'status' => $this->authorization_status_code() ) );
-//		}
+		// TODO Get these permission checks working!
+		if ( ! current_user_can( 'customize_admin' ) ) {
+
+			return new WP_Error( 'rest_forbidden', esc_html__( 'You cannot view the customizations resource.' ), array( 'status' => $this->authorization_status_code() ) );
+		}
 
 		return true;
 	}
@@ -104,13 +104,11 @@ class ClientDash_REST_Customizations_Controller {
 	 */
 	public function create_item_permissions_check( $request ) {
 
-		// TODO Get this working
+		// TODO Get these permission checks working!
+		if ( ! current_user_can( 'customize_admin' ) ) {
 
-		// TODO Custom capability
-//		if ( ! current_user_can( 'manage_options' ) ) {
-//
-//			return new WP_Error( 'rest_forbidden', esc_html__( 'You cannot edit the customizations resource.' ), array( 'status' => $this->authorization_status_code() ) );
-//		}
+			return new WP_Error( 'rest_forbidden', esc_html__( 'You cannot edit the customizations resource.' ), array( 'status' => $this->authorization_status_code() ) );
+		}
 
 		return true;
 	}
@@ -124,13 +122,11 @@ class ClientDash_REST_Customizations_Controller {
 	 */
 	public function update_item_permissions_check( $request ) {
 
-		// TODO Get this working
+		// TODO Get these permission checks working!
+		if ( ! current_user_can( 'customize_admin' ) ) {
 
-		// TODO Custom capability
-//		if ( ! current_user_can( 'read' ) ) {
-//
-//			return new WP_Error( 'rest_forbidden', esc_html__( 'You cannot view the customizations resource.' ), array( 'status' => $this->authorization_status_code() ) );
-//		}
+			return new WP_Error( 'rest_forbidden', esc_html__( 'You cannot view the customizations resource.' ), array( 'status' => $this->authorization_status_code() ) );
+		}
 
 		return true;
 	}
@@ -144,13 +140,11 @@ class ClientDash_REST_Customizations_Controller {
 	 */
 	public function delete_item_permissions_check( $request ) {
 
-		// TODO Get this working
+		// TODO Get these permission checks working!
+		if ( ! current_user_can( 'customize_admin' ) ) {
 
-		// TODO Custom capability
-//		if ( ! current_user_can( 'read' ) ) {
-//
-//			return new WP_Error( 'rest_forbidden', esc_html__( 'You cannot view the customizations resource.' ), array( 'status' => $this->authorization_status_code() ) );
-//		}
+			return new WP_Error( 'rest_forbidden', esc_html__( 'You cannot view the customizations resource.' ), array( 'status' => $this->authorization_status_code() ) );
+		}
 
 		return true;
 	}
@@ -471,7 +465,7 @@ class ClientDash_REST_Customizations_Controller {
 					'description' => esc_html__( 'The customizations dashboard.', 'clientdash' ),
 					'type'        => 'array',
 				),
-				'cdpages' => array(
+				'cdpages'   => array(
 					'description' => esc_html__( 'The customizations Client Dash Pages.', 'clientdash' ),
 					'type'        => 'array',
 				),

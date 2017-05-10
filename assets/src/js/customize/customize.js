@@ -1,5 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import Promise from 'promise-polyfill';
+import 'whatwg-fetch';
 
 import './functions';
 import Editor from './editor';

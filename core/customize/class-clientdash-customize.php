@@ -203,6 +203,7 @@ class ClientDash_Customize {
 			'domain'    => get_bloginfo( 'url' ),
 			'dashicons' => json_decode( file_get_contents( CLIENTDASH_DIR . 'core/dashicons.json' ) ),
 			'cd_pages'  => ClientDash_Core_Pages::get_pages(),
+			'api_nonce' => wp_create_nonce( 'wp_rest' ),
 			'l10n'      => array(
 				'role_switcher_label'               => __( 'Modifying for:', 'clientdash' ),
 				'panel_text_menu'                   => __( 'Menu', 'clientdash' ),

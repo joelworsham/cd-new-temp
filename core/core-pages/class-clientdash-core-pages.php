@@ -154,6 +154,8 @@ class ClientDash_Core_Pages {
 	 */
 	function add_pages() {
 
+		global $submenu;
+
 		if ( ! $this->pages || ! is_array( $this->pages ) ) {
 
 			return;
@@ -172,7 +174,7 @@ class ClientDash_Core_Pages {
 			add_menu_page(
 				$page['title'] ? $page['title'] : $page['original_title'],
 				$page['title'] ? $page['title'] : $page['original_title'],
-				$page['capability'],
+				'read', // TODO Capability for core pages
 				$page['id'],
 				array( $this, 'load_page' ),
 				$page['icon'] ? $page['icon'] : $page['original_icon'],
@@ -192,7 +194,7 @@ class ClientDash_Core_Pages {
 				$page['parent'],
 				$page['title'] ? $page['title'] : $page['original_title'],
 				$page['title'] ? $page['title'] : $page['original_title'],
-				$page['capability'],
+				'read', // TODO Capability for core pages
 				$page['id'],
 				array( $this, 'load_page' )
 			);

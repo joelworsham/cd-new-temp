@@ -28,6 +28,7 @@ import Message from './message';
 
 const l10n     = ClientdashCustomize_Data.l10n || false;
 const adminurl = ClientdashCustomize_Data.adminurl || false;
+const api_nonce = ClientdashCustomize_Data.api_nonce || false;
 
 /**
  * The Customize editor.
@@ -138,8 +139,10 @@ class Editor extends React.Component {
 
         fetch('wp-json/clientdash/v1/customizations/' + this.props.role, {
             method: 'POST',
+            credentials: 'same-origin',
             headers: new Headers({
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-WP-Nonce': api_nonce,
             }),
             body: JSON.stringify(this.state.customizations[this.props.role])
         }).then(function (response) {
@@ -175,8 +178,10 @@ class Editor extends React.Component {
 
         fetch('wp-json/clientdash/v1/customizations/preview_' + this.props.role, {
             method: 'POST',
+            credentials: 'same-origin',
             headers: new Headers({
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-WP-Nonce': api_nonce,
             }),
             body: JSON.stringify(this.state.customizations[this.props.role])
         }).then(function (response) {
@@ -240,9 +245,11 @@ class Editor extends React.Component {
 
         fetch('wp-json/clientdash/v1/customizations/' + this.props.role, {
             method: 'DELETE',
+            credentials: 'same-origin',
             headers: new Headers({
-                'Content-Type': 'application/json'
-            })
+                'Content-Type': 'application/json',
+                'X-WP-Nonce': api_nonce,
+            }),
         }).then(function (response) {
 
             return response.json();
@@ -300,8 +307,10 @@ class Editor extends React.Component {
 
             fetch('wp-json/clientdash/v1/customizations/preview_' + role, {
                 method: 'GET',
+                credentials: 'same-origin',
                 headers: new Headers({
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-WP-Nonce': api_nonce,
                 })
             }).then(function (response) {
 
